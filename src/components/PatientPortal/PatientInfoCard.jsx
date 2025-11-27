@@ -7,61 +7,60 @@ const PatientInfoCard = ({
   room,
   age,
   bloodType,
-  statusText = "Excellent",
-  statusColor = "text-green-600",
-  statusDot = "bg-green-500",
+  healthStatus = "Excellent",
   imageUrl,
 }) => {
   return (
-    <div className="w-full bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex items-center justify-between backdrop-blur-md"
-         style={{ background: "linear-gradient(135deg, #f7faff 0%, #eef5ff 100%)" }}
-    >
-      {/* LEFT SECTION */}
-      <div className="flex items-center gap-5">
-        {/* Profile Image + Status Icon */}
-        <div className="relative">
-          <img
-            src={imageUrl}
-            alt="patient"
-            className="w-20 h-20 rounded-2xl object-cover shadow-md"
-          />
-          
-          {/* Heart Status Badge */}
-          <div className="absolute -bottom-2 -right-2 bg-green-500 p-2 rounded-full shadow-lg">
-            <HeartPulse className="w-5 h-5 text-white" />
+    <div className="bg-white rounded-3xl shadow-md p-6 mb-6 border border-gray-100">
+      <div className="flex items-center justify-between">
+        
+        {/* LEFT SIDE */}
+        <div className="flex items-center gap-5">
+          {/* Image + Status Badge */}
+          <div className="relative">
+            <img
+              src={imageUrl}
+              alt="Patient"
+              className="w-24 h-24 rounded-2xl object-cover shadow-md"
+            />
+
+            {/* Status Badge */}
+            <div className="absolute -bottom-1.5 -right-1.5 bg-green-500 rounded-full p-2 border-2 border-white shadow">
+              <HeartPulse className="w-4 h-4 text-white" />
+            </div>
+          </div>
+
+          {/* Patient Details */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+              Good Morning, {name}
+            </h2>
+
+            <p className="text-left text-gray-600 mb-2">
+              {patientId} • {room}
+            </p>
+
+            <p className="text-left text-gray-500 text-sm">
+              Age: {age} &nbsp;&nbsp; Blood Type: {bloodType}
+            </p>
           </div>
         </div>
 
-        {/* Text Section */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">Good Morning, {name}</h2>
-
-          <p className="text-gray-600 mt-1">
-            {patientId} • {room}
-          </p>
-
-          <div className="flex gap-6 mt-2 text-gray-700">
-            <p>Age: {age}</p>
-            <p>Blood Type: {bloodType}</p>
+        {/* RIGHT SIDE */}
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-sm text-gray-500 mb-1">Health Status</p>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-green-600 font-semibold">{healthStatus}</span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* RIGHT SECTION */}
-      <div className="flex items-center gap-4">
-        <div className="text-right">
-          <p className="text-gray-500 text-sm">Health Status</p>
-
-          <div className="flex items-center gap-2 mt-1">
-            <span className={`w-3 h-3 rounded-full ${statusDot}`}></span>
-            <span className={`font-medium ${statusColor}`}>{statusText}</span>
+          <div className="bg-green-500 p-4 rounded-2xl shadow-md">
+            <HeartPulse className="w-7 h-7 text-white" strokeWidth={2.5} />
           </div>
         </div>
 
-        {/* Status Icon Box */}
-        <div className="bg-green-500 p-4 rounded-xl shadow-lg">
-          <HeartPulse className="w-7 h-7 text-white" />
-        </div>
       </div>
     </div>
   );
