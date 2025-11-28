@@ -41,4 +41,4 @@ return (
 }
 
 
-export default AlertsCard
+export default AlertsCard;

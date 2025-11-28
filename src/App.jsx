@@ -2,6 +2,10 @@ import "./App.css";
 import Header from "./components/PatientPortal/Header";
 import PatientInfoCard from "./components/PatientPortal/PatientInfoCard";
 import React from "react";
+import AppointmentsCard from "./components/PatientPortal/AppointmentsCard";
+import ReportsCard from "./components/PatientPortal/ReportsCard";
+import HealthRiskCard from "./components/PatientPortal/HealthRiskCard";
+import EmergencyCard from "./components/PatientPortal/EmergencyCard";
 import VitalCard from "./components/PatientPortal/VitalCard";
 import GraphCard from "./components/PatientPortal/GraphCard";
 import AlertsCard from "./components/PatientPortal/AlertsCard";
@@ -93,8 +97,18 @@ function App() {
       {/* Alerts & Medications Section */}
       <div className="flex flex-col gap-6 p-10">
         <AlertsCard />
-        <MedicationsCard />
       </div>
+      <div className="grid lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <HealthRiskCard />
+            <EmergencyCard />
+          </div>
+          <div className="space-y-6">
+            <AppointmentsCard />
+            <MedicationsCard />
+            <ReportsCard />
+          </div>
+        </div>
     </>
   );
 }
