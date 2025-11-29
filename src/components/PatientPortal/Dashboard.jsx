@@ -44,7 +44,7 @@ const Dashboard = ({ onTabChange }) => {
 
         {/* Right side Manual Entry button */}
         <button
-          onClick={() => alert("Manual entry clicked")}
+          onClick={() => onTabChange("manual-entry")}
           className="px-6 py-2 rounded-full bg-green-500 text-white font-medium text-sm shadow-md hover:bg-green-600 transition-all duration-200"
         >
           Manual Entry +

@@ -12,9 +12,11 @@ import AlertsCard from "../../components/PatientPortal/AlertsCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
+import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
+  const [showManualEntry, setShowManualEntry] = useState(false);
 
   const vitals = [
     {
@@ -65,10 +67,10 @@ const PatientPortal = () => {
 
   return (
     <>
-      {/* Full Header */}
+      {/* Header */}
       <Header patientName="Sarah" />
 
-      {/* Patient Info Section */}
+      {/* Patient Info */}
       <div className="w-full bg-gray-100 px-6 py-8">
         <PatientInfoCard
           name="Sarah Johnson"
@@ -80,19 +82,32 @@ const PatientPortal = () => {
         />
       </div>
 
-      {/* Tabs Section */}
+      {/* Dashboard (Tabs + Manual Entry Button) */}
       <div className="min-h-screen bg-gray-100">
-        <Dashboard onTabChange={setCurrentTab} />
+        <Dashboard
+          onTabChange={(tab) => {
+            if (tab === "manual-entry") {
+              setShowManualEntry(true);
+            } else {
+              setCurrentTab(tab);
+            }
+          }}
+        />
 
+        {/* Manual Entry Form Pop-up */}
+        {showManualEntry && (
+          <ManualEntryForm
+            onClose={() => setShowManualEntry(false)}
+          />
+        )}
+
+        {/* Main Content Based on Selected Tab */}
         <div className="p-6">
-          {/* ===========================
-              OVERVIEW TAB CONTENT
-          ============================== */}
           {currentTab === "Overview" && (
             <div className="space-y-10">
 
               {/* Vitals Cards */}
-              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {vitals.map((vital, index) => (
                   <VitalCard key={index} {...vital} />
                 ))}
@@ -107,7 +122,7 @@ const PatientPortal = () => {
               {/* Alerts */}
               <AlertsCard />
 
-              {/* Health & Emergency & Appointments */}
+              {/* Health + Emergency + Appointments */}
               <div className="grid lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <HealthRiskCard />
@@ -123,12 +138,9 @@ const PatientPortal = () => {
             </div>
           )}
 
-          {/* ===========================
-                OTHER TABS
-          ============================== */}
-          {currentTab === "Vitals History" && <div>Vitals History Content here…</div>}
-          {currentTab === "ECG Readings" && <div>ECG Readings Content here…</div>}
-          {currentTab === "Profile" && <div>Profile Content here…</div>}
+          {currentTab === "Vitals History" && <div>Vitals History Content…</div>}
+          {currentTab === "ECG Readings" && <div>ECG Readings Content…</div>}
+          {currentTab === "Profile" && <div>Profile Content…</div>}
         </div>
       </div>
     </>
