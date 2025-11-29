@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import Header from "../../components/PatientPortal/Header";
 import PatientInfoCard from "../../components/PatientPortal/PatientInfoCard";
 import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
@@ -9,9 +11,13 @@ import GraphCard from "../../components/PatientPortal/GraphCard";
 import AlertsCard from "../../components/PatientPortal/AlertsCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
-
+import Dashboard from "../../components/PatientPortal/Dashboard";
 
 const PatientPortal = () => {
+
+  // ⭐ FIX: Add this to handle tab switching
+  const [currentTab, setCurrentTab] = useState("Overview");
+
   const vitals = [
     {
       title: "Heart Rate",
@@ -61,11 +67,11 @@ const PatientPortal = () => {
 
   return (
     <>
-      {/* Header */}
-      <Header patientName="Jenny" />
+      {/* Full-Width Header */}
+      <Header patientName="Sarah" />
 
-      {/* Patient Info */}
-      <div className="p-10 bg-gray-100">
+      {/* Patient Information */}
+      <div className="w-full bg-gray-100 px-6 py-8">
         <PatientInfoCard
           name="Sarah Johnson"
           patientId="P-2024-001"
@@ -76,29 +82,40 @@ const PatientPortal = () => {
         />
       </div>
 
-      {/* Vitals Section */}
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-        <div className="max-w-[1600px] mx-auto">
-          <div className="flex gap-6 overflow-x-auto pb-4">
-            {vitals.map((vital, index) => (
-              <VitalCard key={index} {...vital} />
-            ))}
-          </div>
+      {/* Tabs Section */}
+      <div className="min-h-screen bg-gray-100">
+        <Dashboard onTabChange={setCurrentTab} />
+
+        <div className="p-6">
+          {currentTab === "Overview" && <div>Overview Content</div>}
+          {currentTab === "Vitals History" && <div>Vitals History Content</div>}
+          {currentTab === "ECG Readings" && <div>ECG Readings Content</div>}
+          {currentTab === "Profile" && <div>Profile Content</div>}
         </div>
       </div>
 
-      {/* Graph Section */}
-      <div className="px-10">
+      {/* Vitals Section */}
+      <div className="w-full bg-gradient-to-br from-gray-50 to-gray-100 px-6 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+          {vitals.map((vital, index) => (
+            <VitalCard key={index} {...vital} />
+          ))}
+        </div>
+      </div>
+
+      {/* Graphs */}
+      <div className="w-full px-6 space-y-6">
         <GraphCard />
         <ECGMonitor />
       </div>
 
-      {/* Alerts & Medications Section */}
-      <div className="flex flex-col gap-6 p-10">
+      {/* Alerts */}
+      <div className="w-full px-6 py-6">
         <AlertsCard />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 p-10">
+      {/* Bottom Section */}
+      <div className="w-full grid lg:grid-cols-2 gap-6 px-6 pb-12">
         <div className="space-y-6">
           <HealthRiskCard />
           <EmergencyCard />

@@ -5,7 +5,7 @@ const Header = ({ patientName }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+    <header className="bg-white max-w-full shadow-sm border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-blue-500 rounded-full p-2.5">
