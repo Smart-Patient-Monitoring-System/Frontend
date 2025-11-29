@@ -13,6 +13,7 @@ import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
+import BookingsTab from "../../components/PatientPortal/BookingsTab";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -141,6 +142,7 @@ const PatientPortal = () => {
           {currentTab === "Vitals History" && <div>Vitals History Content…</div>}
           {currentTab === "ECG Readings" && <div>ECG Readings Content…</div>}
           {currentTab === "Profile" && <div>Profile Content…</div>}
+          {currentTab === "Bookings" && <BookingsTab />}
         </div>
       </div>
     </>
