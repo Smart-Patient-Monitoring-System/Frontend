@@ -143,7 +143,7 @@ const PatientPortal = () => {
           )}
 
           {currentTab === "Vitals History" && <div>Vitals History Content…</div>}
-          {currentTab === "ECG Readings" && <div>ECG Readings Content…</div>}
+          {currentTab === "ECG Readings" && <ECGMonitor />}
           {currentTab === "Profile" && <div>Profile Content…</div>}
           {currentTab === "Bookings" && <BookingsTab />}
           {currentTab === "Emergency Panel" && (
