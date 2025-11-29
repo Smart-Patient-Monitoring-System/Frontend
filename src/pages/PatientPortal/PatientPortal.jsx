@@ -156,6 +156,13 @@ const PatientPortal = () => {
       <MessagingDashboard />
     </div>
   )}
+  {currentTab === "Medical Records" && (
+  <div className="space-y-6">
+    <ReportsCard />
+    {/* You can also add other medical records cards here */}
+  </div>
+)}
+          {currentTab === "AI Health Assistant" && <div>AI Health Assistant Content…</div>}
 
         </div>
       </div>
