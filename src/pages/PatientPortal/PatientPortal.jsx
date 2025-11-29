@@ -15,6 +15,8 @@ import Dashboard from "../../components/PatientPortal/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
 import BookingsTab from "../../components/PatientPortal/BookingsTab";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
+import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
+
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -149,6 +151,11 @@ const PatientPortal = () => {
     <EmergencyPanel />
   </div>
 )}
+{currentTab === "Messaging" && (
+    <div className="p-6">
+      <MessagingDashboard />
+    </div>
+  )}
 
         </div>
       </div>
