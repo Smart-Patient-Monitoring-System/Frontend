@@ -14,8 +14,6 @@ import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
 
 const PatientPortal = () => {
-
-  // ⭐ FIX: Add this to handle tab switching
   const [currentTab, setCurrentTab] = useState("Overview");
 
   const vitals = [
@@ -67,10 +65,10 @@ const PatientPortal = () => {
 
   return (
     <>
-      {/* Full-Width Header */}
+      {/* Full Header */}
       <Header patientName="Sarah" />
 
-      {/* Patient Information */}
+      {/* Patient Info Section */}
       <div className="w-full bg-gray-100 px-6 py-8">
         <PatientInfoCard
           name="Sarah Johnson"
@@ -87,44 +85,50 @@ const PatientPortal = () => {
         <Dashboard onTabChange={setCurrentTab} />
 
         <div className="p-6">
-          {currentTab === "Overview" && <div>Overview Content</div>}
-          {currentTab === "Vitals History" && <div>Vitals History Content</div>}
-          {currentTab === "ECG Readings" && <div>ECG Readings Content</div>}
-          {currentTab === "Profile" && <div>Profile Content</div>}
-        </div>
-      </div>
+          {/* ===========================
+              OVERVIEW TAB CONTENT
+          ============================== */}
+          {currentTab === "Overview" && (
+            <div className="space-y-10">
 
-      {/* Vitals Section */}
-      <div className="w-full bg-gradient-to-br from-gray-50 to-gray-100 px-6 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-          {vitals.map((vital, index) => (
-            <VitalCard key={index} {...vital} />
-          ))}
-        </div>
-      </div>
+              {/* Vitals Cards */}
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {vitals.map((vital, index) => (
+                  <VitalCard key={index} {...vital} />
+                ))}
+              </div>
 
-      {/* Graphs */}
-      <div className="w-full px-6 space-y-6">
-        <GraphCard />
-        <ECGMonitor />
-      </div>
+              {/* Graphs */}
+              <div className="space-y-6">
+                <GraphCard />
+                <ECGMonitor />
+              </div>
 
-      {/* Alerts */}
-      <div className="w-full px-6 py-6">
-        <AlertsCard />
-      </div>
+              {/* Alerts */}
+              <AlertsCard />
 
-      {/* Bottom Section */}
-      <div className="w-full grid lg:grid-cols-2 gap-6 px-6 pb-12">
-        <div className="space-y-6">
-          <HealthRiskCard />
-          <EmergencyCard />
-        </div>
+              {/* Health & Emergency & Appointments */}
+              <div className="grid lg:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <HealthRiskCard />
+                  <EmergencyCard />
+                </div>
 
-        <div className="space-y-6">
-          <AppointmentsCard />
-          <MedicationsCard />
-          <ReportsCard />
+                <div className="space-y-6">
+                  <AppointmentsCard />
+                  <MedicationsCard />
+                  <ReportsCard />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===========================
+                OTHER TABS
+          ============================== */}
+          {currentTab === "Vitals History" && <div>Vitals History Content here…</div>}
+          {currentTab === "ECG Readings" && <div>ECG Readings Content here…</div>}
+          {currentTab === "Profile" && <div>Profile Content here…</div>}
         </div>
       </div>
     </>
