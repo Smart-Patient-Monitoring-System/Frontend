@@ -14,6 +14,7 @@ import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
 import BookingsTab from "../../components/PatientPortal/BookingsTab";
+import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -143,6 +144,12 @@ const PatientPortal = () => {
           {currentTab === "ECG Readings" && <div>ECG Readings Content…</div>}
           {currentTab === "Profile" && <div>Profile Content…</div>}
           {currentTab === "Bookings" && <BookingsTab />}
+          {currentTab === "Emergency Panel" && (
+  <div className="p-6">
+    <EmergencyPanel />
+  </div>
+)}
+
         </div>
       </div>
     </>
