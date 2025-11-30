@@ -17,6 +17,7 @@ import BookingsTab from "../../components/PatientPortal/BookingsTab";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
+import ProfileTab from "../../components/PatientPortal/ProfileTab";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -144,7 +145,7 @@ const PatientPortal = () => {
 
           {currentTab === "Vitals History" && <div>Vitals History Content…</div>}
           {currentTab === "ECG Readings" && <ECGMonitor />}
-          {currentTab === "Profile" && <div>Profile Content…</div>}
+          {currentTab === "Profile" && <ProfileTab />}
           {currentTab === "Bookings" && <BookingsTab />}
           {currentTab === "Emergency Panel" && (
   <div className="p-6">
