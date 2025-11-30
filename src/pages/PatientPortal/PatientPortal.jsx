@@ -16,7 +16,7 @@ import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
 import BookingsTab from "../../components/PatientPortal/BookingsTab";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
-
+import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -162,10 +162,15 @@ const PatientPortal = () => {
     {/* You can also add other medical records cards here */}
   </div>
 )}
-          {currentTab === "AI Health Assistant" && <div>AI Health Assistant Content…</div>}
+   {currentTab === "AI Health Assistant" && (
+  <div className="w-full h-[calc(100vh-280px)] max-w-7xl mx-auto">
+    <FloatingChatbot isFullScreen={true} />
+  </div>
+)}
 
         </div>
       </div>
+       {currentTab !== "AI Health Assistant" && <FloatingChatbot />}
     </>
   );
 };
