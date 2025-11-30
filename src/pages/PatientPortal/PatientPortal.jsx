@@ -101,16 +101,14 @@ const PatientPortal = () => {
 
         {/* Manual Entry Form Pop-up */}
         {showManualEntry && (
-          <ManualEntryForm
-            onClose={() => setShowManualEntry(false)}
-          />
+          <ManualEntryForm onClose={() => setShowManualEntry(false)} />
         )}
 
         {/* Main Content Based on Selected Tab */}
         <div className="p-6">
+          {/* Overview Tab */}
           {currentTab === "Overview" && (
             <div className="space-y-10">
-
               {/* Vitals Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {vitals.map((vital, index) => (
@@ -121,7 +119,7 @@ const PatientPortal = () => {
               {/* Graphs */}
               <div className="space-y-6">
                 <GraphCard />
-                <ECGMonitor />
+                <ECGMonitor isFullPage={false} />
               </div>
 
               {/* Alerts */}
@@ -143,35 +141,44 @@ const PatientPortal = () => {
             </div>
           )}
 
-          {currentTab === "Vitals History" && <div>Vitals History Content…</div>}
-          {currentTab === "ECG Readings" && <ECGMonitor />}
-          {currentTab === "Profile" && <ProfileTab />}
-          {currentTab === "Bookings" && <BookingsTab />}
-          {currentTab === "Emergency Panel" && (
-  <div className="p-6">
-    <EmergencyPanel />
-  </div>
-)}
-{currentTab === "Messaging" && (
-    <div className="p-6">
-      <MessagingDashboard />
-    </div>
-  )}
-  {currentTab === "Medical Records" && (
-  <div className="space-y-6">
-    <ReportsCard />
-    {/* You can also add other medical records cards here */}
-  </div>
-)}
-   {currentTab === "AI Health Assistant" && (
-  <div className="w-full h-[calc(100vh-280px)] max-w-7xl mx-auto">
-    <FloatingChatbot isFullScreen={true} />
-  </div>
-)}
+          {/* Vitals History Tab */}
+          {currentTab === "Vitals History" && (
+            <div>Vitals History Content…</div>
+          )}
 
+          {/* ECG Readings Tab - Full Page with AI Predictions */}
+          {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} />}
+
+          {/* Profile Tab */}
+          {currentTab === "Profile" && <ProfileTab />}
+
+          {/* Bookings Tab */}
+          {currentTab === "Bookings" && <BookingsTab />}
+
+          {/* Emergency Panel Tab */}
+          {currentTab === "Emergency Panel" && <EmergencyPanel />}
+
+          {/* Messaging Tab */}
+          {currentTab === "Messaging" && <MessagingDashboard />}
+
+          {/* Medical Records Tab */}
+          {currentTab === "Medical Records" && (
+            <div className="space-y-6">
+              <ReportsCard />
+            </div>
+          )}
+
+          {/* AI Health Assistant Tab */}
+          {currentTab === "AI Health Assistant" && (
+            <div className="w-full h-[calc(100vh-280px)] max-w-7xl mx-auto">
+              <FloatingChatbot isFullScreen={true} />
+            </div>
+          )}
         </div>
       </div>
-       {currentTab !== "AI Health Assistant" && <FloatingChatbot />}
+
+      {/* Floating Chatbot - Hide when AI Health Assistant tab is active */}
+      {currentTab !== "AI Health Assistant" && <FloatingChatbot />}
     </>
   );
 };
