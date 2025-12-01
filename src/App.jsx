@@ -7,7 +7,6 @@ import HomePage from './pages/HomePage.jsx';
 import SignInpage from './pages/Login,SignIn/signInpage.jsx';
 import Loginpage from './pages/Login,SignIn/loginpage.jsx'; 
 import DocDashboard from './pages/DoctorsPage/DocDashboard.jsx';
-import NavLinks from './pages/DoctorsPage/NavLinks.jsx';
 
 
 
@@ -18,7 +17,7 @@ function App() {
     <>
   
      <Router> 
-       <div> <NavLinks /></div>
+
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/signin" element={<SignInpage />} />
