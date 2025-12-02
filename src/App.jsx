@@ -1,12 +1,10 @@
 import './App.css'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from './pages/HomePage.jsx';
-import SignInpage from './pages/Login,SignIn/signInpage.jsx';
-import Loginpage from './pages/Login,SignIn/loginpage.jsx'; 
-import DocDashboard from './pages/DoctorsPage/DocDashboard.jsx';
-import NavLinks from './pages/DoctorsPage/NavLinks.jsx';
-
-
+import HomePage from "./pages/HomePage.jsx";
+import SignInpage from "./pages/LoginSignIn/SignInpage.jsx";
+import Loginpage from "./pages/LoginSignIn/Loginpage.jsx";
+import DocDashboard from "./pages/DoctorsPage/DocDashboard.jsx";
+import NavLinks from "./pages/DoctorsPage/NavLinks.jsx";
 
 
 function App() {
