@@ -19,7 +19,6 @@ import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
 
-
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
   const [showManualEntry, setShowManualEntry] = useState(false);
@@ -100,91 +99,92 @@ const PatientPortal = () => {
           }}
         />
 
-        {/* Manual Entry Form Pop-up */}
+        {/* Manual Entry Form */}
         {showManualEntry && (
           <ManualEntryForm onClose={() => setShowManualEntry(false)} />
         )}
 
-        {/* Main Content Based on Selected Tab */}
+        {/* Main Content */}
         <div className="p-6">
           {/* Overview Tab */}
           {currentTab === "Overview" && (
             <div className="space-y-10">
-              {/* Vitals Cards */}
+              {/* Vitals */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {vitals.map((vital, index) => (
                   <VitalCard key={index} {...vital} />
                 ))}
               </div>
-                <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <GraphCard />
-        </div>
-        <div>
-          <HealthRiskCard />
-        </div>
-      </div>
-    </div>
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <ECGMonitor />
-          </div>
-          <div>
-            <HealthTipsCard />
-          </div>
-        </div>
-              
 
-            
-{/* Health + Emergency + Appointments */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Graph + Health Risk */}
+              <div className="min-h-screen bg-gray-50 p-8">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <GraphCard />
+                  </div>
+                  <div>
+                    <HealthRiskCard />
+                  </div>
+                </div>
+              </div>
 
-  {/* ROW 1 — Appointments + Emergency */}
-  <div className="space-y-6">
-    <AppointmentsCard />
-    <EmergencyCard />
-  </div>
+              {/* ECG + Health Tips */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <ECGMonitor />
+                </div>
+                <div>
+                  <HealthTipsCard />
+                </div>
+              </div>
 
-  {/* ROW 2 — Medications + Reports */}
-  <div className="space-y-6">
-    <MedicationsCard />
-    <ReportsCard />
-  </div>
+              {/* Appointments + Emergency  AND  Medications + Reports */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* ROW 1 — Appointments + Emergency */}
+                <div className="space-y-6">
+                  <AppointmentsCard />
+                  <EmergencyCard />
+                </div>
 
-</div>
+                {/* ROW 2 — Medications + Reports */}
+                <div className="space-y-6">
+                  <MedicationsCard />
+                  <ReportsCard />
+                </div>
 
+              </div>
             </div>
           )}
 
-          {/* Vitals History Tab */}
+          {/* Vitals History */}
           {currentTab === "Vitals History" && (
             <div>Vitals History Content…</div>
           )}
 
-          {/* ECG Readings Tab - Full Page with AI Predictions */}
+          {/* Full-page ECG */}
           {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} />}
 
-          {/* Profile Tab */}
+          {/* Profile */}
           {currentTab === "Profile" && <ProfileTab />}
 
-          {/* Bookings Tab */}
+          {/* Bookings */}
           {currentTab === "Bookings" && <BookingsTab />}
 
-          {/* Emergency Panel Tab */}
+          {/* Emergency Panel */}
           {currentTab === "Emergency Panel" && <EmergencyPanel />}
 
-          {/* Messaging Tab */}
+          {/* Messaging */}
           {currentTab === "Messaging" && <MessagingDashboard />}
 
-          {/* Medical Records Tab */}
+          {/* Medical Records */}
           {currentTab === "Medical Records" && (
             <div className="space-y-6">
               <ReportsCard />
             </div>
           )}
 
-          {/* AI Health Assistant Tab */}
+          {/* AI Assistant */}
           {currentTab === "AI Health Assistant" && (
             <div className="w-full h-[calc(100vh-280px)] max-w-7xl mx-auto">
               <FloatingChatbot isFullScreen={true} />
@@ -193,7 +193,7 @@ const PatientPortal = () => {
         </div>
       </div>
 
-      {/* Floating Chatbot - Hide when AI Health Assistant tab is active */}
+      {/* Floating Chatbot */}
       {currentTab !== "AI Health Assistant" && <FloatingChatbot />}
     </>
   );
