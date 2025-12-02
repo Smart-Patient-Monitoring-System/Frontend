@@ -8,7 +8,6 @@ import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
 import EmergencyCard from "../../components/PatientPortal/EmergencyCard";
 import VitalCard from "../../components/PatientPortal/VitalCard";
 import GraphCard from "../../components/PatientPortal/GraphCard";
-import AlertsCard from "../../components/PatientPortal/AlertsCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
@@ -18,6 +17,8 @@ import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
+import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
+
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -115,29 +116,44 @@ const PatientPortal = () => {
                   <VitalCard key={index} {...vital} />
                 ))}
               </div>
+                <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <GraphCard />
+        </div>
+        <div>
+          <HealthRiskCard />
+        </div>
+      </div>
+    </div>
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ECGMonitor />
+          </div>
+          <div>
+            <HealthTipsCard />
+          </div>
+        </div>
+              
 
-              {/* Graphs */}
-              <div className="space-y-6">
-                <GraphCard />
-                <ECGMonitor isFullPage={false} />
-              </div>
+            
+{/* Health + Emergency + Appointments */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-              {/* Alerts */}
-              <AlertsCard />
+  {/* ROW 1 — Appointments + Emergency */}
+  <div className="space-y-6">
+    <AppointmentsCard />
+    <EmergencyCard />
+  </div>
 
-              {/* Health + Emergency + Appointments */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                  <HealthRiskCard />
-                  <EmergencyCard />
-                </div>
+  {/* ROW 2 — Medications + Reports */}
+  <div className="space-y-6">
+    <MedicationsCard />
+    <ReportsCard />
+  </div>
 
-                <div className="space-y-6">
-                  <AppointmentsCard />
-                  <MedicationsCard />
-                  <ReportsCard />
-                </div>
-              </div>
+</div>
+
             </div>
           )}
 
