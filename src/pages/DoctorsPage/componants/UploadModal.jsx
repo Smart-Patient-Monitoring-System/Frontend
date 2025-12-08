@@ -7,13 +7,11 @@ function UploadModal({ open, onClose, onFileUpload }) {
   const [highlight, setHighlight] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // Handle file selection
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
   };
 
-  // Handle drop file
   const handleDrop = (e) => {
     e.preventDefault();
     setHighlight(false);
