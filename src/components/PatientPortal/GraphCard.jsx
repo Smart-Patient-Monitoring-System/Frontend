@@ -1,56 +1,155 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { TrendingUp } from 'lucide-react';
 
 const GraphCard = () => {
-  const [data, setData] = useState([]);
+  const [timeRange, setTimeRange] = useState('24H');
 
-  // Backend API URL 
-  const API_URL = "https://iot-test-red.vercel.app/api/ecg"; 
-  // Change this to your actual backend endpoint
+  // Generate data once using useState initializer
+  const [data] = useState(() => {
+    const temp = [];
+    for (let i = 0; i < 24; i++) {
+      const hr = 70 + Math.sin(i / 3) * 5 + Math.random() * 3;
+      const spo2 = 98 + Math.sin(i / 4) * 1.5 + Math.random() * 0.5;
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(result => {
-          if (result?.ecg) {
-            setData(result.ecg);
-          }
-        })
-        .catch(err => console.log("ECG Fetch Error:", err));
-    }, 1000); // Fetch every 1 sec
+      temp.push({
+        time: `${i}:00`,
+        heartRate: parseFloat(hr.toFixed(1)),
+        spo2: parseFloat(spo2.toFixed(1)),
+      });
+    }
+    return temp;
+  });
 
-    return () => clearInterval(timer);
-  }, []);
+  // Chart dimensions
+  const chartWidth = 800;
+  const chartHeight = 300;
+  const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+  const innerWidth = chartWidth - padding.left - padding.right;
+  const innerHeight = chartHeight - padding.top - padding.bottom;
 
-  // Convert data → polyline points
-  const points = data
-    .map((value, index) => `${index * 30},${50 - value}`)
-    .join(" ");
+  // Scales
+  const xScale = (index) => padding.left + (index / (data.length - 1)) * innerWidth;
+  const yScaleHR = (value) => padding.top + innerHeight - ((value - 60) / 40) * innerHeight;
+  const yScaleSpo2 = (value) => padding.top + innerHeight - ((value - 95) / 5) * innerHeight;
+
+  // SVG paths
+  const heartRatePath = data
+    .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScaleHR(d.heartRate)}`)
+    .join(' ');
+
+  const spo2Path = data
+    .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScaleSpo2(d.spo2)}`)
+    .join(' ');
+
+  const hrTicks = [60, 70, 80, 90, 100];
 
   return (
-    <div className="glass-card p-4 rounded-xl shadow-sm border border-gray-100 col-span-1 sm:col-span-2">
-
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-500">Live ECG</p>
-          <p className="text-lg font-semibold text-gray-800">Realtime</p>
+    <div className="bg-white rounded-2xl shadow-sm p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <TrendingUp className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Vitals Trends</h2>
+            <p className="text-sm text-gray-500">Historical monitoring data</p>
+          </div>
         </div>
-        <div className="text-sm text-gray-500">Last 10 sec</div>
+
+        {/* Time Range Buttons */}
+        <div className="flex gap-2">
+          {['24H', '7D', '30D'].map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                timeRange === range
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {range}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-4">
-        <svg viewBox="0 0 300 50" className="w-full h-20">
-          <polyline
+      {/* Chart */}
+      <div className="relative">
+        <svg width={chartWidth} height={chartHeight} className="w-full text-gray-400">
+          {/* Y-axis grid and labels */}
+          {hrTicks.map((val) => (
+            <React.Fragment key={val}>
+              <line
+                x1={padding.left}
+                y1={yScaleHR(val)}
+                x2={chartWidth - padding.right}
+                y2={yScaleHR(val)}
+                stroke="#e5e7eb"
+              />
+              <text
+                x={padding.left - 10}
+                y={yScaleHR(val)}
+                textAnchor="end"
+                alignmentBaseline="middle"
+                fill="#9ca3af"
+                fontSize="11"
+              >
+                {val}
+              </text>
+            </React.Fragment>
+          ))}
+
+          {/* X-axis labels */}
+          {data.map((d, i) =>
+            i % 4 === 0 ? (
+              <text
+                key={i}
+                x={xScale(i)}
+                y={chartHeight - padding.bottom + 20}
+                textAnchor="middle"
+                fill="#9ca3af"
+                fontSize="11"
+              >
+                {d.time}
+              </text>
+            ) : null
+          )}
+
+          {/* SpO2 Line */}
+          <path
+            d={spo2Path}
             fill="none"
-            stroke="#4f46e5"
-            strokeWidth="2"
-            points={points}
+            stroke="#14b8a6"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Heart Rate Line */}
+          <path
+            d={heartRatePath}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
-      </div>
 
+        {/* Legend */}
+        <div className="flex items-center justify-center gap-6 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full" />
+            <span className="text-sm text-gray-600">Heart Rate (bpm)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-teal-500 rounded-full" />
+            <span className="text-sm text-gray-600">SpO₂ (%)</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
