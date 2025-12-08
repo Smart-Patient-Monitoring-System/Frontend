@@ -8,7 +8,7 @@ function NavLinks() {
       <Link to="/">Home</Link>
       <Link to="/login">Login</Link>
       <Link to="/signin">Sign In</Link>
-      <Link to="/DocDashboard">Dashboard</Link>
+      <Link to="/DocDashboard">DocDashboard</Link>
     </nav>
     </div>
   )

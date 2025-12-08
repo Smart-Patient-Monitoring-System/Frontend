@@ -22,9 +22,7 @@ export default function AlertCard({title,patient,hr,normalRange,time,level = "me
       <div className="flex gap-4">
 
         <div
-          className={`
-            w-12 h-12 rounded-2xl flex items-center justify-center 
-            shadow-md 
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-md 
             ${level === "high" ? "bg-red-500/20" : ""}
             ${level === "medium" ? "bg-yellow-500/20" : ""}
             ${level === "low" ? "bg-blue-500/20" : ""}
