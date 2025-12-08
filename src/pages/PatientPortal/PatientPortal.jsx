@@ -117,14 +117,12 @@ const PatientPortal = () => {
               </div>
 
               {/* Graph + Health Risk */}
-              <div className="min-h-screen bg-gray-50 p-8">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <GraphCard />
-                  </div>
-                  <div>
-                    <HealthRiskCard />
-                  </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <GraphCard />
+                </div>
+                <div>
+                  <HealthRiskCard />
                 </div>
               </div>
 
