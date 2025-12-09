@@ -142,13 +142,13 @@ const PatientPortal = () => {
                 {/* ROW 1 — Appointments + Emergency */}
                 <div className="space-y-6">
                   <AppointmentsCard />
-                  <EmergencyCard />
+                  <ReportsCard />
                 </div>
 
                 {/* ROW 2 — Medications + Reports */}
                 <div className="space-y-6">
                   <MedicationsCard />
-                  <ReportsCard />
+                  <EmergencyCard />
                 </div>
 
               </div>

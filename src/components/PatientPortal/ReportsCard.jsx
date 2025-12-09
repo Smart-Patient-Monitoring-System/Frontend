@@ -4,7 +4,8 @@ const ReportsCard = () => {
   const reports = [
     { id: 1, name: 'Blood Test - Nov 20', date: 'Nov 20' },
     { id: 2, name: 'X-Ray Report - Nov 15', date: 'Nov 15' },
-    { id: 3, name: 'ECG Report - Nov 10', date: 'Nov 10' }
+    { id: 3, name: 'ECG Report - Nov 10', date: 'Nov 10' },
+    { id: 4, name: 'Other - Nov 13', date: 'Nov 13' }
   ];
 
   return (
