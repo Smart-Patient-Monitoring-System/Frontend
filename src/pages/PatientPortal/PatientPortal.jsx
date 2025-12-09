@@ -18,6 +18,7 @@ import MessagingDashboard from "../../components/PatientPortal/MessagingDashboar
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
+import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -156,8 +157,8 @@ const PatientPortal = () => {
           )}
 
           {/* Vitals History */}
-          {currentTab === "Vitals History" && (
-            <div>Vitals History Content…</div>
+          {currentTab === "Real-Time Vitals" && (
+            <RealtimeGraphs />
           )}
 
           {/* Full-page ECG */}

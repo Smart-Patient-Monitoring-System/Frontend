@@ -5,7 +5,7 @@ const Dashboard = ({ onTabChange }) => {
 
   const tabs = [
     "Overview",
-    "Vitals History",
+    "Real-Time Vitals",
     "ECG Readings",
     "Profile",
     "Emergency Panel",
