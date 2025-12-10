@@ -91,9 +91,9 @@ const BookingsTab = () => {
     };
 
     const getTypeIcon = (type) => {
-      if (type === "Video Call") return <Video size={16} />;
-      if (type === "Phone Call") return <Phone size={16} />;
-      return <Building size={16} />;
+      if (type === "Video Call") return <Video className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
+      if (type === "Phone Call") return <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
+      return <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4" />;
     };
 
     const formatDate = (dateString) => {
@@ -103,85 +103,85 @@ const BookingsTab = () => {
     };
 
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-        <div className="flex items-start gap-4">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow">
+        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
           {/* Doctor Avatar */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 self-center sm:self-start">
             <img 
               src={appointment.avatar} 
               alt={appointment.doctorName}
-              className="w-16 h-16 rounded-full object-cover border-2 border-blue-200"
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-blue-200"
             />
           </div>
 
           {/* Content */}
-          <div className="flex-1">
+          <div className="flex-1 w-full">
             {/* Header */}
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">{appointment.doctorName}</h3>
-                <p className="text-sm text-gray-600">{appointment.specialty}</p>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900">{appointment.doctorName}</h3>
+                <p className="text-xs sm:text-sm text-gray-600">{appointment.specialty}</p>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(appointment.status)}`}>
+              <span className={`self-start px-2.5 py-1 sm:px-3 rounded-full text-xs font-semibold border ${getStatusColor(appointment.status)}`}>
                 {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
               </span>
             </div>
 
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Calendar size={16} className="text-blue-600" />
-                <span>{formatDate(appointment.date)}</span>
+            {/* Details Grid - Responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
+                <span className="truncate">{formatDate(appointment.date)}</span>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Clock size={16} className="text-blue-600" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
                 <span>{appointment.time} ({appointment.duration})</span>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-gray-700">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
                 {getTypeIcon(appointment.type)}
                 <span>{appointment.type}</span>
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <MapPin size={16} className="text-blue-600" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
                 <span className="truncate">{appointment.location}</span>
               </div>
             </div>
 
             {/* Reason */}
-            <div className="bg-blue-50 rounded-lg p-3 mb-4">
-              <p className="text-sm text-gray-700">
+            <div className="bg-blue-50 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
+              <p className="text-xs sm:text-sm text-gray-700">
                 <span className="font-semibold">Reason: </span>
                 {appointment.reason}
               </p>
             </div>
 
-            {/* Actions */}
+            {/* Actions - Responsive */}
             {activeView === "upcoming" && (
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 {appointment.type === "Video Call" && (
-                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                    <Video size={16} />
+                  <button className="w-full sm:flex-1 px-3 py-2 sm:px-4 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                    <Video className="w-4 h-4" />
                     Join Call
                   </button>
                 )}
-                <button className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                <button className="w-full sm:flex-1 px-3 py-2 sm:px-4 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
                   Reschedule
                 </button>
-                <button className="px-4 py-2 border-2 border-red-300 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors">
+                <button className="w-full sm:w-auto px-3 py-2 sm:px-4 border-2 border-red-300 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors">
                   Cancel
                 </button>
               </div>
             )}
 
             {activeView === "past" && (
-              <div className="flex gap-3">
-                <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <button className="w-full sm:flex-1 px-3 py-2 sm:px-4 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
                   Book Again
                 </button>
-                <button className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                <button className="w-full sm:flex-1 px-3 py-2 sm:px-4 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
                   View Summary
                 </button>
               </div>
@@ -229,34 +229,34 @@ const BookingsTab = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
+          <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sm:p-5 md:p-6 rounded-t-xl sm:rounded-t-2xl flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Book New Appointment</h2>
-              <p className="text-blue-100 text-sm mt-1">Schedule your next visit</p>
+              <h2 className="text-xl sm:text-2xl font-bold">Book New Appointment</h2>
+              <p className="text-blue-100 text-xs sm:text-sm mt-1">Schedule your next visit</p>
             </div>
             <button
               onClick={() => setShowNewBooking(false)}
               className="text-white hover:bg-blue-800 rounded-full p-2 transition-colors"
             >
-              <X size={24} />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
 
           {/* Form Content */}
-          <div className="p-6 space-y-5">
+          <div className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5">
             {/* Specialty Selection */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 Select Specialty
               </label>
               <select
                 name="specialty"
                 value={bookingData.specialty}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Choose a specialty...</option>
                 {specialties.map(spec => (
@@ -267,14 +267,14 @@ const BookingsTab = () => {
 
             {/* Doctor Selection */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 Select Doctor (Optional)
               </label>
               <select
                 name="doctor"
                 value={bookingData.doctor}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={!bookingData.specialty}
               >
                 <option value="">Any available doctor</option>
@@ -286,7 +286,7 @@ const BookingsTab = () => {
 
             {/* Date */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 Preferred Date
               </label>
               <input
@@ -295,22 +295,22 @@ const BookingsTab = () => {
                 value={bookingData.date}
                 onChange={handleChange}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
-            {/* Time Slots */}
+            {/* Time Slots - Responsive Grid */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 Preferred Time
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {availableTimes.map(time => (
                   <button
                     key={time}
                     type="button"
                     onClick={() => setBookingData(prev => ({ ...prev, time }))}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-2 py-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                       bookingData.time === time
                         ? "bg-blue-600 text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -322,27 +322,30 @@ const BookingsTab = () => {
               </div>
             </div>
 
-            {/* Appointment Type */}
+            {/* Appointment Type - Responsive Grid */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 Appointment Type
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 {["In-Person", "Video Call", "Phone Call"].map(type => (
                   <button
                     key={type}
                     type="button"
                     onClick={() => setBookingData(prev => ({ ...prev, type }))}
-                    className={`px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                    className={`px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                       bookingData.type === type
                         ? "bg-blue-600 text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
-                    {type === "In-Person" && <Building size={16} />}
-                    {type === "Video Call" && <Video size={16} />}
-                    {type === "Phone Call" && <Phone size={16} />}
-                    {type}
+                    {type === "In-Person" && <Building className="w-4 h-4" />}
+                    {type === "Video Call" && <Video className="w-4 h-4" />}
+                    {type === "Phone Call" && <Phone className="w-4 h-4" />}
+                    <span className="hidden sm:inline">{type}</span>
+                    <span className="sm:hidden">
+                      {type === "In-Person" ? "In-Person" : type === "Video Call" ? "Video" : "Phone"}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -350,7 +353,7 @@ const BookingsTab = () => {
 
             {/* Reason */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 Reason for Visit
               </label>
               <textarea
@@ -359,23 +362,23 @@ const BookingsTab = () => {
                 onChange={handleChange}
                 placeholder="Describe your symptoms or reason for booking..."
                 rows="4"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
               <button
                 type="button"
                 onClick={() => setShowNewBooking(false)}
-                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                className="w-full sm:flex-1 px-4 py-2.5 sm:px-6 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors shadow-lg"
+                className="w-full sm:flex-1 px-4 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors shadow-lg"
               >
                 Book Appointment
               </button>
@@ -393,42 +396,43 @@ const BookingsTab = () => {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6">
+      {/* Header Section - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-          <p className="text-gray-600 mt-1">Manage your medical appointments</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Appointments</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your medical appointments</p>
         </div>
         
         <button
           onClick={() => setShowNewBooking(true)}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors shadow-lg flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-4 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors shadow-lg flex items-center justify-center gap-2"
         >
-          <Plus size={20} />
-          Book New Appointment
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline">Book New Appointment</span>
+          <span className="sm:hidden">Book Appointment</span>
         </button>
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4">
+      {/* Search Bar - Responsive */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           <input
             type="text"
-            placeholder="Search by doctor, specialty, or reason..."
+            placeholder="Search by doctor, specialty..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
 
-      {/* View Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      {/* View Tabs - Responsive */}
+      <div className="flex gap-1 sm:gap-2 border-b border-gray-200 overflow-x-auto">
         <button
           onClick={() => setActiveView("upcoming")}
-          className={`px-6 py-3 font-semibold transition-colors relative ${
+          className={`px-4 sm:px-6 py-2.5 sm:py-3 text-sm font-semibold transition-colors relative whitespace-nowrap ${
             activeView === "upcoming"
               ? "text-blue-600"
               : "text-gray-600 hover:text-gray-900"
@@ -441,7 +445,7 @@ const BookingsTab = () => {
         </button>
         <button
           onClick={() => setActiveView("past")}
-          className={`px-6 py-3 font-semibold transition-colors relative ${
+          className={`px-4 sm:px-6 py-2.5 sm:py-3 text-sm font-semibold transition-colors relative whitespace-nowrap ${
             activeView === "past"
               ? "text-blue-600"
               : "text-gray-600 hover:text-gray-900"
@@ -455,24 +459,24 @@ const BookingsTab = () => {
       </div>
 
       {/* Appointments List */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {filteredAppointments.length > 0 ? (
           filteredAppointments.map(appointment => (
             <AppointmentCard key={appointment.id} appointment={appointment} />
           ))
         ) : (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-            <Calendar size={64} className="mx-auto text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Appointments Found</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="text-center py-12 sm:py-16 bg-white rounded-lg sm:rounded-xl border border-gray-200">
+            <Calendar className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-gray-300 mb-3 sm:mb-4" />
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Appointments Found</h3>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-4">
               {searchQuery ? "Try adjusting your search" : "You don't have any appointments scheduled"}
             </p>
             {!searchQuery && (
               <button
                 onClick={() => setShowNewBooking(true)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+                className="px-4 py-2.5 sm:px-6 sm:py-3 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
               >
-                <Plus size={20} />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 Book Your First Appointment
               </button>
             )}
