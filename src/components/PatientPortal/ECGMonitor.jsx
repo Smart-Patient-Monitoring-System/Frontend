@@ -103,119 +103,133 @@ const ECGMonitor = ({ isFullPage = false }) => {
   };
 
   return (
-    <div className={isFullPage ? "space-y-6" : "bg-white rounded-2xl shadow-lg p-6"}>
+    <div className={isFullPage ? "space-y-4 sm:space-y-5 md:space-y-6" : "bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 md:p-6"}>
 
-      {/* ECG CARD (Unchanged) */}
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-red-400 to-red-500 rounded-2xl p-3 shadow-lg">
-              <Activity className="w-6 h-6 text-white" />
+      {/* ECG CARD - Responsive */}
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-5 md:mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="bg-gradient-to-br from-red-400 to-red-500 rounded-xl sm:rounded-2xl p-2.5 sm:p-3 shadow-lg">
+              <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">ECG Monitor</h2>
-              <p className="text-gray-500 text-sm">Real-time electrocardiogram</p>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">ECG Monitor</h2>
+              <p className="text-gray-500 text-xs sm:text-sm">Real-time electrocardiogram</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={togglePause} className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-gray-100">
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <button onClick={togglePause} className="flex items-center gap-2 px-3 py-2 sm:px-4 rounded-lg sm:rounded-xl hover:bg-gray-100 text-sm">
               {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
               <span className="font-semibold text-sm">{isPaused ? "Resume" : "Pause"}</span>
             </button>
-            <button className="p-2 rounded-xl hover:bg-gray-100">
+            <button className="p-2 rounded-lg sm:rounded-xl hover:bg-gray-100">
               <Download className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 mb-4 shadow-xl">
-          <canvas ref={canvasRef} className="w-full h-48 rounded-lg" style={{ background: "#0f172a" }} />
+        <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-3 sm:mb-4 shadow-xl">
+          <canvas ref={canvasRef} className="w-full h-32 sm:h-40 md:h-48 rounded-lg" style={{ background: "#0f172a" }} />
 
-          <div className="absolute top-6 right-6 bg-slate-800/80 px-4 py-2 rounded-full flex items-center gap-2">
-            <Heart className="w-4 h-4 text-red-400" />
-            <span className="text-white font-bold">{heartRate} BPM</span>
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 bg-slate-800/80 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2">
+            <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
+            <span className="text-white font-bold text-sm sm:text-base">{heartRate} BPM</span>
           </div>
 
           {isPaused && (
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <div className="bg-white/90 rounded-xl px-6 py-3 flex items-center gap-2">
-                <Pause className="w-5 h-5" />
-                <span className="font-semibold">Paused</span>
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center">
+              <div className="bg-white/90 rounded-xl px-4 py-2 sm:px-6 sm:py-3 flex items-center gap-2">
+                <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="font-semibold text-sm sm:text-base">Paused</span>
               </div>
             </div>
           )}
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gray-50 rounded-xl p-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4">
             <p className="text-gray-500 text-xs">Heart Rate</p>
-            <p className="text-xl font-bold">{heartRate} bpm</p>
+            <p className="text-lg sm:text-xl font-bold">{heartRate} bpm</p>
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4">
             <p className="text-gray-500 text-xs">Rhythm</p>
             <div className="flex items-center gap-2">
-              <p className="font-bold text-green-600">Normal Sinus</p>
+              <p className="font-bold text-green-600 text-sm sm:text-base">Normal Sinus</p>
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4">
             <p className="text-gray-500 text-xs">QRS Duration</p>
-            <p className="text-xl font-bold">92 ms</p>
+            <p className="text-lg sm:text-xl font-bold">92 ms</p>
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4">
             <p className="text-gray-500 text-xs">QT Interval</p>
-            <p className="text-xl font-bold">380 ms</p>
+            <p className="text-lg sm:text-xl font-bold">380 ms</p>
           </div>
         </div>
       </div>
 
-      {/* ✅ AI INTERPRETATION MOVED OUTSIDE (NEW POSITION) */}
-      <div className="mt-4 bg-blue-50 rounded-xl p-4 border border-blue-100">
-        <div className="flex items-start gap-3">
-          <Brain className="w-5 h-5 text-blue-600 mt-0.5" />
+      {/* AI INTERPRETATION - Responsive */}
+      <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-100">
+        <div className="flex items-start gap-2 sm:gap-3">
+          <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="font-semibold text-blue-900 mb-2">AI ECG Interpretation</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm text-blue-800"><CheckCircle className="w-4 h-4 text-green-600" /> Normal sinus rhythm detected</li>
-              <li className="flex items-center gap-2 text-sm text-blue-800"><CheckCircle className="w-4 h-4 text-green-600" /> No arrhythmias detected</li>
-              <li className="flex items-center gap-2 text-sm text-blue-800"><CheckCircle className="w-4 h-4 text-green-600" /> Healthy heart rate variability</li>
-              <li className="flex items-center gap-2 text-sm text-blue-800"><CheckCircle className="w-4 h-4 text-green-600" /> No ST segment abnormalities</li>
+            <h3 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">AI ECG Interpretation</h3>
+            <ul className="space-y-1.5 sm:space-y-2">
+              <li className="flex items-center gap-2 text-xs sm:text-sm text-blue-800">
+                <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" /> 
+                Normal sinus rhythm detected
+              </li>
+              <li className="flex items-center gap-2 text-xs sm:text-sm text-blue-800">
+                <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" /> 
+                No arrhythmias detected
+              </li>
+              <li className="flex items-center gap-2 text-xs sm:text-sm text-blue-800">
+                <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" /> 
+                Healthy heart rate variability
+              </li>
+              <li className="flex items-center gap-2 text-xs sm:text-sm text-blue-800">
+                <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" /> 
+                No ST segment abnormalities
+              </li>
             </ul>
           </div>
         </div>
       </div>
 
-      {/* Full Page Extra Sections */}
+      {/* Full Page Extra Sections - Responsive */}
       {isFullPage && (
         <>
           {/* Predictions */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Brain className="w-6 h-6 text-purple-600" />
-              <h2 className="text-xl font-bold text-gray-800">AI Cardiac Analysis</h2>
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 md:p-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+              <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">AI Cardiac Analysis</h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {aiPredictions.map((p, i) => (
-                <div key={i} className="bg-gray-50 rounded-xl p-5 border hover:shadow-md">
-                  <div className="flex justify-between mb-3">
-                    <h3 className="font-semibold">{p.title}</h3>
-                    <span className={`px-3 py-1 text-xs rounded-full border ${getRiskColor(p.color)}`}>{p.risk}</span>
+                <div key={i} className="bg-gray-50 rounded-lg sm:rounded-xl p-4 sm:p-5 border hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-3">
+                    <h3 className="font-semibold text-sm sm:text-base">{p.title}</h3>
+                    <span className={`self-start px-2.5 py-1 sm:px-3 text-xs rounded-full border ${getRiskColor(p.color)}`}>
+                      {p.risk}
+                    </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-3">{p.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3">{p.description}</p>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <span className="text-xs text-gray-500">AI Confidence</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="w-full sm:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600 rounded-full" style={{ width: `${p.confidence}%` }} />
                       </div>
-                      <span className="font-semibold text-sm">{p.confidence}%</span>
+                      <span className="font-semibold text-xs sm:text-sm whitespace-nowrap">{p.confidence}%</span>
                     </div>
                   </div>
                 </div>
@@ -223,33 +237,33 @@ const ECGMonitor = ({ isFullPage = false }) => {
             </div>
           </div>
 
-          {/* Recent Readings */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Clock className="w-6 h-6 text-teal-600" />
-              <h2 className="text-xl font-bold text-gray-800">Recent ECG Readings</h2>
+          {/* Recent Readings - Responsive */}
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 md:p-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" />
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">Recent ECG Readings</h2>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {recentReadings.map((r, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-white rounded-lg p-2 shadow-sm">
-                      <Activity className="w-5 h-5 text-teal-600" />
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-gray-100 transition-colors">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="bg-white rounded-lg p-2 shadow-sm flex-shrink-0">
+                      <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
                     </div>
                     <div>
-                      <p className="font-semibold">{r.interpretation}</p>
-                      <p className="text-sm text-gray-500">{r.date}</p>
+                      <p className="font-semibold text-sm sm:text-base">{r.interpretation}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">{r.date}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Heart Rate</p>
-                      <p className="text-lg font-bold">{r.hr} bpm</p>
+                  <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
+                    <div className="text-left sm:text-right">
+                      <p className="text-xs sm:text-sm text-gray-500">Heart Rate</p>
+                      <p className="text-base sm:text-lg font-bold">{r.hr} bpm</p>
                     </div>
 
-                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs border">
+                    <span className="px-2.5 py-1 sm:px-3 bg-green-100 text-green-700 rounded-full text-xs border whitespace-nowrap">
                       {r.status}
                     </span>
                   </div>
@@ -258,32 +272,32 @@ const ECGMonitor = ({ isFullPage = false }) => {
             </div>
           </div>
 
-          {/* Recommendations */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-lg p-6 border">
-            <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="w-6 h-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-800">Health Recommendations</h2>
+          {/* Recommendations - Responsive */}
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 md:p-6 border">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">Health Recommendations</h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="font-semibold">Continue Current Treatment</h3>
-                <p className="text-sm text-gray-600">Your rhythm is stable, continue medications.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm">
+                <h3 className="font-semibold text-sm sm:text-base mb-1">Continue Current Treatment</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Your rhythm is stable, continue medications.</p>
               </div>
 
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="font-semibold">Regular Monitoring</h3>
-                <p className="text-sm text-gray-600">Schedule follow-up ECG in 30 days.</p>
+              <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm">
+                <h3 className="font-semibold text-sm sm:text-base mb-1">Regular Monitoring</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Schedule follow-up ECG in 30 days.</p>
               </div>
 
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="font-semibold">Lifestyle Factors</h3>
-                <p className="text-sm text-gray-600">Maintain exercise and heart-healthy diet.</p>
+              <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm">
+                <h3 className="font-semibold text-sm sm:text-base mb-1">Lifestyle Factors</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Maintain exercise and heart-healthy diet.</p>
               </div>
 
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="font-semibold">Alert Settings</h3>
-                <p className="text-sm text-gray-600">Real-time alerts enabled for abnormalities.</p>
+              <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm">
+                <h3 className="font-semibold text-sm sm:text-base mb-1">Alert Settings</h3>
+                <p className="text-xs sm:text-sm text-gray-600">Real-time alerts enabled for abnormalities.</p>
               </div>
             </div>
           </div>
