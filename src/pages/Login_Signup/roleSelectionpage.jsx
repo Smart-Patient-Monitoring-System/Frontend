@@ -5,6 +5,7 @@ import patient from "../../assets/images/patient.png";
 import admin from "../../assets/images/admin.png";
 import nurse from "../../assets/images/nurse.png";
 import gtMark from "../../assets/images/gtMark.png";
+import { Link } from 'react-router-dom';
 
 export default function RoleSelect() {
     return (
@@ -47,46 +48,54 @@ export default function RoleSelect() {
 
                 <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
                 hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Cart
-                        image={doctor}
-                        text1="Doctor"
-                        text2="Monitor patients and manage care"
-                        bgMain="bg-[#E9FCF9]"
-                        bgCircle="bg-[#00A696]"
-                    />
+                    <Link to="/doctorLogin">
+                        <Cart
+                            image={doctor}
+                            text1="Doctor"
+                            text2="Monitor patients and manage care"
+                            bgMain="bg-[#E9FCF9]"
+                            bgCircle="bg-[#00A696]"
+                        />
+                    </Link>
                 </div>
 
                 <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
                 hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Cart
-                        image={patient}
-                        text1="Patient"
-                        text2="System management and analytics"
-                        bgMain="bg-[#EBF3FE]"
-                        bgCircle="bg-[#2273FF]"
-                    />
+                    <Link to="/patientLogin">
+                        <Cart
+                            image={patient}
+                            text1="Patient"
+                            text2="System management and analytics"
+                            bgMain="bg-[#EBF3FE]"
+                            bgCircle="bg-[#2273FF]"
+                        />
+                    </Link>
                 </div>
 
                 <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
                 hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Cart
-                        image={nurse}
-                        text1="Nurse"
-                        text2="Monitor patients and manage care"
-                        bgMain="bg-[#E8F0B6]"
-                        bgCircle="bg-[#B5A738]"
-                    />
+                    <Link to="/nurseLogin">
+                        <Cart
+                            image={nurse}
+                            text1="Nurse"
+                            text2="Monitor patients and manage care"
+                            bgMain="bg-[#E8F0B6]"
+                            bgCircle="bg-[#B5A738]"
+                        />
+                    </Link>
                 </div>
 
                 <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
                 hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Cart
-                        image={admin}
-                        text1="Admin"
-                        text2="Access your health records and vitals"
-                        bgMain="bg-[#F7F3FF]"
-                        bgCircle="bg-[#A538FF]"
-                    />
+                    <Link to="/adminLogin">
+                        <Cart
+                            image={admin}
+                            text1="Admin"
+                            text2="Access your health records and vitals"
+                            bgMain="bg-[#F7F3FF]"
+                            bgCircle="bg-[#A538FF]"
+                        />
+                    </Link>
                 </div>
 
 

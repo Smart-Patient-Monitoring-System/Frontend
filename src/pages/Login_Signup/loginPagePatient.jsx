@@ -1,9 +1,11 @@
 import React from "react";
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
-import admin from "../../assets/images/admin.png";
+import patient from "../../assets/images/patient.png";
+import { useNavigate } from "react-router-dom";
 
-export default function LoginPageAdmin() {
+export default function LoginPagePatient() {
+    const navigate = useNavigate();
     return (
         <div className="w-full min-h-screen bg-[#F8FBFF] flex justify-center items-center p-4">
             <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -30,25 +32,23 @@ export default function LoginPageAdmin() {
                         </p>
                     </div>
 
-                    <div className="w-full max-w-[520px] bg-[#F7F3FF] rounded-3xl shadow-xl p-6 relative">
+                    <div className="w-full max-w-[520px] bg-[#EBF3FE] rounded-3xl shadow-xl p-6 relative">
                         <div className="flex items-center gap-6">
-                            <div className="w-[85px] h-[85px] rounded-full bg-[#A538FF] shadow-[0_0_20px_rgba(0,0,0,0.25)] flex items-center justify-center">
-                                <img src={admin} alt="Admin" className="w-[45px] h-[45px]" />
+                            <div className="w-[85px] h-[85px] rounded-full bg-[#2273FF] shadow-[0_0_20px_rgba(0,0,0,0.25)] flex items-center justify-center">
+                                <img src={patient} alt="Patient" className="w-[45px] h-[45px]" />
                             </div>
                             <div>
-                                <p className="text-3xl font-medium text-center md:text-left">Admin</p>
-
-                                <p className="text-lg font-light ">
-                                    Access your health records and vitals
+                                <p className="text-3xl font-medium text-center md:text-left">Patient</p>
+                                <p className="text-lg font-light">
+                                    System management and analytics
                                 </p>
                             </div>
                         </div>
                     </div>
-
-                    <div className="w-full max-w-[520px] h-[50px] bg-[#F5F1F1] rounded-2xl shadow-md flex items-center justify-center 
-                scale-100 hover:scale-105 transition-transform duration-300 cursor-pointer">
+                    <button onClick={() => navigate("/patientSignup")} className="w-full max-w-[520px] h-[50px] bg-[#F5F1F1] rounded-2xl shadow-md flex items-center justify-center
+      scale-100 hover:scale-105 transition-transform duration-300 cursor-pointer p-0 border-none">
                         <span className="text-xl font-semibold">SignUp</span>
-                    </div>
+                    </button>
                 </div>
 
                 <hr

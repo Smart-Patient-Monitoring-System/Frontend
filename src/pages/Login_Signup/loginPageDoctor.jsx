@@ -2,8 +2,12 @@ import React from "react";
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
 import doctor from "../../assets/images/doctor.png";
+import { useNavigate } from "react-router-dom";
+
 
 export default function LoginPageDoctor() {
+
+  const navigate = useNavigate();
   return (
     <div className="w-full min-h-screen bg-[#F8FBFF] flex justify-center items-center p-4">
       <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -45,10 +49,13 @@ export default function LoginPageDoctor() {
             </div>
           </div>
 
-          <div className="w-full max-w-[520px] h-[50px] bg-[#F5F1F1] rounded-2xl shadow-md flex items-center justify-center 
-                scale-100 hover:scale-105 transition-transform duration-300 cursor-pointer">
+          <button onClick={() => navigate("/doctorSignup")} className="w-full max-w-[520px] h-[50px] bg-[#F5F1F1] rounded-2xl shadow-md flex items-center justify-center
+      scale-100 hover:scale-105 transition-transform duration-300 cursor-pointer p-0 border-none">
             <span className="text-xl font-semibold">SignUp</span>
-          </div>
+          </button>
+
+
+
         </div>
 
         <hr

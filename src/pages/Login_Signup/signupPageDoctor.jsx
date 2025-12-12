@@ -1,8 +1,8 @@
 import React from 'react';
 import sup from "../../assets/images/sup.jpg";
-import FormRow from '../../components/signin/FormRow';
+import FormRow from '../../components/signup/FormRow';
 
-export default function SignInpageDoctor() {
+export default function SignupPageDoctor() {
   return (
     <div
       className="w-full min-h-screen flex flex-col lg:flex-row items-center justify-center bg-cover bg-center p-4 sm:p-6"

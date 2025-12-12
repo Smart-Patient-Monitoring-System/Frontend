@@ -1,13 +1,17 @@
 
 
 import './App.css'
-import LoginPageAdmin from './pages/Login_SignIn/loginPageAdmin'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginPageAdmin from './pages/Login_Signup/loginPageAdmin'
+import LoginPageDoctor from './pages/Login_Signup/loginPageDoctor';
+import SignupPageDoctor from './pages/Login_Signup/signupPageDoctor';
+import LoginPageNurse from './pages/Login_Signup/loginPageNurse';
 
-import LoginPageNurse from './pages/Login_SignIn/loginPageNurse'
-import SignInpageDoctor from './pages/Login_SignIn/signInPageDoctor'
-import SignInPageNurse from './pages/Login_SignIn/signInPageNurse'
-import SignInPagePatient from './pages/Login_SignIn/signInPagePatient'
-import SignInPageAdmin from './pages/Login_SignIn/signInPageAdmin'
+import RoleSelect from './pages/Login_Signup/roleSelectionpage';
+import LoginPagePatient from './pages/Login_Signup/loginPagePatient';
+import SignupPageNurse from './pages/Login_Signup/signupPageNurse';
+import SignupPageAdmin from './pages/Login_Signup/signupPageAdmin';
+import SignupPagePatient from './pages/Login_Signup/signupPagePatient';
 
 
 
@@ -15,9 +19,24 @@ function App() {
 
 
   return (
-    <>
-      <SignInPagePatient />
-    </>
+
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<RoleSelect />} />
+        <Route path="/doctorLogin" element={<LoginPageDoctor />} />
+        <Route path="/nurseLogin" element={<LoginPageNurse />} />
+        <Route path="/adminLogin" element={<LoginPageAdmin />} />
+        <Route path="/patientLogin" element={<LoginPagePatient />} />
+
+        <Route path="/doctorSignup" element={<SignupPageDoctor />} />
+        <Route path="/nurseSignup" element={<SignupPageNurse />} />
+        <Route path="/adminSignup" element={<SignupPageAdmin />} />
+        <Route path="/patientSignup" element={<SignupPagePatient />} />
+
+
+      </Routes>
+    </BrowserRouter>
+
   )
 }
 
