@@ -119,47 +119,12 @@ jobs:
         name: build-files
         path: build-output/
     
-    # Option 1: Deploy to GitHub Pages
+    # Deploy to GitHub Pages
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build-output
-        cname: your-domain.com  # Optional: Add your custom domain
-    
-    # Option 2: Deploy to Netlify (uncomment if using)
-    # - name: Deploy to Netlify
-    #   uses: nwtgck/actions-netlify@v2
-    #   with:
-    #     publish-dir: './build-output'
-    #     production-branch: main
-    #     github-token: ${{ secrets.GITHUB_TOKEN }}
-    #     deploy-message: "Deploy from GitHub Actions"
-    #   env:
-    #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-    #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-    
-    # Option 3: Deploy to Vercel (uncomment if using)
-    # - name: Deploy to Vercel
-    #   uses: amondnet/vercel-action@v25
-    #   with:
-    #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
-    #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-    #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-    #     vercel-args: '--prod'
-    
-    # Option 4: Deploy to AWS S3 (uncomment if using)
-    # - name: Configure AWS credentials
-    #   uses: aws-actions/configure-aws-credentials@v4
-    #   with:
-    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     aws-region: us-east-1
-    #
-    # - name: Deploy to S3
-    #   run: |
-    #     aws s3 sync build-output/ s3://your-bucket-name --delete
-    #     aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
 
   # Job 4: Lighthouse CI for performance testing (optional)
   lighthouse:
@@ -171,10 +136,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Wait for GitHub Pages deployment
+      run: sleep 60
+    
     - name: Run Lighthouse CI
       uses: treosh/lighthouse-ci-action@v10
       with:
         urls: |
-          https://your-deployed-url.com
+          https://smart-patient-monitoring-system.github.io/Frontend
         uploadArtifacts: true
         temporaryPublicStorage: true
