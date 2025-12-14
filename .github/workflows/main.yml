@@ -65,11 +65,38 @@ jobs:
         CI: false
         NODE_ENV: production
     
+    # Check if build directory exists and list contents for debugging
+    - name: Verify build output
+      run: |
+        echo "Checking for build output..."
+        if [ -d "dist" ]; then
+          echo "Found dist/ directory"
+          ls -la dist/
+          echo "BUILD_DIR=dist" >> $GITHUB_ENV
+        elif [ -d "build" ]; then
+          echo "Found build/ directory"
+          ls -la build/
+          echo "BUILD_DIR=build" >> $GITHUB_ENV
+        elif [ -d "out" ]; then
+          echo "Found out/ directory"
+          ls -la out/
+          echo "BUILD_DIR=out" >> $GITHUB_ENV
+        elif [ -d ".next" ]; then
+          echo "Found .next/ directory"
+          ls -la .next/
+          echo "BUILD_DIR=.next" >> $GITHUB_ENV
+        else
+          echo "ERROR: No build output directory found!"
+          echo "Current directory contents:"
+          ls -la
+          exit 1
+        fi
+    
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: build-files
-        path: build/
+        path: ${{ env.BUILD_DIR }}
         retention-days: 7
 
   # Job 3: Deploy to production (only on main branch)
@@ -86,21 +113,21 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-files
-        path: build/
+        path: build-output/
     
     # Option 1: Deploy to GitHub Pages
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build
+        publish_dir: ./build-output
         cname: your-domain.com  # Optional: Add your custom domain
     
     # Option 2: Deploy to Netlify (uncomment if using)
     # - name: Deploy to Netlify
     #   uses: nwtgck/actions-netlify@v2
     #   with:
-    #     publish-dir: './build'
+    #     publish-dir: './build-output'
     #     production-branch: main
     #     github-token: ${{ secrets.GITHUB_TOKEN }}
     #     deploy-message: "Deploy from GitHub Actions"
@@ -127,7 +154,7 @@ jobs:
     #
     # - name: Deploy to S3
     #   run: |
-    #     aws s3 sync build/ s3://your-bucket-name --delete
+    #     aws s3 sync build-output/ s3://your-bucket-name --delete
     #     aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
 
   # Job 4: Lighthouse CI for performance testing (optional)
