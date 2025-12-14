@@ -137,7 +137,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Wait for GitHub Pages deployment
-      run: sleep 60
+      run: sleep 120
     
     - name: Run Lighthouse CI
       uses: treosh/lighthouse-ci-action@v10
