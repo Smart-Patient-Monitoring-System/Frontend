@@ -8,7 +8,6 @@ import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
 import EmergencyCard from "../../components/PatientPortal/EmergencyCard";
 import VitalCard from "../../components/PatientPortal/VitalCard";
 import GraphCard from "../../components/PatientPortal/GraphCard";
-import AlertsCard from "../../components/PatientPortal/AlertsCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
@@ -18,6 +17,8 @@ import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
+import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
+import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -75,8 +76,8 @@ const PatientPortal = () => {
       {/* Header */}
       <Header patientName="Sarah" />
 
-      {/* Patient Info */}
-      <div className="w-full bg-gray-100 px-6 py-8">
+      {/* Patient Info - Responsive padding */}
+      <div className="w-full bg-gray-100 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
         <PatientInfoCard
           name="Sarah Johnson"
           patientId="P-2024-001"
@@ -99,85 +100,113 @@ const PatientPortal = () => {
           }}
         />
 
-        {/* Manual Entry Form Pop-up */}
+        {/* Manual Entry Form */}
         {showManualEntry && (
           <ManualEntryForm onClose={() => setShowManualEntry(false)} />
         )}
 
-        {/* Main Content Based on Selected Tab */}
-        <div className="p-6">
+        {/* Main Content - Responsive padding */}
+        <div className="p-3 sm:p-4 md:p-5 lg:p-6">
           {/* Overview Tab */}
           {currentTab === "Overview" && (
-            <div className="space-y-10">
-              {/* Vitals Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-10">
+              {/* Vitals - Responsive grid 
+                  Mobile: 1 column
+                  Small mobile (>480px): 2 columns
+                  Tablet: 2 columns
+                  Laptop+: 4 columns
+              */}
+              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                 {vitals.map((vital, index) => (
                   <VitalCard key={index} {...vital} />
                 ))}
               </div>
 
-              {/* Graphs */}
-              <div className="space-y-6">
-                <GraphCard />
-                <ECGMonitor isFullPage={false} />
+              {/* Graph + Health Risk 
+                  Mobile/Tablet: Stack vertically
+                  Laptop+: 2:1 ratio
+              */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+                <div className="lg:col-span-2">
+                  <GraphCard />
+                </div>
+                <div>
+                  <HealthRiskCard />
+                </div>
               </div>
 
-              {/* Alerts */}
-              <AlertsCard />
+              {/* ECG + Health Tips 
+                  Mobile/Tablet: Stack vertically
+                  Laptop+: 2:1 ratio
+              */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+                <div className="lg:col-span-2">
+                  <ECGMonitor />
+                </div>
+                <div>
+                  <HealthTipsCard />
+                </div>
+              </div>
 
-              {/* Health + Emergency + Appointments */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                  <HealthRiskCard />
+              {/* Appointments + Emergency AND Medications + Reports 
+                  Mobile: All stack vertically
+                  Tablet+: 2 columns
+              */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+                
+                {/* Column 1 — Appointments + Reports */}
+                <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                  <AppointmentsCard />
+                  <ReportsCard />
+                </div>
+
+                {/* Column 2 — Medications + Emergency */}
+                <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                  <MedicationsCard />
                   <EmergencyCard />
                 </div>
 
-                <div className="space-y-6">
-                  <AppointmentsCard />
-                  <MedicationsCard />
-                  <ReportsCard />
-                </div>
               </div>
             </div>
           )}
 
-          {/* Vitals History Tab */}
-          {currentTab === "Vitals History" && (
-            <div>Vitals History Content…</div>
+          {/* Vitals History */}
+          {currentTab === "Real-Time Vitals" && (
+            <RealtimeGraphs />
           )}
 
-          {/* ECG Readings Tab - Full Page with AI Predictions */}
+          {/* Full-page ECG */}
           {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} />}
 
-          {/* Profile Tab */}
+          {/* Profile */}
           {currentTab === "Profile" && <ProfileTab />}
 
-          {/* Bookings Tab */}
+          {/* Bookings */}
           {currentTab === "Bookings" && <BookingsTab />}
 
-          {/* Emergency Panel Tab */}
+          {/* Emergency Panel */}
           {currentTab === "Emergency Panel" && <EmergencyPanel />}
 
-          {/* Messaging Tab */}
+          {/* Messaging */}
           {currentTab === "Messaging" && <MessagingDashboard />}
 
-          {/* Medical Records Tab */}
+          {/* Medical Records */}
           {currentTab === "Medical Records" && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-5 md:space-y-6">
               <ReportsCard />
             </div>
           )}
 
-          {/* AI Health Assistant Tab */}
+          {/* AI Assistant - Responsive height */}
           {currentTab === "AI Health Assistant" && (
-            <div className="w-full h-[calc(100vh-280px)] max-w-7xl mx-auto">
+            <div className="w-full h-[calc(100vh-200px)] sm:h-[calc(100vh-240px)] md:h-[calc(100vh-260px)] lg:h-[calc(100vh-280px)] max-w-7xl mx-auto">
               <FloatingChatbot isFullScreen={true} />
             </div>
           )}
         </div>
       </div>
 
-      {/* Floating Chatbot - Hide when AI Health Assistant tab is active */}
+      {/* Floating Chatbot */}
       {currentTab !== "AI Health Assistant" && <FloatingChatbot />}
     </>
   );
