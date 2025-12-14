@@ -1,6 +1,7 @@
 import React from 'react'
 import CriticalAlertPage from './CriticalAlertPage'
 import ECGReaderPage from './ECGReaderPage'
+import ECGGraph from './componants/ECGGraph'
 
 function DocDashboard() {
   return (
@@ -9,6 +10,7 @@ function DocDashboard() {
     <div>DocDashboard</div>
     
     <div><ECGReaderPage/></div>
+    <div className=""><ECGGraph/></div>
     </>
     
   )
