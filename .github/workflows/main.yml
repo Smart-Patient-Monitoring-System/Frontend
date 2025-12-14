@@ -126,23 +126,24 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build-output
 
-  # Job 4: Lighthouse CI for performance testing (optional)
-  lighthouse:
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Wait for GitHub Pages deployment
-      run: sleep 120
-    
-    - name: Run Lighthouse CI
-      uses: treosh/lighthouse-ci-action@v10
-      with:
-        urls: |
-          https://smart-patient-monitoring-system.github.io/Frontend
-        uploadArtifacts: true
-        temporaryPublicStorage: true
+  # Job 4: Lighthouse CI for performance testing (optional - disabled)
+  # Uncomment below if you want to enable Lighthouse performance testing
+  # lighthouse:
+  #   needs: deploy
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+  #   
+  #   - name: Wait for GitHub Pages deployment
+  #     run: sleep 120
+  #   
+  #   - name: Run Lighthouse CI
+  #     uses: treosh/lighthouse-ci-action@v10
+  #     with:
+  #       urls: |
+  #         https://smart-patient-monitoring-system.github.io/Frontend
+  #       uploadArtifacts: true
+  #       temporaryPublicStorage: true
