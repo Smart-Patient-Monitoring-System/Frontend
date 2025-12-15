@@ -1,28 +1,43 @@
+
+
 import './App.css'
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage.jsx";
-import SignInpage from "./pages/LoginSignIn/SignInpage.jsx";
-import Loginpage from "./pages/LoginSignIn/Loginpage.jsx";
-import DocDashboard from "./pages/DoctorsPage/DocDashboard.jsx";
-import NavLinks from "./pages/DoctorsPage/NavLinks.jsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginPageAdmin from './pages/Login_Signup/loginPageAdmin'
+import LoginPageDoctor from './pages/Login_Signup/loginPageDoctor';
+import SignupPageDoctor from './pages/Login_Signup/signupPageDoctor';
+import LoginPageNurse from './pages/Login_Signup/loginPageNurse';
+
+import RoleSelect from './pages/Login_Signup/roleSelectionpage';
+import LoginPagePatient from './pages/Login_Signup/loginPagePatient';
+import SignupPageNurse from './pages/Login_Signup/signupPageNurse';
+import SignupPageAdmin from './pages/Login_Signup/signupPageAdmin';
+import SignupPagePatient from './pages/Login_Signup/signupPagePatient';
+
+import DoctorDashboard from './pages/DoctorsPage/DocDashboard';
 
 
 function App() {
 
+
   return (
-    <>
-  
-     <Router> 
-       <div> <NavLinks /></div>
+
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/signin" element={<SignInpage />} />
-        <Route path="/login" element={<Loginpage />} />
-        <Route path="/DocDashboard" element={<DocDashboard />} />
-        </Routes>
-     </Router>
-   
-    </>
+        <Route path="/" element={<RoleSelect />} />
+        <Route path="/doctorLogin" element={<DoctorDashboard />} />
+        <Route path="/nurseLogin" element={<LoginPageNurse />} />
+        <Route path="/adminLogin" element={<LoginPageAdmin />} />
+        <Route path="/patientLogin" element={<LoginPagePatient />} />
+
+        <Route path="/doctorSignup" element={<SignupPageDoctor />} />
+        <Route path="/nurseSignup" element={<SignupPageNurse />} />
+        <Route path="/adminSignup" element={<SignupPageAdmin />} />
+        <Route path="/patientSignup" element={<SignupPagePatient />} />
+
+
+      </Routes>
+    </BrowserRouter>
+
   )
 }
 
