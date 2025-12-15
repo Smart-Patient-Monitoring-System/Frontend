@@ -1,51 +1,127 @@
 import React from 'react';
-import { Activity, Heart, Phone, MapPin, Clock, AlertTriangle, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Brain, TrendingUp } from 'lucide-react';
 
 const HealthRiskCard = () => {
+  const healthPredictions = [
+    {
+      id: 1,
+      title: 'Cardiac Event',
+      risk: '5%',
+      status: 'Normal',
+      icon: CheckCircle,
+      color: 'green',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700',
+      iconColor: 'text-green-600'
+    },
+    {
+      id: 2,
+      title: 'Arrhythmia',
+      risk: '8%',
+      status: 'Normal',
+      icon: CheckCircle,
+      color: 'green',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700',
+      iconColor: 'text-green-600'
+    },
+    {
+      id: 3,
+      title: 'Hypertension',
+      risk: '35%',
+      status: 'Monitor',
+      icon: AlertTriangle,
+      color: 'orange',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-700',
+      iconColor: 'text-orange-600'
+    }
+  ];
+
   return (
-    <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-8 text-white shadow-xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Activity className="w-8 h-8" />
-        <h2 className="text-2xl font-bold">AI Health Risk Analysis</h2>
+    <div className="bg-white rounded-2xl shadow-sm p-6 w-full max-w-full">
+
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <Brain className="w-6 h-6 text-purple-600" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
+            AI Health Predictions <span className="text-purple-600">✨</span>
+          </h2>
+          <p className="text-sm text-gray-500">ML-powered risk analysis</p>
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <div>
-          <p className="text-blue-100 text-sm mb-2">Predicted Condition</p>
-          <h3 className="text-3xl font-bold mb-1">Low Risk</h3>
-          <p className="text-blue-100">Cardiovascular Health</p>
-        </div>
+      {/* Prediction Cards */}
+      <div className="space-y-3 mb-6">
+        {healthPredictions.map((prediction) => {
+          const Icon = prediction.icon;
+          return (
+            <div
+              key={prediction.id}
+              className={`${prediction.bgColor} rounded-xl p-4 transition-all hover:shadow-md`}
+            >
+              <div className="flex items-start justify-between mb-2 flex-wrap gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <Icon className={`w-5 h-5 ${prediction.iconColor} flex-shrink-0`} />
+                  <h3 className="font-semibold text-gray-900 truncate">{prediction.title}</h3>
+                </div>
 
-        <div>
-          <p className="text-blue-100 text-sm mb-2">Confidence Level</p>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 bg-white/20 rounded-full h-3 overflow-hidden">
-              <div className="bg-green-400 h-full rounded-full" style={{ width: '92%' }}></div>
+                <div className="text-right flex-shrink-0">
+                  <div className="text-2xl font-bold text-gray-900">{prediction.risk}</div>
+                  <div className="text-xs text-gray-500">Risk</div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <span className={`text-sm ${prediction.textColor}`}>
+                  Status: {prediction.status}
+                </span>
+
+                <div className="flex-1 min-w-[80px] h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${
+                      prediction.color === 'green' ? 'bg-green-500' : 'bg-orange-500'
+                    }`}
+                    style={{ width: prediction.risk }}
+                  ></div>
+                </div>
+              </div>
             </div>
-            <span className="text-2xl font-bold">92%</span>
+          );
+        })}
+      </div>
+
+      {/* Overall Health Score */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+          <p className="text-lg font-semibold text-gray-900">Overall Health Score</p>
+          <div className="flex items-center gap-1 text-green-600 font-semibold flex-shrink-0">
+            <TrendingUp className="w-4 h-4" />
+            92/100
           </div>
+        </div>
+
+        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-green-500"
+            style={{ width: "92%" }}
+          ></div>
         </div>
       </div>
 
-      <div>
-        <h4 className="text-lg font-semibold mb-4">AI Recommendations:</h4>
-        <div className="space-y-3">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" />
-            <p className="text-blue-50">Maintain current exercise routine - 30 mins daily walking</p>
-          </div>
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
-            <p className="text-blue-50">Schedule cholesterol test in next 2 weeks</p>
-          </div>
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
-            <p className="text-blue-50">Consider consultation with nutritionist for diet optimization</p>
-          </div>
-        </div>
+      {/* AI Analysis Info */}
+      <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 flex-wrap">
+        <Brain className="w-6 h-6 text-blue-600 flex-shrink-0" />
+        <p className="text-sm text-blue-700 leading-snug flex-1 min-w-0">
+          AI analysis based on 24h vitals monitoring, historical trends, and clinical data patterns
+        </p>
       </div>
+
     </div>
   );
 };
 
-export default HealthRiskCard;  
+export default HealthRiskCard;
