@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { TrendingUp } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { TrendingUp } from "lucide-react";
 
 const GraphCard = () => {
-  const [timeRange, setTimeRange] = useState('24H');
+  const [timeRange, setTimeRange] = useState("24H");
+  const svgRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Generate data once using useState initializer
   const [data] = useState(() => {
     const temp = [];
     for (let i = 0; i < 24; i++) {
       const hr = 70 + Math.sin(i / 3) * 5 + Math.random() * 3;
       const spo2 = 98 + Math.sin(i / 4) * 1.5 + Math.random() * 0.5;
-
       temp.push({
         time: `${i}:00`,
         heartRate: parseFloat(hr.toFixed(1)),
@@ -20,53 +20,69 @@ const GraphCard = () => {
     return temp;
   });
 
-  // Chart dimensions
-  const chartWidth = 800;
-  const chartHeight = 300;
+  // Update dimensions on mount and resize
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (svgRef.current) {
+        setDimensions({
+          width: svgRef.current.clientWidth,
+          height: svgRef.current.clientHeight,
+        });
+      }
+    };
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
+
   const padding = { top: 20, right: 20, bottom: 40, left: 50 };
-  const innerWidth = chartWidth - padding.left - padding.right;
-  const innerHeight = chartHeight - padding.top - padding.bottom;
+  const innerWidth = dimensions.width - padding.left - padding.right || 0;
+  const innerHeight = dimensions.height - padding.top - padding.bottom || 0;
 
-  // Scales
-  const xScale = (index) => padding.left + (index / (data.length - 1)) * innerWidth;
-  const yScaleHR = (value) => padding.top + innerHeight - ((value - 60) / 40) * innerHeight;
-  const yScaleSpo2 = (value) => padding.top + innerHeight - ((value - 95) / 5) * innerHeight;
+  const xScale = (index) =>
+    padding.left + (index / (data.length - 1)) * innerWidth;
 
-  // SVG paths
+  const yScaleHR = (value) =>
+    padding.top + innerHeight - ((value - 60) / 40) * innerHeight;
+
+  const yScaleSpo2 = (value) =>
+    padding.top + innerHeight - ((value - 95) / 5) * innerHeight;
+
   const heartRatePath = data
-    .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScaleHR(d.heartRate)}`)
-    .join(' ');
+    .map((d, i) => `${i === 0 ? "M" : "L"} ${xScale(i)} ${yScaleHR(d.heartRate)}`)
+    .join(" ");
 
   const spo2Path = data
-    .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScaleSpo2(d.spo2)}`)
-    .join(' ');
+    .map((d, i) => `${i === 0 ? "M" : "L"} ${xScale(i)} ${yScaleSpo2(d.spo2)}`)
+    .join(" ");
 
   const hrTicks = [60, 70, 80, 90, 100];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-2xl shadow-sm p-6 w-full max-w-full">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
             <TrendingUp className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Vitals Trends</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Vitals Trends
+            </h2>
             <p className="text-sm text-gray-500">Historical monitoring data</p>
           </div>
         </div>
 
-        {/* Time Range Buttons */}
         <div className="flex gap-2">
-          {['24H', '7D', '30D'].map((range) => (
+          {["24H", "7D", "30D"].map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
                 timeRange === range
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {range}
@@ -75,16 +91,21 @@ const GraphCard = () => {
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="relative">
-        <svg width={chartWidth} height={chartHeight} className="w-full text-gray-400">
-          {/* Y-axis grid and labels */}
+      {/* CHART */}
+      <div className="relative w-full overflow-hidden h-64 sm:h-72 md:h-80 lg:h-96">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+          className="w-full h-full"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Y-AXIS GRID */}
           {hrTicks.map((val) => (
             <React.Fragment key={val}>
               <line
                 x1={padding.left}
                 y1={yScaleHR(val)}
-                x2={chartWidth - padding.right}
+                x2={dimensions.width - padding.right}
                 y2={yScaleHR(val)}
                 stroke="#e5e7eb"
               />
@@ -101,13 +122,13 @@ const GraphCard = () => {
             </React.Fragment>
           ))}
 
-          {/* X-axis labels */}
+          {/* X LABELS */}
           {data.map((d, i) =>
             i % 4 === 0 ? (
               <text
                 key={i}
                 x={xScale(i)}
-                y={chartHeight - padding.bottom + 20}
+                y={dimensions.height - padding.bottom + 20}
                 textAnchor="middle"
                 fill="#9ca3af"
                 fontSize="11"
@@ -117,7 +138,7 @@ const GraphCard = () => {
             ) : null
           )}
 
-          {/* SpO2 Line */}
+          {/* LINES */}
           <path
             d={spo2Path}
             fill="none"
@@ -126,8 +147,6 @@ const GraphCard = () => {
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-
-          {/* Heart Rate Line */}
           <path
             d={heartRatePath}
             fill="none"
@@ -138,8 +157,8 @@ const GraphCard = () => {
           />
         </svg>
 
-        {/* Legend */}
-        <div className="flex items-center justify-center gap-6 mt-4">
+        {/* LEGEND */}
+        <div className="flex items-center justify-center gap-6 mt-4 flex-wrap">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full" />
             <span className="text-sm text-gray-600">Heart Rate (bpm)</span>

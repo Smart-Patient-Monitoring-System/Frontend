@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Upload, Database, Download, Activity } from "lucide-react";
-import UploadModal from "./UploadModal"; 
+import UploadModal from "./UploadModal";
 
-function ECGheader() {
+function ECGheader({ onFileUpload }) {
   const [openModal, setOpenModal] = useState(false);
 
   return (
@@ -41,7 +41,11 @@ function ECGheader() {
         </div>
       </div>
 
-      <UploadModal open={openModal} onClose={() => setOpenModal(false)} />
+      <UploadModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        onFileUpload={onFileUpload}
+      />
     </>
   );
 }

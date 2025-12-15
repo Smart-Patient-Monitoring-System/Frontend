@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import CriticalAlertPage from './CriticalAlertPage';
 import ECGReaderPage from './ECGReaderPage';
@@ -17,6 +18,7 @@ import {
   LogOut,
   Users
 } from "lucide-react";
+
 
 function DocDashboard() {
   // State hooks
@@ -375,6 +377,7 @@ function DocDashboard() {
       </div>
     </div>
   );
+
 }
 
 export default DocDashboard;
