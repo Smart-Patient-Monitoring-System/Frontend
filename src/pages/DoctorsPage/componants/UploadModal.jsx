@@ -1,82 +1,74 @@
 import React, { useState } from "react";
-import { X, Upload } from "lucide-react";
+import { X } from "lucide-react";
+import axios from "axios";
 
-function UploadModal({ open, onClose, onFileUpload }) {
+function UploadModal({ open, onClose, onAnalyze }) {
   if (!open) return null;
 
-  const [highlight, setHighlight] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [patientId, setPatientId] = useState("");
+  const [datFile, setDatFile] = useState(null);
+  const [heaFile, setHeaFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-  };
+ const handleSubmit = async () => {
+  if (!patientId || !datFile || !heaFile) {
+    alert("Please fill all fields");
+    return;
+  }
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setHighlight(false);
+  const formData = new FormData();
+  formData.append("dat_file", datFile);
+  formData.append("hea_file", heaFile);
 
-    const file = e.dataTransfer.files[0];
-    if (file) setSelectedFile(file);
-  };
+  try {
+    setLoading(true);
 
-  const prevent = (e) => e.preventDefault();
+    const res = await axios.post(
+      `http://localhost:8081/api/ecg/analyze?patientId=${patientId}`,
+      formData
+    );
+
+    onAnalyze(res.data);
+    onClose();
+  } catch (err) {
+    console.error(err);
+    alert("ECG analysis failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white w-[90%] md:w-[450px] p-6 rounded-3xl shadow-xl relative">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white w-[400px] p-6 rounded-3xl shadow-xl relative">
 
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-        >
-          <X size={20} />
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500">
+          <X />
         </button>
 
-        <h2 className="text-xl font-bold mb-2">Upload ECG File</h2>
-        <p className="text-gray-500 text-sm mb-4">
-          Drop your ECG file here or browse (XML, CSV supported)
-        </p>
+        <h2 className="text-xl font-bold mb-4">Upload ECG</h2>
 
-        <label
-          onDragEnter={(e) => {
-            prevent(e);
-            setHighlight(true);
-          }}
-          onDragLeave={(e) => {
-            prevent(e);
-            setHighlight(false);
-          }}
-          onDragOver={prevent}
-          onDrop={handleDrop}
-          className={`
-            border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition 
-            ${highlight ? "border-blue-500 bg-blue-50" : "border-gray-300"}
-          `}
-        >
-          <Upload size={36} className="text-blue-500 mb-2" />
+        <input
+          type="text"
+          placeholder="Patient ID"
+          value={patientId}
+          onChange={(e) => setPatientId(e.target.value)}
+          className="w-full border p-2 rounded mb-4"
+        />
 
-          <span className="text-gray-600">
-            {selectedFile ? selectedFile.name : "Drag & Drop ECG File"}
-          </span>
+        <label className="block mb-2 text-sm font-medium">ECG .dat file</label>
+        <input type="file" accept=".dat" onChange={(e) => setDatFile(e.target.files[0])} />
 
-          <input
-            type="file"
-            className="hidden"
-            accept=".xml,.csv,.hea,.dat"
-            onChange={handleFileSelect}
-          />
-        </label>
+        <label className="block mb-2 mt-3 text-sm font-medium">ECG .hea file</label>
+        <input type="file" accept=".hea" onChange={(e) => setHeaFile(e.target.files[0])} />
 
         <button
-          onClick={() => {
-            if (!selectedFile) return alert("Select a file!");
-            onFileUpload(selectedFile);
-            onClose();
-          }}
-          className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="w-full mt-4 bg-blue-600 text-white py-2 rounded-xl"
         >
-          Upload & Process
+          {loading ? "Analyzing..." : "Upload & Analyze"}
         </button>
       </div>
     </div>
