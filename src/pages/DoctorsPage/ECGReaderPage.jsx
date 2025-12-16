@@ -1,32 +1,40 @@
 import React, { useState } from "react";
 import ECGheader from "./componants/ECGheader";
+import ECGGraph from "./componants/ECGGraph";
+import AnalysisDetails from "./componants/AnalysisDetails";
+import AIInterpretation from "./componants/AIInterpretation";
 
 function ECGReaderPage() {
-  const [uploadedFile, setUploadedFile] = useState(null);
-
-  const handleFileUpload = (file) => {
-    console.log("📤 File received in ECGReaderPage:", file);
-    setUploadedFile(file);
-  };
+  const [analysis, setAnalysis] = useState(null);
 
   return (
-    <div className="p-6">
+    <div className="p-6 space-y-6">
 
-      {/* Header */}
-      <ECGheader onFileUpload={handleFileUpload} />
+      <ECGheader onAnalyze={setAnalysis} />
 
-      {/* Show output */}
-      {!uploadedFile ? (
-        <p className="text-center text-gray-500 mt-10">
-          Upload an ECG file to display graph.
+      {!analysis && (
+        <p className="text-center text-gray-500">
+          Upload ECG (.dat + .hea) files to analyze
         </p>
-      ) : (
-        <div className="mt-10 text-center bg-green-100 text-green-800 p-4 rounded-xl">
-          <h3 className="font-bold text-lg">File Uploaded Successfully ✔</h3>
-          <p className="mt-2">{uploadedFile.name}</p>
-        </div>
       )}
 
+      {analysis && (
+        <>
+          <ECGGraph waveform={analysis.waveform} fs={analysis.fs} />
+
+          <AnalysisDetails
+            meanHR={analysis.meanHR}
+            sdnn={analysis.SDNN}
+            rmssd={analysis.RMSSD}
+            status={analysis.status}
+          />
+
+          <AIInterpretation
+            diagnosis={analysis.status}
+            rationale={analysis.rationale}
+          />
+        </>
+      )}
     </div>
   );
 }
