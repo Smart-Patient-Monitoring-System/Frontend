@@ -1,34 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
+
 import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginPageAdmin from './pages/Login_Signup/loginPageAdmin'
+import LoginPageDoctor from './pages/Login_Signup/loginPageDoctor';
+import SignupPageDoctor from './pages/Login_Signup/signupPageDoctor';
+import LoginPageNurse from './pages/Login_Signup/loginPageNurse';
+
+import RoleSelect from './pages/Login_Signup/roleSelectionpage';
+import LoginPagePatient from './pages/Login_Signup/loginPagePatient';
+import SignupPageNurse from './pages/Login_Signup/signupPageNurse';
+import SignupPageAdmin from './pages/Login_Signup/signupPageAdmin';
+import SignupPagePatient from './pages/Login_Signup/signupPagePatient';
+
+import DoctorDashboard from './pages/DoctorsPage/DocDashboard';
+
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<RoleSelect />} />
+        <Route path="/doctorLogin" element={<DoctorDashboard />} />
+        <Route path="/nurseLogin" element={<LoginPageNurse />} />
+        <Route path="/adminLogin" element={<LoginPageAdmin />} />
+        <Route path="/patientLogin" element={<LoginPagePatient />} />
+
+        <Route path="/doctorSignup" element={<SignupPageDoctor />} />
+        <Route path="/nurseSignup" element={<SignupPageNurse />} />
+        <Route path="/adminSignup" element={<SignupPageAdmin />} />
+        <Route path="/patientSignup" element={<SignupPagePatient />} />
+
+
+      </Routes>
+    </BrowserRouter>
+
   )
 }
 
