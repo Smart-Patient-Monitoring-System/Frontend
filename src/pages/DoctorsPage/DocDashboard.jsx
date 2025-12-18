@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CriticalAlertPage from './CriticalAlertPage';
 import ECGReaderPage from './ECGReaderPage';
+import PatientOwerview from './PatientOwerview';
 import { 
   Heart, 
   Bell, 
