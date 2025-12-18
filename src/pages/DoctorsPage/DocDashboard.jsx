@@ -292,18 +292,21 @@ function DocDashboard() {
                             </span>
                           </div>
                         </td>
+
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
                             <Thermometer className="w-4 h-4 text-orange-500" />
                             <span className="text-gray-700">{patient.temp}</span>
                           </div>
                         </td>
+
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
                             <Droplets className="w-4 h-4 text-cyan-500" />
                             <span className="text-gray-700">{patient.spO2}</span>
                           </div>
                         </td>
+
                         <td className="py-4 px-4">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                             patient.riskLevel === 'High' 
@@ -315,6 +318,7 @@ function DocDashboard() {
                             {patient.riskLevel}
                           </span>
                         </td>
+
                         <td className="py-4 px-4">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                             patient.status === 'Critical' 
@@ -326,6 +330,7 @@ function DocDashboard() {
                             {patient.status}
                           </span>
                         </td>
+                        
                         <td className="py-4 px-4">
                           <button className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium">
                             <Eye className="w-4 h-4" />

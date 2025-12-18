@@ -12,7 +12,9 @@ function UploadModal({ open, onClose, onAnalyze }) {
 
  const handleSubmit = async () => {
   if (!patientId || !datFile || !heaFile) {
+    
     alert("Please fill all fields");
+
     return;
   }
 
