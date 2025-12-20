@@ -20,6 +20,8 @@ import {
   TrendingUp,
   Wifi
 } from "lucide-react";
+import admin from "../../assets/images/admin.png";
+
 
 function AdminDashboard() {
     const [analysis, setAnalysis] = useState(null);
@@ -35,13 +37,18 @@ return(
                 {/* Left: Logo and Title */}
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div 
-                    className="rounded-lg p-2 sm:p-2.5 shadow-xl"
-                    style={{
-                      background: 'linear-gradient(45deg, #00BAC5 0%, #0090EE 100%)'
-                    }}
-                  >
-                    <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
+                      className="rounded-lg p-2 sm:p-2.5 shadow-xl flex items-center justify-center"
+                        style={{
+                            background: 'linear-gradient(45deg, #00BAC5 0%, #0090EE 100%)'
+                        }}
+                    >
+                        <img
+                            src={admin}
+                            alt="Admin Logo"
+                            className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
+                        />
+                        </div>
+
                   <div>
                     <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-left">
                       Admin Portal
