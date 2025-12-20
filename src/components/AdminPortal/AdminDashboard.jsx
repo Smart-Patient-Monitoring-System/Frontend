@@ -23,6 +23,7 @@ import {
 
 function AdminDashboard() {
     const [analysis, setAnalysis] = useState(null);
+    const [hasNotification, setHasNotification] = useState(true);
     const handleLogout = () => {console.log('Logging out...');};
 
 return( 
@@ -43,10 +44,10 @@ return(
                   </div>
                   <div>
                     <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-left">
-                      Doctor Portal
+                      Admin Portal
                     </h1>
                     <p className="hidden sm:block text-xs sm:text-sm text-gray-600">
-                      Welcome, <span className="font-semibold">Section 7</span> Jpā Supul
+                      Welcome, <span className="font-semibold">Section 7</span> Janith
                     </p>
                   </div>
                 </div>
