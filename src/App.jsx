@@ -14,7 +14,7 @@ import SignupPageAdmin from './pages/Login_Signup/signupPageAdmin';
 import SignupPagePatient from './pages/Login_Signup/signupPagePatient';
 
 import DoctorDashboard from './pages/DoctorsPage/DocDashboard';
-
+import AdminDashboard from './components/AdminPortal/AdminDashboard';
 
 function App() {
 
@@ -26,7 +26,7 @@ function App() {
         <Route path="/" element={<RoleSelect />} />
         <Route path="/doctorLogin" element={<DoctorDashboard />} />
         <Route path="/nurseLogin" element={<LoginPageNurse />} />
-        <Route path="/adminLogin" element={<LoginPageAdmin />} />
+        <Route path="/adminLogin" element={<AdminDashboard />} />
         <Route path="/patientLogin" element={<LoginPagePatient />} />
 
         <Route path="/doctorSignup" element={<SignupPageDoctor />} />
