@@ -1,33 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Header from "./pages/HomePage/components/Header"
+import Hero from "./pages/HomePage/components/Hero"
+import Features from "./pages/HomePage/components/Features"
+import FooterCTA from "./pages/HomePage/components/FooterCTA"
 
 function App() {
-  const [count, setCount] = useState(0)
+  const stats = [
+    { value: "24/7", label: "Monitoring" },
+    { value: "99.9%", label: "Uptime" },
+    { value: "AI-POWERED", label: "Predictions" },
+  ]
+
+  const features = [
+    {
+      id: 1,
+      icon: "activity",
+      title: "Real-Time Vitals",
+      description: "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
+    },
+    {
+      id: 2,
+      icon: "heart",
+      title: "Advanced ECG",
+      description: "12-lead visualization with AI arrhythmia detection",
+    },
+    {
+      id: 3,
+      icon: "brain",
+      title: "AI Predictions",
+      description: "Machine learning risk assessment and early warnings",
+    },
+    {
+      id: 4,
+      icon: "message",
+      title: "AI Assistant",
+      description: "Intelligent chatbot for health insights and guidance",
+    },
+    {
+      id: 5,
+      icon: "shield",
+      title: "Enterprise Security",
+      description: "HIPAA-compliant with role-based access control",
+    },
+    {
+      id: 6,
+      icon: "wifi",
+      title: "IoT Management",
+      description: "Real-time device monitoring and fleet management",
+    },
+  ]
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Header />
+      <Hero stats={stats} />
+      <Features features={features} />
+      <FooterCTA />
     </>
   )
 }
