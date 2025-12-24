@@ -182,20 +182,34 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium
-              ${activeTab === "analytics"
-                ? "bg-blue-600 text-white"
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
+              ${activeTab === "analystics"
+                ? "text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"}`}
+            style={
+              activeTab === "analystics"
+                ? {
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                  }
+                : {}
+            }
           >
             Analytics
           </button>
 
           <button
             onClick={() => setActiveTab("logs")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
               ${activeTab === "logs"
-                ? "bg-blue-600 text-white"
+                ? "text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"}`}
+            style={
+              activeTab === "logs"
+                ? {
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                  }
+                : {}
+            }
           >
             Security Logs
           </button>
