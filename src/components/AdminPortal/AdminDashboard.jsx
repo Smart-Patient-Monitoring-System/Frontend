@@ -155,7 +155,7 @@ function AdminDashboard() {
             style={
               activeTab === "users"
                 ? {
-                    background: "linear-gradient(45deg, #00BAC5 0%, #0090EE 100%)"
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
                   }
                 : {}
             }
