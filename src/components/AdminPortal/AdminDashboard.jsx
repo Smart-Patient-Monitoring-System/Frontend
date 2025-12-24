@@ -144,7 +144,7 @@ function AdminDashboard() {
 
       {/* ================= BOTTOM NAVIGATION ================= */}
       <div className="px-6 mt-8">
-        <div className="bg-white rounded-xl shadow-md p-2 flex gap-3 w-fit">
+        <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
 
           <button
             onClick={() => setActiveTab("users")}
@@ -165,10 +165,17 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("iot")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
               ${activeTab === "iot"
-                ? "bg-blue-600 text-white"
+                ? "text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"}`}
+            style={
+              activeTab === "iot"
+                ? {
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                  }
+                : {}
+            }
           >
             IOT Devices
           </button>
