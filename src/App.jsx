@@ -1,43 +1,61 @@
-
-
-import './App.css'
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoginPageAdmin from './pages/Login_Signup/loginPageAdmin'
-import LoginPageDoctor from './pages/Login_Signup/loginPageDoctor';
-import SignupPageDoctor from './pages/Login_Signup/signupPageDoctor';
-import LoginPageNurse from './pages/Login_Signup/loginPageNurse';
-
-import RoleSelect from './pages/Login_Signup/roleSelectionpage';
-import LoginPagePatient from './pages/Login_Signup/loginPagePatient';
-import SignupPageNurse from './pages/Login_Signup/signupPageNurse';
-import SignupPageAdmin from './pages/Login_Signup/signupPageAdmin';
-import SignupPagePatient from './pages/Login_Signup/signupPagePatient';
-
-import DoctorDashboard from './pages/DoctorsPage/DocDashboard';
-
+import Header from "./pages/HomePage/components/Header"
+import Hero from "./pages/HomePage/components/Hero"
+import Features from "./pages/HomePage/components/Features"
+import FooterCTA from "./pages/HomePage/components/FooterCTA"
 
 function App() {
+  const stats = [
+    { value: "24/7", label: "Monitoring" },
+    { value: "99.9%", label: "Uptime" },
+    { value: "AI-POWERED", label: "Predictions" },
+  ]
 
+  const features = [
+    {
+      id: 1,
+      icon: "activity",
+      title: "Real-Time Vitals",
+      description: "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
+    },
+    {
+      id: 2,
+      icon: "heart",
+      title: "Advanced ECG",
+      description: "12-lead visualization with AI arrhythmia detection",
+    },
+    {
+      id: 3,
+      icon: "brain",
+      title: "AI Predictions",
+      description: "Machine learning risk assessment and early warnings",
+    },
+    {
+      id: 4,
+      icon: "message",
+      title: "AI Assistant",
+      description: "Intelligent chatbot for health insights and guidance",
+    },
+    {
+      id: 5,
+      icon: "shield",
+      title: "Enterprise Security",
+      description: "HIPAA-compliant with role-based access control",
+    },
+    {
+      id: 6,
+      icon: "wifi",
+      title: "IoT Management",
+      description: "Real-time device monitoring and fleet management",
+    },
+  ]
 
   return (
-
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RoleSelect />} />
-        <Route path="/doctorLogin" element={<DoctorDashboard />} />
-        <Route path="/nurseLogin" element={<LoginPageNurse />} />
-        <Route path="/adminLogin" element={<LoginPageAdmin />} />
-        <Route path="/patientLogin" element={<LoginPagePatient />} />
-
-        <Route path="/doctorSignup" element={<SignupPageDoctor />} />
-        <Route path="/nurseSignup" element={<SignupPageNurse />} />
-        <Route path="/adminSignup" element={<SignupPageAdmin />} />
-        <Route path="/patientSignup" element={<SignupPagePatient />} />
-
-
-      </Routes>
-    </BrowserRouter>
-
+    <>
+      <Header />
+      <Hero stats={stats} />
+      <Features features={features} />
+      <FooterCTA />
+    </>
   )
 }
 
