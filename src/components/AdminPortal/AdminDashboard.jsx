@@ -187,7 +187,7 @@ function AdminDashboard() {
                 ? "text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"}`}
             style={
-              activeTab === "analystics"
+              activeTab === "analytics"
                 ? {
                     background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
                   }
