@@ -13,14 +13,21 @@ export default function LoginPageAdmin() {
 
                 <div className="flex flex-col items-center lg:items-start gap-10 p-4">
 
-                    <button className="relative w-[140px] h-[48px] sm:w-[160px] sm:h-[51px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center justify-center pl-10">
-                        <img
-                            src={gtMark}
-                            alt="gt mark"
-                            className="absolute left-0 w-[45px] h-[45px]"
-                        />
-                        <span className="text-white font-medium text-lg sm:text-2xl">HOME</span>
-                    </button>
+                    <button
+  onClick={() => navigate("/")}
+  className="relative w-[140px] h-[48px] sm:w-[160px] sm:h-[51px] rounded-full 
+  bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center justify-center pl-10
+  scale-100 hover:scale-105 transition-transform duration-300 cursor-pointer"
+>
+  <img
+    src={gtMark}
+    alt="gt mark"
+    className="absolute left-0 w-[45px] h-[45px]"
+  />
+  <span className="text-white font-medium text-lg sm:text-2xl">
+    HOME
+  </span>
+</button>
 
                     <div className="w-[150px] h-[150px] sm:w-[215px] sm:h-[205px] rounded-3xl bg-gradient-to-tr from-[#0DC0BD] to-[#057EF8] shadow-[0_0_8px_8px_#0090EE40] flex justify-center items-center">
                         <img src={heart} alt="heart" className="w-[120px] sm:w-[162px]" />
@@ -93,12 +100,15 @@ export default function LoginPageAdmin() {
                             className="w-full h-[60px] bg-[#F3F3F5] border border-[#7D7D7D] rounded-xl px-4 mt-2 mb-10 outline-none"
                         />
 
-                        <button className="w-full h-[65px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] 
-                   flex items-center justify-center 
-                   scale-100 hover:scale-105 
-                   transition-transform duration-300 cursor-pointer">
-                            <span className="text-white text-xl font-medium">Log In</span>
-                        </button>
+                        <button
+  onClick={() => navigate("/AdminDashboard")}
+  className="w-full h-[65px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] 
+  flex items-center justify-center 
+  scale-100 hover:scale-105 
+  transition-transform duration-300 cursor-pointer"
+>
+  <span className="text-white text-xl font-medium">Log In</span>
+</button>
                     </div>
                 </div>
 

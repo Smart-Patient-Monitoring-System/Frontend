@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { 
   Heart, 
   Bell, 
@@ -26,7 +28,10 @@ import admin from "../../assets/images/admin.png";
 function AdminDashboard() {
     const [analysis, setAnalysis] = useState(null);
     const [hasNotification, setHasNotification] = useState(true);
-    const handleLogout = () => {console.log('Logging out...');};
+    const navigate = useNavigate();
+    const handleLogout = () => {
+      console.log('Logging out...');
+        navigate('/');};
 
 return( 
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">

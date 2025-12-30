@@ -12,22 +12,26 @@ export default function RoleSelect() {
         <div className="min-h-screen w-full bg-[#F8FBFF] flex flex-col items-center pt-6 px-4 sm:px-8">
 
             {/* HOME button */}
-            <div className="w-full flex justify-start mb-6 px-4 sm:px-6 md:px-8">
-                <button className="relative w-[140px] sm:w-[160px] md:w-[180px] h-[45px] sm:h-[51px] rounded-full 
-                   bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center justify-center 
-                   pl-12 sm:pl-14 md:pl-16 scale-100 hover:scale-105 
-                   transition-transform duration-300 cursor-pointer">
-                    <img
-                        src={gtMark}
-                        alt="gt mark"
-                        className="absolute top-0 left-0 w-[40px] sm:w-[50px] md:w-[55px] h-[40px] sm:h-[50px] md:h-[55px] object-cover rounded-md"
-                    />
-                    <span className="font-inter font-medium text-[20px] sm:text-[24px] md:text-[28px] leading-[100%] tracking-[0%] text-white">
-                        HOME
-                    </span>
-                </button>
+<div className="w-full flex justify-start mb-6 px-4 sm:px-6 md:px-8">
+  <Link to="/">
+    <button
+      className="relative w-[140px] sm:w-[160px] md:w-[180px] h-[45px] sm:h-[51px] rounded-full 
+      bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center justify-center 
+      pl-12 sm:pl-14 md:pl-16 scale-100 hover:scale-105 
+      transition-transform duration-300 cursor-pointer"
+    >
+      <img
+        src={gtMark}
+        alt="gt mark"
+        className="absolute top-0 left-0 w-[40px] sm:w-[50px] md:w-[55px] h-[40px] sm:h-[50px] md:h-[55px] object-cover rounded-md"
+      />
+      <span className="font-inter font-medium text-[20px] sm:text-[24px] md:text-[28px] leading-[100%] tracking-[0%] text-white">
+        HOME
+      </span>
+    </button>
+  </Link>
+</div>
 
-            </div>
 
             {/* Page title */}
             <div className="text-center mb-2 px-4 sm:px-0">
