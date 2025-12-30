@@ -40,6 +40,22 @@ function UserManagement(){
                 </div>
                 </div>
             </div>
+
+             {/* Right Card */}
+            <div className="bg-white rounded-2xl shadow-md p-6">
+                <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold text-gray-800">Doctors & Staff</h3>
+                <button className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded-full">
+                    Add Doctor
+                </button>
+                </div>
+
+                <input
+                type="text"
+                placeholder="Search Doctors..."
+                className="w-full px-4 py-2 bg-gray-100 rounded-full text-sm outline-none"
+                />
+            </div>
          </div>
     );
 }
