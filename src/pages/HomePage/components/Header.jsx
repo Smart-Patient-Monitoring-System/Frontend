@@ -7,7 +7,7 @@ function Header() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Heart size={32} className="text-white" fill="white" />
           <div>
-            <h1 className="text-white text-lg sm:text-xl lg:text-2xl font-bold">Smart Patient Monitoring</h1>
+            <h1 className="text-white text-lg sm:text-xl lg:text-2xl font-bold">SmartCare Monitor</h1>
             <p className="text-teal-100 text-xs sm:text-sm">AI-Powered Healthcare</p>
           </div>
         </div>
