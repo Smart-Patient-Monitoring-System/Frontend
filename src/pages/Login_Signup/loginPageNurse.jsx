@@ -1,53 +1,11 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React from "react";
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
 import nurse from "../../assets/images/nurse.png";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api";
-
 export default function LoginPageNurse() {
     const navigate = useNavigate();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
-
-        if (!username.trim() || !password.trim()) {
-            setError("Please enter both username and password");
-            setLoading(false);
-            return;
-        }
-
-        try {
-            const response = await axios.post(`${API_URL}/auth/login`, {
-                username: username.trim(),
-                password: password.trim(),
-            });
-
-            localStorage.setItem("token", response.data.token);
-            localStorage.setItem("user", JSON.stringify(response.data.user));
-
-            if (response.data.user.role === "nurse") {
-                navigate("/nurse-dashboard"); // Update this route if different
-            } else {
-                setError("Access denied. This is for nurses only.");
-            }
-        } catch (err) {
-            setError(
-                err.response?.data?.message || 
-                "Login failed. Please check your credentials."
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
     return (
         <div className="w-full min-h-screen bg-[#F8FBFF] flex justify-center items-center p-4">
             <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -115,17 +73,11 @@ export default function LoginPageNurse() {
                 />
 
                 <div className="flex justify-center p-4">
-                    <form onSubmit={handleLogin} className="w-full max-w-[650px] bg-white rounded-[40px] shadow-2xl p-8 sm:p-10">
+                    <div className="w-full max-w-[650px] bg-white rounded-[40px] shadow-2xl p-8 sm:p-10">
                         <h1 className="text-3xl sm:text-4xl font-normal mb-3 text-left">Login</h1>
                         <p className="text-lg font-light mb-20 text-left">
                             Enter your credentials to continue
                         </p>
-
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                                {error}
-                            </div>
-                        )}
 
                         <label className="text-xl font-medium text-left block">
                             User Name
@@ -134,11 +86,7 @@ export default function LoginPageNurse() {
                         <input
                             type="text"
                             placeholder="Enter your username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
                             className="w-full h-[60px] bg-[#F3F3F5] border border-[#7D7D7D] rounded-xl px-4 mt-2 mb-10 outline-none"
-                            required
-                            disabled={loading}
                         />
 
                         <label className="text-xl font-medium text-left block">
@@ -148,26 +96,16 @@ export default function LoginPageNurse() {
                         <input
                             type="password"
                             placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full h-[60px] bg-[#F3F3F5] border border-[#7D7D7D] rounded-xl px-4 mt-2 mb-10 outline-none"
-                            required
-                            disabled={loading}
                         />
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full h-[65px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] 
-                            flex items-center justify-center 
-                            scale-100 hover:scale-105 
-                            transition-transform duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <span className="text-white text-xl font-medium">
-                                {loading ? "Logging in..." : "Log In"}
-                            </span>
+                        <button className="w-full h-[65px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] 
+                   flex items-center justify-center 
+                   scale-100 hover:scale-105 
+                   transition-transform duration-300 cursor-pointer">
+                            <span className="text-white text-xl font-medium">Log In</span>
                         </button>
-                    </form>
+                    </div>
                 </div>
 
             </div>
