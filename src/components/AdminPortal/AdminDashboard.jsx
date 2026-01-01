@@ -8,7 +8,9 @@ import {
   TrendingUp
 } from "lucide-react";
 import admin from "../../assets/images/admin.png";
-import UserManagement from "../pages/admin/UserManagement";
+import UserManagement from "../../pages/AdminPages/UserManagement";
+import IotDevices from "../../pages/AdminPages/IotDevices";
+
 
 
 function AdminDashboard() {
