@@ -184,7 +184,7 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveTab("analytics")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "analystics"
+              ${activeTab === "analytics"
                 ? "text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"}`}
             style={
@@ -217,7 +217,12 @@ function AdminDashboard() {
 
         </div>
       </div>
-
+       <div className="px-6 mt-6">
+        {activeTab === "users" && <UserManagement />}
+        {activeTab === "iot" && <IotDevices />}
+        {activeTab === "analytics" && <Analytics />}
+        {activeTab === "logs" && <SecurityLogs />}
+       </div>      
 
     </div>
   );
