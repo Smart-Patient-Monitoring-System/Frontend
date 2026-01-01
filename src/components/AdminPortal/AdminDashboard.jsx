@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { 
   Bell,
   Settings,
@@ -17,6 +19,7 @@ import SecurityLogs from "../../pages/AdminPages/SecurityLogs";
 
 function AdminDashboard() {
   const [hasNotification, setHasNotification] = useState(true);
+
 
   const handleLogout = () => {
     console.log('Logging out...');

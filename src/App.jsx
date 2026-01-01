@@ -1,44 +1,106 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Header from "./pages/HomePage/components/Header";
+import Hero from "./pages/HomePage/components/Hero";
+import Features from "./pages/HomePage/components/Features";
+import FooterCTA from "./pages/HomePage/components/FooterCTA";
+
+import RoleSelectionPage from "./pages/Login_Signup/roleSelectionpage";
+import LoginDoctor from "./pages/Login_Signup/loginPageDoctor";
+import LoginPatient from "./pages/Login_Signup/loginPagePatient";
+import LoginNurse from "./pages/Login_Signup/loginPageNurse";
+import LoginAdmin from "./pages/Login_Signup/loginPageAdmin";
+
+import SignupDoctor from "./pages/Login_Signup/signupPageDoctor";
+import SignupPatient from "./pages/Login_Signup/signupPagePatient";
+import SignupNurse from "./pages/Login_Signup/signupPageNurse";
+import SignupAdmin from "./pages/Login_Signup/signupPageAdmin";
+
+import PatientPortal from "./pages/PatientPortal/PatientPortal";
+import AdminDashboard from "./components/AdminPortal/AdminDashboard";
+import DocDashboard from "./pages/DoctorsPage/DocDashboard";
 
 
-import './App.css'
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoginPageAdmin from './pages/Login_Signup/loginPageAdmin'
-import LoginPageDoctor from './pages/Login_Signup/loginPageDoctor';
-import SignupPageDoctor from './pages/Login_Signup/signupPageDoctor';
-import LoginPageNurse from './pages/Login_Signup/loginPageNurse';
+function HomePage() {
+  const stats = [
+    { value: "24/7", label: "Monitoring" },
+    { value: "99.9%", label: "Uptime" },
+    { value: "AI-POWERED", label: "Predictions" },
+  ];
 
-import RoleSelect from './pages/Login_Signup/roleSelectionpage';
-import LoginPagePatient from './pages/Login_Signup/loginPagePatient';
-import SignupPageNurse from './pages/Login_Signup/signupPageNurse';
-import SignupPageAdmin from './pages/Login_Signup/signupPageAdmin';
-import SignupPagePatient from './pages/Login_Signup/signupPagePatient';
-
-import DoctorDashboard from './pages/DoctorsPage/DocDashboard';
-import AdminDashboard from './components/AdminPortal/AdminDashboard';
-
-function App() {
-
+  const features = [
+    {
+      id: 1,
+      icon: "activity",
+      title: "Real-Time Vitals",
+      description: "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
+    },
+    {
+      id: 2,
+      icon: "heart",
+      title: "Advanced ECG",
+      description: "12-lead visualization with AI arrhythmia detection",
+    },
+    {
+      id: 3,
+      icon: "brain",
+      title: "AI Predictions",
+      description: "Machine learning risk assessment and early warnings",
+    },
+    {
+      id: 4,
+      icon: "message",
+      title: "AI Assistant",
+      description: "Intelligent chatbot for health insights and guidance",
+    },
+    {
+      id: 5,
+      icon: "shield",
+      title: "Enterprise Security",
+      description: "HIPAA-compliant with role-based access control",
+    },
+    {
+      id: 6,
+      icon: "wifi",
+      title: "IoT Management",
+      description: "Real-time device monitoring and fleet management",
+    },
+  ];
 
   return (
-
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RoleSelect />} />
-        <Route path="/doctorLogin" element={<DoctorDashboard />} />
-        <Route path="/nurseLogin" element={<LoginPageNurse />} />
-        <Route path="/adminLogin" element={<AdminDashboard />} />
-        <Route path="/patientLogin" element={<LoginPagePatient />} />
-
-        <Route path="/doctorSignup" element={<SignupPageDoctor />} />
-        <Route path="/nurseSignup" element={<SignupPageNurse />} />
-        <Route path="/adminSignup" element={<SignupPageAdmin />} />
-        <Route path="/patientSignup" element={<SignupPagePatient />} />
-
-
-      </Routes>
-    </BrowserRouter>
-
-  )
+    <>
+      <Header />
+      <Hero stats={stats} />
+      <Features features={features} />
+      <FooterCTA />
+    </>
+  );
 }
-// hello
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/role-selection" element={<RoleSelectionPage />} />
+        {/* Login routes */}
+        <Route path="/doctorLogin" element={<LoginDoctor />} />
+        <Route path="/patientLogin" element={<LoginPatient />} />
+        <Route path="/nurseLogin" element={<LoginNurse />} />
+        <Route path="/adminLogin" element={<LoginAdmin />} />
+
+        {/* Signup routes */}
+        <Route path="/doctorSignup" element={<SignupDoctor />} />
+        <Route path="/patientSignup" element={<SignupPatient />} />
+        <Route path="/nurseSignup" element={<SignupNurse />} />
+        <Route path="/adminSignup" element={<SignupAdmin />} />
+
+        <Route path="/patient-portal" element={<PatientPortal />} />
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/DocDashboard" element={<DocDashboard />} />
+      </Routes>
+    </Router>
+  );
+}
+
 export default App;

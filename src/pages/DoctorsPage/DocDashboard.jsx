@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CriticalAlertPage from './CriticalAlertPage';
 import ECGReaderPage from './ECGReaderPage';
+import { useNavigate } from "react-router-dom";
 import { 
   Heart, 
   Bell, 
@@ -29,10 +30,12 @@ function DocDashboard() {
   const [hasNotification, setHasNotification] = useState(true);
   const [activeTab, setActiveTab] = useState('patient-overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   // Event handler for logout
   const handleLogout = () => {
     console.log('Logging out...');
+    navigate('/');
   };
 
   // Patient data
