@@ -11,6 +11,7 @@ import admin from "../../assets/images/admin.png";
 import UserManagement from "../../pages/AdminPages/UserManagement";
 import IotDevices from "../../pages/AdminPages/IotDevices";
 import Analytics from "../../pages/AdminPages/Analytics";
+import SecurityLogs from "../../pages/AdminPages/SecurityLogs";
 
 
 
