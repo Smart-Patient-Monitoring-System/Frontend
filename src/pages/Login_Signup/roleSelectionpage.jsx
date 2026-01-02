@@ -26,11 +26,7 @@ export default function RoleSelect() {
                 src={gtMark}
                 alt="gt mark"
                 className="
-                    w-[18px] h-[18px]
-                    sm:w-[20px] sm:h-[20px]
-                    lg:w-[16px] lg:h-[16px]
-                    object-contain
-                "
+                    w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] lg:w-[16px] lg:h-[16px] object-contain"
                 />
             </div>
 
