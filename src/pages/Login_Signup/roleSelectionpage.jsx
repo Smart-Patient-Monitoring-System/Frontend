@@ -12,25 +12,49 @@ export default function RoleSelect() {
         <div className="min-h-screen w-full bg-[#F8FBFF] flex flex-col items-center pt-6 px-4 sm:px-8">
 
             {/* HOME button */}
-<div className="w-full flex justify-start mb-6 px-4 sm:px-6 md:px-8">
-  <Link to="/">
-    <button
-      className="relative w-[140px] sm:w-[160px] md:w-[180px] h-[45px] sm:h-[51px] rounded-full 
-      bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center justify-center 
-      pl-12 sm:pl-14 md:pl-16 scale-100 hover:scale-105 
-      transition-transform duration-300 cursor-pointer"
-    >
-      <img
-        src={gtMark}
-        alt="gt mark"
-        className="absolute top-0 left-0 w-[40px] sm:w-[50px] md:w-[55px] h-[40px] sm:h-[50px] md:h-[55px] object-cover rounded-md"
-      />
-      <span className="font-inter font-medium text-[20px] sm:text-[24px] md:text-[28px] leading-[100%] tracking-[0%] text-white">
-        HOME
-      </span>
-    </button>
-  </Link>
-</div>
+            <div className="w-full flex justify-start mb-6 px-4 sm:px-6 md:px-8">
+            <Link to="/">
+                <button
+            className="
+                relative
+                w-[140px] sm:w-[160px] md:w-[170px] lg:w-[150px] xl:w-[140px]
+                h-[45px] sm:h-[50px] md:h-[48px] lg:h-[42px] xl:h-[40px]
+                rounded-full
+                bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
+                flex items-center
+                px-3 sm:px-4
+                text-sm md:text-base lg:text-sm
+                font-semibold text-white
+                hover:scale-105 transition-all duration-300
+                shadow-md hover:shadow-lg
+                cursor-pointer
+            "
+            >
+            {/* Left icon space */}
+            <div className="w-[26px] sm:w-[28px] flex justify-center">
+                <img
+                src={gtMark}
+                alt="gt mark"
+                className="
+                    w-[18px] h-[18px]
+                    sm:w-[20px] sm:h-[20px]
+                    lg:w-[16px] lg:h-[16px]
+                    object-contain
+                "
+                />
+            </div>
+
+            {/* Center text */}
+            <span className="flex-1 text-center font-inter font-medium">
+                HOME
+            </span>
+
+            {/* Right balance space */}
+            <div className="w-[26px] sm:w-[28px]" />
+            </button>
+
+            </Link>
+            </div>
 
 
             {/* Page title */}
