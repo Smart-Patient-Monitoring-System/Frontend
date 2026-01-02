@@ -13,11 +13,12 @@ export default function SignupPagePatient() {
       <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/40"></div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-[1600px] flex flex-col lg:flex-row gap-6">
+      <div className="relative z-10 w-full max-w-[1600px] flex flex-col lg:flex-row gap-6 items-stretch">
 
         {/* LEFT CARD */}
         <div className="
           w-full lg:w-1/2
+          h-full
           bg-white/20 backdrop-blur-xl
           border border-white/30
           shadow-[0_8px_40px_rgba(0,0,0,0.25)]
@@ -51,23 +52,24 @@ export default function SignupPagePatient() {
             </FormRow>
 
             <FormRow label="Contact No" type="tel" />
-            <FormRow label="Guardian’s Name" />
+            
           </div>
         </div>
 
         {/* RIGHT CARD */}
         <div className="
           w-full lg:w-1/2
+          h-full
           bg-white/20 backdrop-blur-xl
           border border-white/30
           shadow-[0_8px_40px_rgba(0,0,0,0.25)]
           rounded-[36px] lg:rounded-[56px]
           p-6 sm:p-8 md:p-10
           flex flex-col justify-between
-          min-h-[520px] max-h-[75vh]
         ">
-          {/* Scrollable form */}
-          <div className="flex flex-col gap-5 overflow-y-auto pr-2">
+          {/* Form content */}
+          <div className="flex flex-col gap-5">
+            <FormRow label="Guardian’s Name" />
             <FormRow label="Guardian’s Contact No" type="tel" />
             <FormRow label="User Name" />
             <FormRow label="Password" type="password" />
@@ -75,7 +77,7 @@ export default function SignupPagePatient() {
             <FormRow label="Blood Type" />
           </div>
 
-          {/* Actions (SAME AS ADMIN) */}
+          {/* Actions */}
           <div className="flex flex-col items-center mt-6 gap-4">
             <button className="
               w-full sm:w-2/3 lg:w-[260px]
