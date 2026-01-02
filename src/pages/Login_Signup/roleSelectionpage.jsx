@@ -58,7 +58,7 @@ export default function RoleSelect() {
             </div>
 
             {/* Cards grid */}
-            <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0 justify-items-center">
+            <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0 justify-items-center">
 
                 <div className="w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[55%] flex justify-center
                                 hover:scale-105 transition-transform duration-300 cursor-pointer">
