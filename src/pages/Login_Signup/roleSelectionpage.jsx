@@ -9,7 +9,8 @@ import { Link } from 'react-router-dom';
 
 export default function RoleSelect() {
     return (
-        <div className="min-h-screen w-full bg-[#F8FBFF] flex flex-col items-center pt-6 px-4 sm:px-8">
+        <div className="min-h-screen w-full bg-[#F8FBFF] flex flex-col items-center
+                        pt-6 pb-6 sm:pb-8 md:pb-10 px-4 sm:px-8">
 
             {/* HOME button */}
             <div className="w-full flex justify-start mb-6 px-4 sm:px-6 md:px-8">
@@ -44,23 +45,23 @@ export default function RoleSelect() {
 
             {/* Page title */}
             <div className="text-center mb-2 px-4 sm:px-0">
-                <span className="font-inter font-bold text-[24px] sm:text-[28px] md:text-[32px] lg:text-[36px] leading-[100%] tracking-[0%]">
+                <span className="font-inter font-bold text-[16px] sm:text-[20px] md:text-[24px] lg:text-[28px] leading-[100%] tracking-[0%]">
                     Select Your Role
                 </span>
             </div>
 
             {/* Subtitle */}
             <div className="text-center mb-10 px-4 sm:px-0">
-                <span className="font-inter font-light text-[18px] sm:text-[24px] md:text-[28px] lg:text-[32px] leading-[100%] tracking-[0%]">
+                <span className="font-inter font-light text-[12px] sm:text-[16px] md:text-[20px] lg:text-[24px] leading-[100%] tracking-[0%]">
                     Choose your role to continue to the portal
                 </span>
             </div>
 
             {/* Cards grid */}
-            <div className="w-full max-w-[1280px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0 justify-items-center">
+            <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0 justify-items-center">
 
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <div className="w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[55%] flex justify-center
+                                hover:scale-105 transition-transform duration-300 cursor-pointer">
                     <Link to="/doctorLogin">
                         <Cart
                             image={doctor}
@@ -72,8 +73,8 @@ export default function RoleSelect() {
                     </Link>
                 </div>
 
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <div className="w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[55%] flex justify-center
+                                hover:scale-105 transition-transform duration-300 cursor-pointer">
                     <Link to="/patientLogin">
                         <Cart
                             image={patient}
@@ -85,8 +86,8 @@ export default function RoleSelect() {
                     </Link>
                 </div>
 
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <div className="w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[55%] flex justify-center
+                                hover:scale-105 transition-transform duration-300 cursor-pointer">
                     <Link to="/nurseLogin">
                         <Cart
                             image={nurse}
@@ -98,8 +99,8 @@ export default function RoleSelect() {
                     </Link>
                 </div>
 
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <div className="w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[55%] flex justify-center
+                                hover:scale-105 transition-transform duration-300 cursor-pointer">
                     <Link to="/adminLogin">
                         <Cart
                             image={admin}
