@@ -16,19 +16,9 @@ export default function RoleSelect() {
             <Link to="/">
                 <button
             className="
-                relative
-                w-[140px] sm:w-[160px] md:w-[170px] lg:w-[150px] xl:w-[140px]
-                h-[45px] sm:h-[50px] md:h-[48px] lg:h-[42px] xl:h-[40px]
-                rounded-full
-                bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
-                flex items-center
-                px-3 sm:px-4
-                text-sm md:text-base lg:text-sm
-                font-semibold text-white
-                hover:scale-105 transition-all duration-300
-                shadow-md hover:shadow-lg
-                cursor-pointer
-            "
+                relative w-[140px] sm:w-[160px] md:w-[170px] lg:w-[150px] xl:w-[140px] h-[45px] sm:h-[50px] md:h-[48px] lg:h-[42px] xl:h-[40px]
+                rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center px-3 sm:px-4 text-sm md:text-base
+                lg:text-sm font-semibold text-white hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer"
             >
             {/* Left icon space */}
             <div className="w-[26px] sm:w-[28px] flex justify-center">
@@ -52,7 +42,6 @@ export default function RoleSelect() {
             {/* Right balance space */}
             <div className="w-[26px] sm:w-[28px]" />
             </button>
-
             </Link>
             </div>
 
