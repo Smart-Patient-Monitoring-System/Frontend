@@ -13,11 +13,12 @@ export default function SignupPageAdmin() {
       <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-black/40"></div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-[1600px] flex flex-col lg:flex-row gap-6">
+      <div className="relative z-10 w-full max-w-[1600px] flex flex-col lg:flex-row gap-6 items-stretch">
 
         {/* LEFT CARD */}
         <div className="
           w-full lg:w-1/2
+          h-full
           bg-white/20 backdrop-blur-xl
           border border-white/30
           shadow-[0_8px_40px_rgba(0,0,0,0.25)]
@@ -38,19 +39,18 @@ export default function SignupPageAdmin() {
 
             {/* Gender */}
             <FormRow label="Gender">
-  <div className="flex items-center gap-6 h-11">
-    <label className="flex items-center gap-2 text-white/80">
-      <input type="radio" name="gender" className="accent-[#00BAC5]" />
-      Male
-    </label>
+              <div className="flex items-center gap-6 h-11">
+                <label className="flex items-center gap-2 text-white/80">
+                  <input type="radio" name="gender" className="accent-[#00BAC5]" />
+                  Male
+                </label>
 
-    <label className="flex items-center gap-2 text-white/80">
-      <input type="radio" name="gender" className="accent-[#00BAC5]" />
-      Female
-    </label>
-  </div>
-</FormRow>
-
+                <label className="flex items-center gap-2 text-white/80">
+                  <input type="radio" name="gender" className="accent-[#00BAC5]" />
+                  Female
+                </label>
+              </div>
+            </FormRow>
 
             <FormRow label="Contact No" />
           </div>
@@ -59,16 +59,16 @@ export default function SignupPageAdmin() {
         {/* RIGHT CARD */}
         <div className="
           w-full lg:w-1/2
+          h-full
           bg-white/20 backdrop-blur-xl
           border border-white/30
           shadow-[0_8px_40px_rgba(0,0,0,0.25)]
           rounded-[36px] lg:rounded-[56px]
           p-6 sm:p-8 md:p-10
           flex flex-col justify-between
-          min-h-[520px] max-h-[75vh]
         ">
-          {/* Scrollable form */}
-          <div className="flex flex-col gap-5 overflow-y-auto pr-2">
+          {/* Form content */}
+          <div className="flex flex-col gap-5">
             <FormRow label="User Name" />
             <FormRow label="Password" type="password" />
             <FormRow label="Confirm Password" type="password" />
