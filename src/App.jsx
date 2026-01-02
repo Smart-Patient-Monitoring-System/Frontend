@@ -8,12 +8,10 @@ import FooterCTA from "./pages/HomePage/components/FooterCTA";
 import RoleSelectionPage from "./pages/Login_Signup/roleSelectionpage";
 import LoginDoctor from "./pages/Login_Signup/loginPageDoctor";
 import LoginPatient from "./pages/Login_Signup/loginPagePatient";
-import LoginNurse from "./pages/Login_Signup/loginPageNurse";
 import LoginAdmin from "./pages/Login_Signup/loginPageAdmin";
 
 import SignupDoctor from "./pages/Login_Signup/signupPageDoctor";
 import SignupPatient from "./pages/Login_Signup/signupPagePatient";
-import SignupNurse from "./pages/Login_Signup/signupPageNurse";
 import SignupAdmin from "./pages/Login_Signup/signupPageAdmin";
 
 import PatientPortal from "./pages/PatientPortal/PatientPortal";
@@ -86,13 +84,13 @@ function App() {
         {/* Login routes */}
         <Route path="/doctorLogin" element={<LoginDoctor />} />
         <Route path="/patientLogin" element={<LoginPatient />} />
+
         <Route path="/nurseLogin" element={<LoginNurse />} />
         <Route path="/adminLogin" element={<AdminDashboard />} />
 
         {/* Signup routes */}
         <Route path="/doctorSignup" element={<SignupDoctor />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
-        <Route path="/nurseSignup" element={<SignupNurse />} />
         <Route path="/adminSignup" element={<SignupAdmin />} />
 
         <Route path="/patient-portal" element={<PatientPortal />} />

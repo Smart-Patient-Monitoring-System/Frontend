@@ -1,86 +1,163 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
 import admin from "../../assets/images/admin.png";
-import { useNavigate } from "react-router-dom";
 
 export default function LoginPageAdmin() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    return (
-        <div className="w-full min-h-screen bg-[#F8FBFF] flex justify-center items-center p-4">
-            <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <div className="flex flex-col items-center lg:items-start gap-10 p-4">
-                    <button
-                        onClick={() => navigate("/")}
-                        className="
-                          relative w-[140px] sm:w-[160px] md:w-[170px] lg:w-[150px] xl:w-[140px] h-[45px] sm:h-[50px] md:h-[48px] lg:h-[42px] xl:h-[40px]
-                          rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center px-3 sm:px-4 text-sm md:text-base
-                          lg:text-sm font-semibold text-white hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer"
-                    >
-                {/* Left icon space */}
-                        <div className="w-[26px] sm:w-[28px] flex justify-center">
-                          <img
-                            src={gtMark}
-                            alt="gt mark"
-                            className="
-                            w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] lg:w-[16px] lg:h-[16px] object-contain"
-                         />
-                        </div>          
-                {/* Center text */}
-                        <span className="flex-1 text-center font-inter font-medium">
-                          HOME
-                       </span>    
-                {/* Right balance space */}
-                        <div className="w-[26px] sm:w-[28px]" />
-                  </button>
-                </div>
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-                <hr
-                    className="hidden lg:block absolute left-1/2 top-1/2  w-[1102px] 
-                            border-t border-black  rotate-90 -translate-x-1/2 -translate-y-1/2"
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both username and password");
+      setLoading(false);
+      return;
+    }
+
+    const mockUser = {
+      username,
+      role: "admin",
+    };
+
+    localStorage.setItem("token", "frontend-admin-demo-token");
+    localStorage.setItem("user", JSON.stringify(mockUser));
+
+    setTimeout(() => {
+      navigate("/AdminDashboard");
+      setLoading(false);
+    }, 800);
+  };
+
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-br from-[#F8FBFF] to-[#EEF6FF] flex items-center justify-center px-4">
+      <div className="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-10 items-center">
+
+        {/* ================= LEFT SECTION ================= */}
+        <div className="flex flex-col items-center lg:items-start gap-6">
+
+          {/* HOME BUTTON */}
+          <button
+            onClick={() => navigate("/")}
+            className="relative w-[120px] h-[42px] rounded-full 
+            bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
+            flex items-center justify-center pl-9
+            hover:scale-105 transition-all shadow-md"
+          >
+            <img
+              src={gtMark}
+              alt="Home"
+              className="absolute left-1 top-1 w-[34px] h-[34px] rounded-full"
+            />
+            <span className="text-white font-semibold">HOME</span>
+          </button>
+
+          {/* ICON */}
+          <div className="w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] rounded-3xl 
+          bg-gradient-to-tr from-[#0DC0BD] to-[#057EF8] 
+          shadow-xl flex items-center justify-center">
+            <img src={heart} alt="Heart" className="w-[100px] sm:w-[130px]" />
+          </div>
+
+          {/* TEXT */}
+          <div className="text-center lg:text-left">
+            <h1 className="text-4xl sm:text-5xl font-light text-gray-800">
+              WELCOME!
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-600 mt-2">
+              Sign in to access your dashboard
+            </p>
+          </div>
+
+          {/* ROLE CARD */}
+          <div className="w-full max-w-[420px] bg-[#F7F3FF] rounded-2xl p-5 shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="w-[64px] h-[64px] rounded-full bg-[#A538FF] flex items-center justify-center shadow-md">
+                <img
+                  src={admin}
+                  alt="Admin"
+                  className="w-[34px] filter invert"
                 />
-
-                <div className="flex justify-center p-4">
-                    <div className="w-full max-w-[650px] bg-white rounded-[40px] shadow-2xl p-8 sm:p-10">
-                        <h1 className="text-3xl sm:text-4xl font-normal mb-3 text-left">Login</h1>
-                        <p className="text-lg font-light mb-20 text-left">
-                            Enter your credentials to continue
-                        </p>
-
-                        <label className="text-xl font-medium text-left block">
-                            User Name
-                        </label>
-
-                        <input
-                            type="text"
-                            placeholder="Enter your username"
-                            className="w-full h-[60px] bg-[#F3F3F5] border border-[#7D7D7D] rounded-xl px-4 mt-2 mb-10 outline-none"
-                        />
-
-                        <label className="text-xl font-medium text-left block">
-                            Password
-                        </label>
-
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            className="w-full h-[60px] bg-[#F3F3F5] border border-[#7D7D7D] rounded-xl px-4 mt-2 mb-10 outline-none"
-                        />
-
-                        <button
-  onClick={() => navigate("/AdminDashboard")}
-  className="w-full h-[65px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] 
-  flex items-center justify-center 
-  scale-100 hover:scale-105 
-  transition-transform duration-300 cursor-pointer"
->
-  <span className="text-white text-xl font-medium">Log In</span>
-</button>
-                    </div>
-                </div>
-
+              </div>
+              <div>
+                <p className="text-xl font-semibold text-gray-800">Admin</p>
+                <p className="text-sm text-gray-600">
+                  Manage system users and configurations
+                </p>
+              </div>
             </div>
+          </div>
+
+          {/* SIGN UP */}
+          <button
+            onClick={() => navigate("/adminSignup")}
+            className="w-full max-w-[420px] h-[52px] bg-white rounded-xl shadow hover:shadow-lg transition"
+          >
+            <span className="font-semibold text-gray-700">Sign Up</span>
+          </button>
         </div>
-    );
+
+        {/* ================= DIVIDER ================= */}
+        <div className="hidden lg:flex justify-center">
+          <div className="w-[1px] h-[70vh] bg-gradient-to-b from-transparent via-gray-300 to-transparent" />
+        </div>
+
+        {/* ================= RIGHT SECTION ================= */}
+        <div className="flex justify-center items-center">
+          <form
+            onSubmit={handleLogin}
+            className="w-full max-w-[480px] bg-white rounded-3xl shadow-xl p-8 sm:p-10"
+          >
+            <h2 className="text-3xl font-bold text-gray-800">Login</h2>
+            <p className="text-gray-600 mb-8">
+              Enter your credentials to continue
+            </p>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
+            <label className="font-semibold text-gray-700">User Name</label>
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+            />
+
+            <label className="font-semibold text-gray-700">Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full h-[52px] mt-2 mb-8 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-[56px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
+              text-white font-semibold text-lg hover:scale-105 transition
+              disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Logging in..." : "Log In"}
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  );
 }
