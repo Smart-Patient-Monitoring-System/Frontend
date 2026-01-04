@@ -10,36 +10,34 @@ function UploadModal({ open, onClose, onAnalyze }) {
   const [heaFile, setHeaFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
- const handleSubmit = async () => {
-  if (!patientId || !datFile || !heaFile) {
-    
-    alert("Please fill all fields");
+  const handleSubmit = async () => {
+    if (!patientId || !datFile || !heaFile) {
+      alert("Please fill all fields");
+      return;
+    }
 
-    return;
-  }
+    const formData = new FormData();
+    formData.append("patientId", patientId);
+    formData.append("dat_file", datFile);
+    formData.append("hea_file", heaFile);
 
-  const formData = new FormData();
-  formData.append("dat_file", datFile);
-  formData.append("hea_file", heaFile);
+    try {
+      setLoading(true);
 
-  try {
-    setLoading(true);
+      const res = await axios.post(
+        "http://localhost:8080/api/ecg/analyze", // ✅ FIXED
+        formData
+      );
 
-    const res = await axios.post(
-      `http://localhost:8081/api/ecg/analyze?patientId=${patientId}`,
-      formData
-    );
-
-    onAnalyze(res.data);
-    onClose();
-  } catch (err) {
-    console.error(err);
-    alert("ECG analysis failed");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      onAnalyze(res.data);   // send data to parent
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("ECG analysis failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -60,15 +58,25 @@ function UploadModal({ open, onClose, onAnalyze }) {
         />
 
         <label className="block mb-2 text-sm font-medium">ECG .dat file</label>
-        <input type="file" accept=".dat" onChange={(e) => setDatFile(e.target.files[0])} />
+        <input
+          type="file"
+          accept=".dat"
+          onChange={(e) => setDatFile(e.target.files[0])}
+          className="mb-4"
+        />
 
-        <label className="block mb-2 mt-3 text-sm font-medium">ECG .hea file</label>
-        <input type="file" accept=".hea" onChange={(e) => setHeaFile(e.target.files[0])} />
+        <label className="block mb-2 text-sm font-medium">ECG .hea file</label>
+        <input
+          type="file"
+          accept=".hea"
+          onChange={(e) => setHeaFile(e.target.files[0])}
+          className="mb-6"
+        />
 
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full mt-4 bg-blue-600 text-white py-2 rounded-xl"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl"
         >
           {loading ? "Analyzing..." : "Upload & Analyze"}
         </button>
