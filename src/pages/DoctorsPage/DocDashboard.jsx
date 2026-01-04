@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import CriticalAlertPage from './CriticalAlertPage';
 import ECGReaderPage from './ECGReaderPage';
@@ -16,7 +15,12 @@ import {
   Droplets,
   Eye,
   LogOut,
-  Users
+  Users,
+  UserCircle,
+  AlertCircle,
+  Tablet,
+  TrendingUp,
+  Wifi
 } from "lucide-react";
 
 
@@ -65,6 +69,43 @@ function DocDashboard() {
       spO2: '98%',
       riskLevel: 'Medium',
       status: 'Medium'
+    }
+  ];
+
+  // Statistics data for the 4 boxes
+  const statsData = [
+    {
+      title: 'Total Patients',
+      value: '24',
+      icon: <Users className="w-6 h-6" />,
+      color: '#ffffffff',
+      bgColor: '#1A65FE',
+      
+    },
+    {
+      title: 'Critical Alerts',
+      value: '2',
+      icon: <AlertCircle className="w-6 h-6" />,
+      color: '#ffffffff',
+      bgColor: '#F41D2A',
+      
+    },
+    {
+      title: 'IoT Devices',
+      value: '48',
+      icon: <Wifi className="w-6 h-6" />,
+      color: '#ffffffff',
+      bgColor: '#00AD42',
+      
+    },
+    {
+      title: 'Avg Health Score',
+      value: '87',
+      suffix: '%',
+      icon: <TrendingUp className="w-6 h-6" />,
+      color: '#ffffffff',
+      bgColor: '#00AC9B',
+      
     }
   ];
 
@@ -245,130 +286,169 @@ function DocDashboard() {
           
           {/* Patient Overview Tab Content */}
           {activeTab === 'patient-overview' && (
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              {/* Table Header */}
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-800">Patient Overview</h2>
-                <p className="text-gray-600 text-sm mt-1">Detailed patient monitoring data</p>
-              </div>
-
-              {/* Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Room</th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Heart Rate</th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Temp</th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SpO₂</th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Risk Level</th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {patients.map((patient, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="py-4 px-4">
-                          <div>
-                            <div className="font-medium text-gray-900">{patient.name}</div>
-                            <div className="text-sm text-gray-500">{patient.id} - {patient.age}</div>
+            <>
+              {/* Statistics Boxes Section */}
+              <div className="mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {statsData.map((stat, index) => (
+                    <div 
+                      key={index} 
+                      className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm text-gray-500 font-medium mb-1">{stat.title}</p>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-gray-800">{stat.value}</span>
+                            {stat.suffix && (
+                              <span className="text-sm text-gray-500 font-medium">{stat.suffix}</span>
+                            )}
                           </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-700">{patient.room}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-blue-500" />
-                            <span className={`font-medium ${
-                              patient.heartRate.includes('145') ? 'text-red-600' : 'text-gray-700'
+                          {stat.change && (
+                            <div className={`inline-flex items-center mt-2 text-xs font-medium px-2 py-1 rounded-full ${
+                              stat.title === 'Critical Alerts' 
+                                ? 'bg-red-50 text-red-700' 
+                                : 'bg-green-50 text-green-700'
                             }`}>
-                              {patient.heartRate}
-                            </span>
+                              
+                            </div>
+                          )}
+                        </div>
+                        <div 
+                          className="p-3 rounded-lg"
+                          style={{ backgroundColor: stat.bgColor }}
+                        >
+                          <div style={{ color: stat.color }}>
+                            {stat.icon}
                           </div>
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-2">
-                            <Thermometer className="w-4 h-4 text-orange-500" />
-                            <span className="text-gray-700">{patient.temp}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-2">
-                            <Droplets className="w-4 h-4 text-cyan-500" />
-                            <span className="text-gray-700">{patient.spO2}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            patient.riskLevel === 'High' 
-                              ? 'bg-red-100 text-red-800' 
-                              : patient.riskLevel === 'Medium'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-green-100 text-green-800'
-                          }`}>
-                            {patient.riskLevel}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            patient.status === 'Critical' 
-                              ? 'bg-red-100 text-red-800' 
-                              : patient.status === 'Medium'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-green-100 text-green-800'
-                          }`}>
-                            {patient.status}
-                          </span>
-                        </td>
-                        
-                        <td className="py-4 px-4">
-                          <button className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium">
-                            <Eye className="w-4 h-4" />
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Table Footer */}
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Showing {patients.length} of 42 patients
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
-                      Previous
-                    </button>
-                    <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg">
-                      1
-                    </button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
-                      2
-                    </button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
-                      3
-                    </button>
-                    <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
-                      Next
-                    </button>
+              {/* Patient Table Section */}
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                {/* Table Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-xl font-bold text-gray-800">Patient Overview</h2>
+                  <p className="text-gray-600 text-sm mt-1">Detailed patient monitoring data</p>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Room</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Heart Rate</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Temp</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SpO₂</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Risk Level</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {patients.map((patient, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="py-4 px-4">
+                            <div>
+                              <div className="font-medium text-gray-900">{patient.name}</div>
+                              <div className="text-sm text-gray-500">{patient.id} - {patient.age}</div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-gray-400" />
+                              <span className="text-gray-700">{patient.room}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <Activity className="w-4 h-4 text-blue-500" />
+                              <span className={`font-medium ${
+                                patient.heartRate.includes('145') ? 'text-red-600' : 'text-gray-700'
+                              }`}>
+                                {patient.heartRate}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <Thermometer className="w-4 h-4 text-orange-500" />
+                              <span className="text-gray-700">{patient.temp}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-2">
+                              <Droplets className="w-4 h-4 text-cyan-500" />
+                              <span className="text-gray-700">{patient.spO2}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                              patient.riskLevel === 'High' 
+                                ? 'bg-red-100 text-red-800' 
+                                : patient.riskLevel === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {patient.riskLevel}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                              patient.status === 'Critical' 
+                                ? 'bg-red-100 text-red-800' 
+                                : patient.status === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {patient.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <button className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium">
+                              <Eye className="w-4 h-4" />
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Table Footer */}
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                      Showing {patients.length} of 42 patients
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
+                        Previous
+                      </button>
+                      <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg">
+                        1
+                      </button>
+                      <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
+                        2
+                      </button>
+                      <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
+                        3
+                      </button>
+                      <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white rounded-lg">
+                        Next
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* ECG Reader Tab Content */}
