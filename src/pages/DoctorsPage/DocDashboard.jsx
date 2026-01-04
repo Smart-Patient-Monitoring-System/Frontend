@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CriticalAlertPage from './CriticalAlertPage';
 import ECGReaderPage from './ECGReaderPage';
+import { useNavigate } from "react-router-dom";
 import { 
   Heart, 
   Bell, 
@@ -29,10 +30,12 @@ function DocDashboard() {
   const [hasNotification, setHasNotification] = useState(true);
   const [activeTab, setActiveTab] = useState('patient-overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   // Event handler for logout
   const handleLogout = () => {
     console.log('Logging out...');
+    navigate('/');
   };
 
   // Patient data
@@ -276,7 +279,7 @@ function DocDashboard() {
                   placeholder="Search Patients by Name or ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white rounded-lg shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 bg-white rounded-3xl shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
