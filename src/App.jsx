@@ -18,7 +18,6 @@ import PatientPortal from "./pages/PatientPortal/PatientPortal";
 import AdminDashboard from "./components/AdminPortal/AdminDashboard";
 import DocDashboard from "./pages/DoctorsPage/DocDashboard";
 
-
 function HomePage() {
   const stats = [
     { value: "24/7", label: "Monitoring" },
@@ -31,7 +30,8 @@ function HomePage() {
       id: 1,
       icon: "activity",
       title: "Real-Time Vitals",
-      description: "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
+      description:
+        "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
     },
     {
       id: 2,

@@ -41,10 +41,8 @@ export default function LoginPageAdmin() {
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-[#F8FBFF] to-[#EEF6FF] flex items-center justify-center px-4">
       <div className="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-10 items-center">
-
         {/* ================= LEFT SECTION ================= */}
         <div className="flex flex-col items-center lg:items-start gap-6">
-
           {/* HOME BUTTON */}
           <button
             onClick={() => navigate("/")}
@@ -62,9 +60,11 @@ export default function LoginPageAdmin() {
           </button>
 
           {/* ICON */}
-          <div className="w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] rounded-3xl 
+          <div
+            className="w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] rounded-3xl 
           bg-gradient-to-tr from-[#0DC0BD] to-[#057EF8] 
-          shadow-xl flex items-center justify-center">
+          shadow-xl flex items-center justify-center"
+          >
             <img src={heart} alt="Heart" className="w-[100px] sm:w-[130px]" />
           </div>
 
@@ -157,7 +157,6 @@ export default function LoginPageAdmin() {
             </button>
           </form>
         </div>
-
       </div>
     </div>
   );
