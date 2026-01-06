@@ -11,10 +11,14 @@ const EmergencyPanel = () => {
           <AlertTriangle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex-shrink-0" />
           <h2 className="text-xl sm:text-2xl font-bold">Emergency Services</h2>
         </div>
-        <button className="w-full sm:w-auto bg-white text-red-600 rounded-lg sm:rounded-xl py-2.5 px-5 sm:py-3 sm:px-6 font-bold text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 hover:bg-red-50 transition-colors shadow-lg">
-          <Phone className="w-5 h-5 sm:w-6 sm:h-6" />
-          Call Ambulance
-        </button>
+       <button
+  onClick={() => window.open("https://www.1990.lk/", "_blank")}
+  className="w-full lg:w-auto bg-white text-red-600 rounded-xl py-3 px-6 font-bold text-lg flex items-center justify-center gap-3 hover:bg-red-50 transition-colors shadow-lg"
+>
+  <Phone className="w-6 h-6" />
+  Call Ambulance
+</button>
+
       </div>
 
       {/* Grid for other emergency info - Responsive */}
