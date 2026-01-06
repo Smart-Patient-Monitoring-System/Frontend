@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../api";
 
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
@@ -13,7 +14,7 @@ export default function LoginPageAdmin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -24,18 +25,45 @@ export default function LoginPageAdmin() {
       return;
     }
 
-    const mockUser = {
-      username,
-      role: "admin",
-    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    localStorage.setItem("token", "frontend-admin-demo-token");
-    localStorage.setItem("user", JSON.stringify(mockUser));
+      if (!response.ok) {
+        setError("Invalid username or password");
+        setLoading(false);
+        return;
+      }
 
-    setTimeout(() => {
+      const data = await response.json();
+
+      // Check if user is admin
+      if (data.role?.toUpperCase() !== "ADMIN") {
+        setError("Access denied. Admin credentials required.");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          username: data.username,
+          role: data.role?.toLowerCase() || "admin",
+        })
+      );
+
       navigate("/AdminDashboard");
+    } catch (e) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -97,13 +125,6 @@ export default function LoginPageAdmin() {
             </div>
           </div>
 
-          {/* SIGN UP */}
-          <button
-            onClick={() => navigate("/adminSignup")}
-            className="w-full max-w-[420px] h-[52px] bg-white rounded-xl shadow hover:shadow-lg transition"
-          >
-            <span className="font-semibold text-gray-700">Sign Up</span>
-          </button>
         </div>
 
         {/* ================= DIVIDER ================= */}

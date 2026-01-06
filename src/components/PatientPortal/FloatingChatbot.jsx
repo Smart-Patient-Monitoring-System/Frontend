@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 
 const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) => {
@@ -11,12 +11,17 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
-
   const [inputMessage, setInputMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
   const toggleChat = () => setIsOpen(!isOpen);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim() === "") return;
 
     const userMessage = {
@@ -28,23 +33,42 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
 
     setMessages([...messages, userMessage]);
     setInputMessage("");
+    setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("http://localhost:8080/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: inputMessage }),
+      });
+
+      const data = await res.json();
+      
       const botMessage = {
         id: messages.length + 2,
-        text: "Thank you for your message. A healthcare professional will assist you shortly.",
+        text: data.reply || "I received your message. How else can I assist you?",
         sender: "bot",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
+      
       setMessages((prev) => [...prev, botMessage]);
-    }, 1000);
+    } catch (error) {
+      const errorMessage = {
+        id: messages.length + 2,
+        text: "⚠️ Something went wrong. Please try again.",
+        sender: "bot",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyPress = (e) => e.key === "Enter" && handleSendMessage();
 
   const shouldShowChat = isFullScreen || isOpen;
 
-  // Responsive container
   const chatContainerClass = isFullScreen
     ? "w-full h-full min-h-[600px] bg-white rounded-xl shadow-lg flex flex-col"
     : `
@@ -111,6 +135,16 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
                 </div>
               </div>
             ))}
+
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-white text-gray-800 rounded-2xl rounded-bl-none shadow-sm px-4 py-2 animate-pulse">
+                  <p className="text-sm">Thinking...</p>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
@@ -126,11 +160,13 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
-                className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                disabled={loading}
+                className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
               />
               <button
                 onClick={handleSendMessage}
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 sm:p-3 transition"
+                disabled={loading}
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 sm:p-3 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
