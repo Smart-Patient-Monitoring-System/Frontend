@@ -98,12 +98,12 @@ export default function LoginPageAdmin() {
           </div>
 
           {/* SIGN UP */}
-          <button
+          {/* <button
             onClick={() => navigate("/adminSignup")}
             className="w-full max-w-[420px] h-[52px] bg-white rounded-xl shadow hover:shadow-lg transition"
           >
             <span className="font-semibold text-gray-700">Sign Up</span>
-          </button>
+          </button> */}
         </div>
 
         {/* ================= DIVIDER ================= */}
