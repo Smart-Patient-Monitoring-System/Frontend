@@ -1,104 +1,80 @@
 import React from 'react';
-import Cart from '../../components/login/cart';
 import doctor from "../../assets/images/doctor.png";
 import patient from "../../assets/images/patient.png";
 import admin from "../../assets/images/admin.png";
-import nurse from "../../assets/images/nurse.png";
 import gtMark from "../../assets/images/gtMark.png";
 import { Link } from 'react-router-dom';
 
 export default function RoleSelect() {
     return (
-        <div className="min-h-screen w-full bg-[#F8FBFF] flex flex-col items-center pt-6 px-4 sm:px-8">
+        <div className="min-h-screen w-full bg-gradient-to-br from-[#F8FBFF] to-[#EEF6FF] flex flex-col overflow-x-hidden">
 
-            {/* HOME button */}
-            <div className="w-full flex justify-start mb-6 px-4 sm:px-6 md:px-8">
-                <button className="relative w-[140px] sm:w-[160px] md:w-[180px] h-[45px] sm:h-[51px] rounded-full 
-                   bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center justify-center 
-                   pl-12 sm:pl-14 md:pl-16 scale-100 hover:scale-105 
-                   transition-transform duration-300 cursor-pointer">
-                    <img
-                        src={gtMark}
-                        alt="gt mark"
-                        className="absolute top-0 left-0 w-[40px] sm:w-[50px] md:w-[55px] h-[40px] sm:h-[50px] md:h-[55px] object-cover rounded-md"
-                    />
-                    <span className="font-inter font-medium text-[20px] sm:text-[24px] md:text-[28px] leading-[100%] tracking-[0%] text-white">
-                        HOME
-                    </span>
-                </button>
-
+            {/* Header with HOME button */}
+            <div className="w-full px-6 py-4">
+                <Link to="/">
+                    <button className="relative w-[110px] h-[40px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD] flex items-center justify-center pl-9 hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md">
+                        <img src={gtMark} alt="gt mark" className="absolute top-1 left-1 w-[32px] h-[32px] object-cover rounded-full" />
+                        <span className="font-inter font-semibold text-[14px] text-white tracking-wide">HOME</span>
+                    </button>
+                </Link>
             </div>
 
-            {/* Page title */}
-            <div className="text-center mb-2 px-4 sm:px-0">
-                <span className="font-inter font-bold text-[24px] sm:text-[28px] md:text-[32px] lg:text-[36px] leading-[100%] tracking-[0%]">
+            {/* Main content centered */}
+            <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+                
+                {/* Page title */}
+                <h1 className="font-inter font-bold text-[32px] md:text-[36px] mb-2 text-gray-800">
                     Select Your Role
-                </span>
-            </div>
+                </h1>
 
-            {/* Subtitle */}
-            <div className="text-center mb-10 px-4 sm:px-0">
-                <span className="font-inter font-light text-[18px] sm:text-[24px] md:text-[28px] lg:text-[32px] leading-[100%] tracking-[0%]">
+                {/* Subtitle */}
+                <p className="font-inter font-light text-[16px] md:text-[18px] text-gray-600 mb-10">
                     Choose your role to continue to the portal
-                </span>
-            </div>
+                </p>
 
-            {/* Cards grid */}
-            <div className="w-full max-w-[1280px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-0 justify-items-center">
+                {/* Cards grid */}
+                <div className="w-full max-w-[1000px] grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
 
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Link to="/doctorLogin">
-                        <Cart
-                            image={doctor}
-                            text1="Doctor"
-                            text2="Monitor patients and manage care"
-                            bgMain="bg-[#E9FCF9]"
-                            bgCircle="bg-[#00A696]"
-                        />
+                    {/* Doctor Card */}
+                    <Link to="/doctorLogin" className="w-full group">
+                        <div className="bg-[#E9FCF9] rounded-3xl p-6 flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-[280px] justify-between shadow-lg border border-[#00A696]/10">
+                            <div className="w-24 h-24 bg-gradient-to-br from-[#00A696] to-[#00C9B7] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                <img src={doctor} alt="Doctor" className="w-16 h-16 object-contain filter brightness-0 invert" />
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <h3 className="font-inter font-bold text-[24px] mb-2 text-gray-800">Doctor</h3>
+                                <p className="font-inter text-[14px] text-center text-gray-600 leading-relaxed">Monitor patients and manage care</p>
+                            </div>
+                        </div>
                     </Link>
-                </div>
 
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Link to="/patientLogin">
-                        <Cart
-                            image={patient}
-                            text1="Patient"
-                            text2="System management and analytics"
-                            bgMain="bg-[#EBF3FE]"
-                            bgCircle="bg-[#2273FF]"
-                        />
+                    {/* Patient Card */}
+                    <Link to="/patientLogin" className="w-full group">
+                        <div className="bg-[#EBF3FE] rounded-3xl p-6 flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-[280px] justify-between shadow-lg border border-[#2273FF]/10">
+                            <div className="w-24 h-24 bg-gradient-to-br from-[#2273FF] to-[#4A90FF] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                <img src={patient} alt="Patient" className="w-16 h-16 object-contain filter brightness-0 invert" />
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <h3 className="font-inter font-bold text-[24px] mb-2 text-gray-800">Patient</h3>
+                                <p className="font-inter text-[14px] text-center text-gray-600 leading-relaxed">Access your health records and vitals</p>
+                            </div>
+                        </div>
                     </Link>
-                </div>
 
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Link to="/nurseLogin">
-                        <Cart
-                            image={nurse}
-                            text1="Nurse"
-                            text2="Monitor patients and manage care"
-                            bgMain="bg-[#E8F0B6]"
-                            bgCircle="bg-[#B5A738]"
-                        />
+                    {/* Admin Card */}
+                    <Link to="/adminLogin" className="w-full group">
+                        <div className="bg-[#F7F3FF] rounded-3xl p-6 flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-[280px] justify-between shadow-lg border border-[#A538FF]/10">
+                            <div className="w-24 h-24 bg-gradient-to-br from-[#A538FF] to-[#C066FF] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                                <img src={admin} alt="Admin" className="w-16 h-16 object-contain filter brightness-0 invert" />
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <h3 className="font-inter font-bold text-[24px] mb-2 text-gray-800">Admin</h3>
+                                <p className="font-inter text-[14px] text-center text-gray-600 leading-relaxed">System management and analytics</p>
+                            </div>
+                        </div>
                     </Link>
+
                 </div>
-
-                <div className="w-full flex justify-center scale-95 sm:scale-100 md:scale-100 
-                hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    <Link to="/adminLogin">
-                        <Cart
-                            image={admin}
-                            text1="Admin"
-                            text2="Access your health records and vitals"
-                            bgMain="bg-[#F7F3FF]"
-                            bgCircle="bg-[#A538FF]"
-                        />
-                    </Link>
-                </div>
-
-
             </div>
         </div>
     );
