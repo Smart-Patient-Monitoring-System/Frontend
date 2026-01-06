@@ -47,7 +47,7 @@ const AppointmentCard = ({ appointment, activeView }) => {
               <p className="text-gray-600 text-sm">{appointment.specialty}</p>
             </div>
             <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+              className={`px-3 py-1 rounded-full text-s font-semibold border ${getStatusColor(
                 appointment.status
               )}`}
             >
