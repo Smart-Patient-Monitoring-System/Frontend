@@ -15,6 +15,7 @@ function AnalysisDetails({ meanHR, sdnn, rmssd, beats, status }) {
         <strong>Status:</strong> {status}
       </p>
     </div>
+    
   );
 }
 

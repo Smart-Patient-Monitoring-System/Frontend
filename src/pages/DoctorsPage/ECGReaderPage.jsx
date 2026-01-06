@@ -26,13 +26,11 @@ function ECGReaderPage() {
             meanHR={analysis.meanHR}
             sdnn={analysis.SDNN}
             rmssd={analysis.RMSSD}
-            status={analysis.status}
-          />
+            status={analysis.status}/>
 
           <AIInterpretation
             diagnosis={analysis.status}
-            rationale={analysis.rationale}
-          />
+            rationale={analysis.rationale}/>
         </>
       )}
     </div>
