@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 import { Activity, Thermometer, Heart, Droplet, Wind, Waves } from "lucide-react";
 
-const BACKEND_URL = "https://perfect-wholeness-production-2240.up.railway.app";
+const BACKEND_URL = "http://172.30.21.47:8080";
 
 // Metric Card Component
 function MetricCard({ icon: Icon, label, value, unit, status, statusColor }) {
@@ -51,14 +51,14 @@ function GraphCard({ data, dataKey, label, icon: Icon, unit }) {
           <LineChart data={data}>
             <defs>
               <linearGradient id={`gradient-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
               </linearGradient>
             </defs>
 
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
 
-            <XAxis 
+            <XAxis
               dataKey="receivedAt"
               tickFormatter={(v) =>
                 new Date(v).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -67,12 +67,12 @@ function GraphCard({ data, dataKey, label, icon: Icon, unit }) {
               style={{ fontSize: "11px" }}
             />
 
-            <YAxis 
+            <YAxis
               stroke="#9ca3af"
               style={{ fontSize: "11px" }}
             />
 
-            <Tooltip 
+            <Tooltip
               contentStyle={{
                 backgroundColor: "white",
                 border: "1px solid #14b8a6",
@@ -173,9 +173,9 @@ function RealtimeGraphs() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50">
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        
+
         {/* Patient Vital Signs */}
         <div className="mb-8 sm:mb-10">
           <div className="flex items-center gap-2 mb-4 sm:mb-6">
@@ -186,7 +186,7 @@ function RealtimeGraphs() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            
+
             <MetricCard
               icon={Heart}
               label="Heart Rate"
@@ -227,7 +227,7 @@ function RealtimeGraphs() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            
+
             <MetricCard
               icon={Thermometer}
               label="Room Temperature"
@@ -255,7 +255,7 @@ function RealtimeGraphs() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            
+
             <GraphCard
               data={history}
               dataKey="avgBpm"
@@ -292,7 +292,7 @@ function RealtimeGraphs() {
             Health Reference Ranges
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-sm">
-            
+
             <div>
               <p className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <Heart className="w-4 h-4 text-teal-600" />
