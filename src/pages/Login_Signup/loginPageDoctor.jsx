@@ -69,6 +69,7 @@ export default function LoginPageDoctor() {
           {/* HOME BUTTON */}
           <button
             onClick={() => navigate("/")}
+
             className="relative w-[120px] h-[42px] rounded-full 
             bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
             flex items-center justify-center pl-9
