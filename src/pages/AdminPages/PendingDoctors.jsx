@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { fetchDoctor } from "./service/docter";
+import { fetchPendingDoctor } from "./service/pendingDoctorConnecter";
 
-function UserManagement() {
-  const [doctors, setDoctor] = useState([]);
+function PendingDoctors() {
+  const [pendingdoctors, setPendingDoctor] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await fetchDoctor();
-        setDoctor(data || []);
+        const data = await fetchPendingDoctor();
+        setPendingDoctor(data || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -21,17 +21,14 @@ function UserManagement() {
   }, []);
 
   // ✅ THIS WAS MISSING
-  const filteredDoctors = doctors.filter((doc) =>
-    doc.name?.toLowerCase().includes(search.toLowerCase())
+  const filteredPendingDoctors = pendingdoctors.filter((pendingdoc) =>
+    pendingdoc.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-gray-800">Doctors & Staff</h3>
-        <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm px-4 py-1.5 rounded-full">
-          Add Doctor
-        </button>
+        <h3 className="font-semibold text-gray-800">Pending Doctors</h3>
       </div>
 
       <input
@@ -47,56 +44,46 @@ function UserManagement() {
           <p className="text-sm text-gray-500">Loading...</p>
         )}
 
-        {!loading && filteredDoctors.length === 0 && (
+        {!loading && filteredPendingDoctors.length === 0 && (
           <p className="text-sm text-gray-500">No doctors found</p>
         )}
 
-        {filteredDoctors.map((doctor) => (
+        {filteredPendingDoctors.map((pendingdoctor) => (
   <div
-    key={doctor.id}
+    key={pendingdoctor.id}
     className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
   >
     {/* LEFT SIDE – Doctor Info */}
     <div className="space-y-1">
       <p className="font-medium text-gray-800">
-        {doctor.name}
+        {pendingdoctor.name}
       </p>
 
       <p className="text-sm text-gray-500">
-        {doctor.position} · {doctor.doctorRegNo}
+        {pendingdoctor.position} · {pendingdoctor.doctorRegNo}
       </p>
 
       <p className="text-sm text-gray-500">
-        {doctor.hospital}
+        {pendingdoctor.hospital}
       </p>
 
       <p className="text-sm text-gray-500">
-        📧 {doctor.email}
+        📧 {pendingdoctor.email}
       </p>
 
       <p className="text-sm text-gray-500">
-        📞 {doctor.contactNo}
+        📞 {pendingdoctor.contactNo}
       </p>
 
       <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-        {doctor.gender}
+        {pendingdoctor.gender}
       </span>
     </div>
 
     {/* RIGHT SIDE – ACTION BUTTONS */}
     <div className="flex flex-col gap-2">
-      <button
-        onClick={() => console.log("Edit", doctor.id)}
-        className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-      >
-        Edit
-      </button>
-
-      <button
-        onClick={() => console.log("Delete", doctor.id)}
-        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
-      >
-        Delete
+      <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm px-4 py-1.5 rounded-full">
+          Accept
       </button>
     </div>
   </div>
@@ -107,4 +94,4 @@ function UserManagement() {
   );
 }
 
-export default UserManagement;
+export default PendingDoctors;

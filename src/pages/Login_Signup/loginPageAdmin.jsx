@@ -8,7 +8,6 @@ import admin from "../../assets/images/admin.png";
 
 export default function LoginPageAdmin() {
   const navigate = useNavigate();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
