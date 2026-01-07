@@ -8,6 +8,7 @@ import {
   PointElement,
 } from "chart.js";
 
+
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement);
 
 function ECGGraph({ waveform, fs }) {

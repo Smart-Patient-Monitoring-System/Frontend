@@ -13,7 +13,6 @@ import LoginPageNurse from "./pages/Login_Signup/loginPageNurse";
 
 import SignupDoctor from "./pages/Login_Signup/signupPageDoctor";
 import SignupPatient from "./pages/Login_Signup/signupPagePatient";
-import SignupAdmin from "./pages/Login_Signup/signupPageAdmin";
 
 import PatientPortal from "./pages/PatientPortal/PatientPortal";
 import AdminDashboard from "./components/AdminPortal/AdminDashboard";
@@ -92,7 +91,6 @@ function App() {
         {/* Signup routes */}
         <Route path="/doctorSignup" element={<SignupDoctor />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
-        <Route path="/adminSignup" element={<SignupAdmin />} />
 
         <Route path="/patient-portal" element={<PatientPortal />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />

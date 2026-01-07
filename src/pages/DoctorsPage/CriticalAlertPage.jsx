@@ -25,7 +25,6 @@ function CriticalAlertPage() {
             level={item.level}
         />
       ))}
-
     </div>
   )
 }

@@ -8,6 +8,7 @@ export default function AlertCard({title,patient,hr,normalRange,time,level = "me
     low: "bg-blue-100 border-blue-300 text-blue-700",
   };
 
+  
   return (
     <div
       className={`${colors[level]} 

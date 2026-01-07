@@ -1,4 +1,4 @@
-export default function FormRow({ label, type = "text", children }) {
+export default function FormRow({ label, type = "text", value, onChange, children, required = false }) {
   return (
     <div className="
       flex items-center
@@ -21,8 +21,11 @@ export default function FormRow({ label, type = "text", children }) {
           children
         ) : (
           <input
-  type={type}
-  className="
+            type={type}
+            value={value}
+            onChange={onChange}
+            required={required}
+            className="
     w-full h-11
     bg-white/35 backdrop-blur-md
     rounded-full px-5
@@ -38,9 +41,7 @@ export default function FormRow({ label, type = "text", children }) {
 
     transition-all duration-200
   "
-/>
-
-
+          />
         )}
       </div>
     </div>
