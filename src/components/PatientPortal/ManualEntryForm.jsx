@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Heart, Thermometer, Activity, Droplet, Scale, Calendar } from "lucide-react";
 
-const ManualEntryForm = ({ onClose }) => {
+const ManualEntryForm = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     bloodPressureSystolic: "",
     bloodPressureDiastolic: "",
@@ -16,6 +16,7 @@ const ManualEntryForm = ({ onClose }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,12 +59,62 @@ const ManualEntryForm = ({ onClose }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Form submitted:", formData);
+    
+    if (!validateForm()) return;
+
+    setSubmitting(true);
+    setErrors({});
+
+    try {
+      // Prepare data for API
+      const apiData = {
+        bloodPressureSystolic: formData.bloodPressureSystolic ? parseInt(formData.bloodPressureSystolic) : null,
+        bloodPressureDiastolic: formData.bloodPressureDiastolic ? parseInt(formData.bloodPressureDiastolic) : null,
+        bloodSugar: formData.bloodSugar ? parseFloat(formData.bloodSugar) : null,
+        temperature: formData.temperature ? parseFloat(formData.temperature) : null,
+        heartRate: formData.heartRate ? parseInt(formData.heartRate) : null,
+        spo2: formData.spo2 ? parseInt(formData.spo2) : null,
+        weight: formData.weight ? parseFloat(formData.weight) : null,
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes || null,
+      };
+
+      console.log("Submitting vital signs:", apiData);
+
+      const response = await fetch("http://localhost:8080/api/vital-signs/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Submission failed" }));
+        throw new Error(errorData.error || `Submission failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Submission successful:", result);
+
       alert("Health data submitted successfully!");
+      
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess(result);
+      }
+      
       onClose();
+      
+    } catch (error) {
+      console.error("Submission error:", error);
+      setErrors({ general: error.message || "Failed to submit data. Please try again." });
+      alert("Failed to submit: " + error.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -79,6 +130,7 @@ const ManualEntryForm = ({ onClose }) => {
           </div>
           <button
             onClick={onClose}
+            disabled={submitting}
             className="text-white hover:bg-blue-800 rounded-full p-2 transition-colors flex-shrink-0"
           >
             <X size={24} />
@@ -108,6 +160,7 @@ const ManualEntryForm = ({ onClose }) => {
                 onChange={handleChange}
                 max={new Date().toISOString().split("T")[0]}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={submitting}
                 required
               />
             </div>
@@ -119,6 +172,7 @@ const ManualEntryForm = ({ onClose }) => {
                 value={formData.time}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={submitting}
                 required
               />
             </div>
@@ -140,6 +194,7 @@ const ManualEntryForm = ({ onClose }) => {
                     value={formData.bloodPressureSystolic}
                     onChange={handleChange}
                     placeholder="Systolic (120)"
+                    disabled={submitting}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.bloodPressureSystolic ? "border-red-500" : "border-gray-300"}`}
                   />
                   {errors.bloodPressureSystolic && <p className="text-red-600 text-xs mt-1">{errors.bloodPressureSystolic}</p>}
@@ -151,6 +206,7 @@ const ManualEntryForm = ({ onClose }) => {
                     value={formData.bloodPressureDiastolic}
                     onChange={handleChange}
                     placeholder="Diastolic (80)"
+                    disabled={submitting}
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.bloodPressureDiastolic ? "border-red-500" : "border-gray-300"}`}
                   />
                   {errors.bloodPressureDiastolic && <p className="text-red-600 text-xs mt-1">{errors.bloodPressureDiastolic}</p>}
@@ -170,6 +226,7 @@ const ManualEntryForm = ({ onClose }) => {
                 value={formData.bloodSugar}
                 onChange={handleChange}
                 placeholder="e.g., 100"
+                disabled={submitting}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent ${errors.bloodSugar ? "border-red-500" : "border-gray-300"}`}
               />
               {errors.bloodSugar && <p className="text-red-600 text-xs mt-1">{errors.bloodSugar}</p>}
@@ -188,6 +245,7 @@ const ManualEntryForm = ({ onClose }) => {
                 value={formData.temperature}
                 onChange={handleChange}
                 placeholder="e.g., 98.6"
+                disabled={submitting}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.temperature ? "border-red-500" : "border-gray-300"}`}
               />
               {errors.temperature && <p className="text-red-600 text-xs mt-1">{errors.temperature}</p>}
@@ -205,6 +263,7 @@ const ManualEntryForm = ({ onClose }) => {
                 value={formData.heartRate}
                 onChange={handleChange}
                 placeholder="e.g., 72"
+                disabled={submitting}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.heartRate ? "border-red-500" : "border-gray-300"}`}
               />
               {errors.heartRate && <p className="text-red-600 text-xs mt-1">{errors.heartRate}</p>}
@@ -222,6 +281,7 @@ const ManualEntryForm = ({ onClose }) => {
                 value={formData.spo2}
                 onChange={handleChange}
                 placeholder="e.g., 98"
+                disabled={submitting}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${errors.spo2 ? "border-red-500" : "border-gray-300"}`}
               />
               {errors.spo2 && <p className="text-red-600 text-xs mt-1">{errors.spo2}</p>}
@@ -240,6 +300,7 @@ const ManualEntryForm = ({ onClose }) => {
                 value={formData.weight}
                 onChange={handleChange}
                 placeholder="e.g., 150"
+                disabled={submitting}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
@@ -255,6 +316,7 @@ const ManualEntryForm = ({ onClose }) => {
                 onChange={handleChange}
                 placeholder="Any symptoms, activities, or relevant information..."
                 rows="3"
+                disabled={submitting}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
             </div>
@@ -265,15 +327,17 @@ const ManualEntryForm = ({ onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              disabled={submitting}
+              className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors shadow-lg"
+              disabled={submitting}
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Data
+              {submitting ? "Submitting..." : "Submit Data"}
             </button>
           </div>
 

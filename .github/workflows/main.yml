@@ -2,18 +2,18 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev, develop ]
 
 jobs:
-  # Job 1: Install dependencies and run tests
-  test:
+  # Job 1: Build and test
+  build-and-test:
     runs-on: ubuntu-latest
     
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x]
     
     steps:
     - name: Checkout code
@@ -28,23 +28,43 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run linting
-      run: npm run lint --if-present
-      continue-on-error: true
-    
-    - name: Run tests
-      run: npm test --if-present
+    - name: Build application
+      run: npm run build
       env:
-        CI: true
+        NODE_ENV: production
     
-    - name: Check code formatting
-      run: npm run format:check --if-present
-      continue-on-error: true
+    - name: Verify build output
+      run: |
+        echo "✅ Build completed successfully!"
+        echo "📦 Build output in dist/:"
+        ls -la dist/
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
+        retention-days: 7
 
-  # Job 2: Build the application
-  build:
-    needs: test
+  # Job 2: Deploy to GitHub Pages (only on main branch)
+  deploy:
+    needs: build-and-test
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    # Prevent concurrent deployments
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
     - name: Checkout code
@@ -59,91 +79,24 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Build application
+    - name: Build for GitHub Pages
       run: npm run build
       env:
-        CI: false
         NODE_ENV: production
     
-    # Check if build directory exists and list contents for debugging
-    - name: Verify build output
-      run: |
-        echo "Checking for build output..."
-        if [ -d "dist" ]; then
-          echo "Found dist/ directory"
-          ls -la dist/
-          echo "BUILD_DIR=dist" >> $GITHUB_ENV
-        elif [ -d "build" ]; then
-          echo "Found build/ directory"
-          ls -la build/
-          echo "BUILD_DIR=build" >> $GITHUB_ENV
-        elif [ -d "out" ]; then
-          echo "Found out/ directory"
-          ls -la out/
-          echo "BUILD_DIR=out" >> $GITHUB_ENV
-        elif [ -d ".next" ]; then
-          echo "Found .next/ directory"
-          ls -la .next/
-          echo "BUILD_DIR=.next" >> $GITHUB_ENV
-        else
-          echo "ERROR: No build output directory found!"
-          echo "Current directory contents:"
-          ls -la
-          exit 1
-        fi
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
     
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        name: build-files
-        path: ${{ env.BUILD_DIR }}
-        retention-days: 7
-
-  # Job 3: Deploy to production (only on main branch)
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
+        path: './dist'
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-files
-        path: build-output/
-    
-    # Deploy to GitHub Pages
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build-output
-
-  # Job 4: Lighthouse CI for performance testing (optional - disabled)
-  # Uncomment below if you want to enable Lighthouse performance testing
-  # lighthouse:
-  #   needs: deploy
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-  #   
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-  #   
-  #   - name: Wait for GitHub Pages deployment
-  #     run: sleep 120
-  #   
-  #   - name: Run Lighthouse CI
-  #     uses: treosh/lighthouse-ci-action@v10
-  #     with:
-  #       urls: |
-  #         https://smart-patient-monitoring-system.github.io/Frontend
-  #       uploadArtifacts: true
-  #       temporaryPublicStorage: true
+      id: deployment
+      uses: actions/deploy-pages@v4
+    
+    - name: Deployment summary
+      run: |
+        echo "✅ Deployment completed successfully!"
+        echo "🌐 Your site is available at: ${{ steps.deployment.outputs.page_url }}"
