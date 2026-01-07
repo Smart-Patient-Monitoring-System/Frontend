@@ -1,7 +1,7 @@
 import React from "react";
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
-import nurse from "../../assets/images/nurse.png";
+import nurse from "../../assets/images/heart.png";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPageNurse() {
