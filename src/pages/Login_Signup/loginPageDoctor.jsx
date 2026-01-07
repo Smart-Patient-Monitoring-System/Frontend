@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../api";
 
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
@@ -13,7 +14,7 @@ export default function LoginPageDoctor() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -24,18 +25,38 @@ export default function LoginPageDoctor() {
       return;
     }
 
-    const mockUser = {
-      username,
-      role: "doctor",
-    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    localStorage.setItem("token", "frontend-doctor-demo-token");
-    localStorage.setItem("user", JSON.stringify(mockUser));
+      if (!response.ok) {
+        setError("Invalid username or password");
+        setLoading(false);
+        return;
+      }
 
-    setTimeout(() => {
+      const data = await response.json();
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          username: data.username,
+          role: data.role?.toLowerCase() || "doctor",
+        })
+      );
+
       navigate("/DocDashboard");
+    } catch (err) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
