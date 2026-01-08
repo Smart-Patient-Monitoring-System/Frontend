@@ -77,7 +77,7 @@ function HomePage() {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/Frontend">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/role-selection" element={<RoleSelectionPage />} />

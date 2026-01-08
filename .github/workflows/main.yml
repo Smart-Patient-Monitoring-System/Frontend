@@ -99,5 +99,5 @@ jobs:
     
     - name: Deployment summary
       run: |
-        echo "✅ Deployment completed successfully!"
-        echo "🌐 Your site is available at: ${{ steps.deployment.outputs.page_url }}"
+        echo "Deployment completed successfully!"
+        echo "Your site is available at: ${{ steps.deployment.outputs.page_url }}"
