@@ -3,22 +3,27 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, dev, develop ]
+    branches: [ main, dev, develop ]
   pull_request:
     branches: [ main, dev, develop ]
 
 jobs:
-  # Job 1: Build
-  build:
+  # Job 1: Build and test
+  build-and-test:
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Setup Node.js
+    - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
     - name: Install dependencies
@@ -44,7 +49,7 @@ jobs:
 
   # Job 2: Deploy to GitHub Pages (only on main branch)
   deploy:
-    needs: build
+    needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
@@ -53,6 +58,7 @@ jobs:
       pages: write
       id-token: write
     
+    # Prevent concurrent deployments
     concurrency:
       group: "pages"
       cancel-in-progress: false
@@ -93,5 +99,5 @@ jobs:
     
     - name: Deployment summary
       run: |
-        echo "Deployment completed successfully!"
-        echo "Your site is available at: ${{ steps.deployment.outputs.page_url }}"
+        echo "✅ Deployment completed successfully!"
+        echo "🌐 Your site is available at: ${{ steps.deployment.outputs.page_url }}"
