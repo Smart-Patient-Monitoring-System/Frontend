@@ -2,7 +2,7 @@ import { User, Mail, Phone, MapPin, Calendar, Heart, Pill, AlertCircle } from "l
 
 const ProfileTab = () => {
   const personalInfo = {
-    fullName: "Sarah Johnson",
+    fullName: "Janith kavishan",
     patientId: "P-2024-001",
     age: 34,
     bloodType: "A+",
@@ -34,7 +34,7 @@ const ProfileTab = () => {
       {/* Personal Information Card */}
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 w-full">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Personal Information</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Column */}
           <div className="space-y-3 sm:space-y-4">
@@ -109,7 +109,7 @@ const ProfileTab = () => {
       {/* Medical History Card */}
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 w-full">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Medical History</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Column */}
           <div className="space-y-4 sm:space-y-6">

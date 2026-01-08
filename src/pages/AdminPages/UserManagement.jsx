@@ -28,7 +28,7 @@ function UserManagement() {
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-gray-800">Doctors & Staff</h3>
+        <h3 className="font-semibold text-gray-800">Doctors</h3>
         <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm px-4 py-1.5 rounded-full">
           Add Doctor
         </button>

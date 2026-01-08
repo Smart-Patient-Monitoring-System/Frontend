@@ -4,7 +4,7 @@ import {
   TrendingUp, Clock 
 } from 'lucide-react';
 
-const BACKEND_URL = "http://172.30.21.47:8080";
+const BACKEND_URL = "http://172.30.21.47:8082";
 
 const ECGMonitor = ({ isFullPage = false }) => {
   const [isPaused, setIsPaused] = useState(false);

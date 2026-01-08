@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 import { Activity, Thermometer, Heart, Droplet, Wind, Waves } from "lucide-react";
 
-const BACKEND_URL = "http://172.30.21.47:8080";
+const BACKEND_URL = "http://172.30.21.47:8082";
 
 // Metric Card Component
 function MetricCard({ icon: Icon, label, value, unit, status, statusColor }) {
