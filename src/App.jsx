@@ -82,11 +82,10 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/role-selection" element={<RoleSelectionPage />} />
         {/* Login routes */}
-        <Route path="/doctorLogin" element={<DocDashboard />} />
-        <Route path="/patientLogin" element={<PatientPortal />} />
+        <Route path="/doctorLogin" element={<LoginDoctor />} />
+        <Route path="/patientLogin" element={<LoginPatient />} />
 
-        <Route path="/nurseLogin" element={<LoginPageNurse />} />
-        <Route path="/adminLogin" element={<AdminDashboard />} />
+        <Route path="/adminLogin" element={<LoginAdmin />} />
 
         {/* Signup routes */}
         <Route path="/doctorSignup" element={<SignupDoctor />} />

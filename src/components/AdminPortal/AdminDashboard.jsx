@@ -189,7 +189,7 @@ function AdminDashboard() {
                 : {}
             }
           >
-            User Management
+            Doctor Management
           </button>
 
           <button
