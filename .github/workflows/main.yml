@@ -3,7 +3,6 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, dev, develop ]
-    branches: [ main, dev, develop ]
   pull_request:
     branches: [ main, dev, develop ]
 
@@ -36,8 +35,8 @@ jobs:
     
     - name: Verify build output
       run: |
-        echo "✅ Build completed successfully!"
-        echo "📦 Build output in dist/:"
+        echo "Build completed successfully!"
+        echo "Build output in dist/:"
         ls -la dist/
     
     - name: Upload build artifacts
