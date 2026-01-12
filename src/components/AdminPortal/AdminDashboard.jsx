@@ -23,13 +23,15 @@ import SecurityLogs from "../../pages/AdminPages/SecurityLogs";
 
 
 function AdminDashboard() {
-  const [hasNotification, setHasNotification] = useState(true);
-
+    const navigate = useNavigate();
+    const [hasNotification, setHasNotification] = useState(true);
 
   const handleLogout = () => {
-    console.log('Logging out...');
-  };
+    // later: clear auth data if needed
+    // localStorage.clear();
 
+    navigate("/"); //  go back to Home page
+  };
    const [activeTab, setActiveTab] = useState("users");
 
   return (
