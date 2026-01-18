@@ -14,6 +14,9 @@ import LoginPageNurse from "./pages/Login_Signup/loginPageNurse";
 import SignupDoctor from "./pages/Login_Signup/signupPageDoctor";
 import SignupPatient from "./pages/Login_Signup/signupPagePatient";
 
+import ForgotPasswordPage from "./pages/Login_Signup/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/Login_Signup/ResetPasswordPage";
+
 import PatientPortal from "./pages/PatientPortal/PatientPortal";
 import AdminDashboard from "./components/AdminPortal/AdminDashboard";
 import DocDashboard from "./pages/DoctorsPage/DocDashboard";
@@ -90,6 +93,10 @@ function App() {
         {/* Signup routes */}
         <Route path="/doctorSignup" element={<SignupDoctor />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
+
+        {/* Password reset routes */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route path="/patient-portal" element={<PatientPortal />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
