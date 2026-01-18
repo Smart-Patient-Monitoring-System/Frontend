@@ -8,8 +8,10 @@ export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token") || "";
+  const roleFromUrl = searchParams.get("role") || "";
 
   const [token, setToken] = useState(tokenFromUrl);
+  const [role, setRole] = useState(roleFromUrl);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,7 +22,10 @@ export default function ResetPasswordPage() {
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
     }
-  }, [tokenFromUrl]);
+    if (roleFromUrl) {
+      setRole(roleFromUrl.toUpperCase());
+    }
+  }, [tokenFromUrl, roleFromUrl]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,11 +74,24 @@ export default function ResetPasswordPage() {
         return;
       }
 
+      // Get role from response or URL parameter
+      const userRole = (data.role || role || "").toUpperCase();
+      
       setSuccess("Password has been reset successfully! Redirecting to login...");
       
-      // Redirect to login after 2 seconds
+      // Determine redirect path based on role
+      let redirectPath = "/patientLogin"; // Default fallback
+      if (userRole === "DOCTOR") {
+        redirectPath = "/doctorLogin";
+      } else if (userRole === "PATIENT") {
+        redirectPath = "/patientLogin";
+      } else if (userRole === "ADMIN") {
+        redirectPath = "/adminLogin";
+      }
+      
+      // Redirect to appropriate login page after 2 seconds
       setTimeout(() => {
-        navigate("/patientLogin"); // Default to patient login, can be made dynamic
+        navigate(redirectPath);
       }, 2000);
     } catch (err) {
       setError("Unable to connect to server. Please try again.");
@@ -176,7 +194,17 @@ export default function ResetPasswordPage() {
 
           <div className="mt-6 text-center">
             <button
-              onClick={() => navigate("/patientLogin")}
+              onClick={() => {
+                // Navigate to appropriate login based on role from URL
+                const userRole = (role || "").toUpperCase();
+                let loginPath = "/patientLogin";
+                if (userRole === "DOCTOR") {
+                  loginPath = "/doctorLogin";
+                } else if (userRole === "ADMIN") {
+                  loginPath = "/adminLogin";
+                }
+                navigate(loginPath);
+              }}
               className="text-sm text-[#057EF8] hover:text-[#0DC0BD] hover:underline"
             >
               Back to Login
