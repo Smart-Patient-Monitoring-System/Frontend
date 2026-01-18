@@ -30,11 +30,21 @@ export default function LoginPageAdmin() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, role: "ADMIN" }),
       });
 
       if (!response.ok) {
-        setError("Invalid username or password");
+        // Try to get error message from response
+        let errorMessage = "Invalid username or password";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {
+          // If response is not JSON, use default message
+        }
+        setError(errorMessage);
         setLoading(false);
         return;
       }
@@ -163,8 +173,19 @@ export default function LoginPageAdmin() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-[52px] mt-2 mb-8 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+              className="w-full h-[52px] mt-2 mb-2 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
             />
+
+            {/* Forgot Password Link */}
+            <div className="mb-6 text-right">
+              <button
+                type="button"
+                onClick={() => navigate("/forgot-password?role=ADMIN")}
+                className="text-sm text-[#057EF8] hover:text-[#0DC0BD] hover:underline transition"
+              >
+                Forgot Password?
+              </button>
+            </div>
 
             <button
               type="submit"
