@@ -35,7 +35,17 @@ export default function LoginPageDoctor() {
       });
 
       if (!response.ok) {
-        setError("Invalid username or password");
+        // Try to get error message from response
+        let errorMessage = "Invalid username or password";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {
+          // If response is not JSON, use default message
+        }
+        setError(errorMessage);
         setLoading(false);
         return;
       }
