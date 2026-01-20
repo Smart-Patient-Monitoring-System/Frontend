@@ -11,9 +11,9 @@ import LoginDoctor from "./pages/Login_Signup/loginPageDoctor";
 import LoginPatient from "./pages/Login_Signup/loginPagePatient";
 import LoginAdmin from "./pages/Login_Signup/loginPageAdmin";
 import AdminAccessPage from "./pages/Login_Signup/AdminAccessPage";
-import SignupAdmin from "./pages/Login_Signup/SignupPageAdmin";
+import SignupAdmin from "./pages/Login_Signup/signupPageAdmin";
 
-import SignupPatient from "./pages/Login_Signup/SignupPagePatient";
+import SignupPatient from "./pages/Login_Signup/signupPagePatient";
 
 import ForgotPasswordPage from "./pages/Login_Signup/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/Login_Signup/ResetPasswordPage";
