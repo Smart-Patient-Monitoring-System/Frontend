@@ -5,7 +5,7 @@ import admin from "../../assets/images/admin.png";
 import gtMark from "../../assets/images/gtMark.png";
 import { Link } from 'react-router-dom';
 
-export default function RoleSelect() {
+export default function RoleSelectPage() {
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-[#F8FBFF] to-[#EEF6FF] flex flex-col overflow-x-hidden">
 
