@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import sup from "../../assets/images/sup.jpg";
-import FormRow from "../../components/signup/FormRow";
+import FormRow from "../../components/signup/formRow";
 import { API_BASE_URL } from "../../api";
 
 export default function SignupPagePatient() {
