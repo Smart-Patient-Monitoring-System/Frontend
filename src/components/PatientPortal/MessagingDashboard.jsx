@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Paperclip, Search, Phone, Video, MoreVertical, User, Smile, Check, CheckCheck, X, UserPlus } from "lucide-react";
 import { Client } from '@stomp/stompjs';
@@ -9,15 +10,15 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
   const searchUsers = async (query) => {
     if (!query.trim()) {
-      setSearchResults([]);
+      loadAllDoctors();
       return;
     }
 
     setIsSearching(true);
     try {
       const endpoint = userRole === 'PATIENT' 
-        ? `/api/chat/search-doctors?query=${encodeURIComponent(query)}`
-        : `/api/chat/search-patients?query=${encodeURIComponent(query)}`;
+        ? `/api/chat/doctors/search?query=${encodeURIComponent(query)}`
+        : `/api/chat/patients/search?query=${encodeURIComponent(query)}`;
 
       const response = await fetch(`http://localhost:8080${endpoint}`, {
         headers: {
@@ -28,7 +29,14 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
       if (response.ok) {
         const data = await response.json();
-        setSearchResults(data);
+        setSearchResults(data.map(doctor => ({
+          id: doctor.id,
+          name: doctor.name,
+          role: doctor.position || 'Doctor',
+          avatar: doctor.profilePicture || null,
+          hospital: doctor.hospital,
+          doctorRegNo: doctor.doctorRegNo
+        })));
       }
     } catch (error) {
       console.error('Error searching users:', error);
@@ -36,6 +44,40 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
       setIsSearching(false);
     }
   };
+
+  const loadAllDoctors = async () => {
+    setIsSearching(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/chat/doctors', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data.map(doctor => ({
+          id: doctor.id,
+          name: doctor.name,
+          role: doctor.position || 'Doctor',
+          avatar: doctor.profilePicture || null,
+          hospital: doctor.hospital,
+          doctorRegNo: doctor.doctorRegNo
+        })));
+      }
+    } catch (error) {
+      console.error('Error loading doctors:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      loadAllDoctors();
+    }
+  }, [isOpen]);
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
@@ -45,26 +87,29 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
   const handleStartChat = async (user) => {
     try {
-      const conversationData = userRole === 'PATIENT'
-        ? { patient: { id: parseInt(localStorage.getItem('userId')) }, doctor: { id: user.id } }
-        : { patient: { id: user.id }, doctor: { id: parseInt(localStorage.getItem('userId')) } };
+      const endpoint = userRole === 'PATIENT'
+        ? `http://localhost:8080/api/chat/conversations/start?doctorId=${user.id}`
+        : `http://localhost:8080/api/chat/conversations/start?patientId=${user.id}`;
 
-      const response = await fetch('http://localhost:8080/api/chat/conversations', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(conversationData)
+        }
       });
 
       if (response.ok) {
         const conversation = await response.json();
         onChatStart(conversation);
         onClose();
+      } else {
+        console.error('Failed to create conversation:', response.status);
+        alert('Failed to start conversation. Please try again.');
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
+      alert('Error starting conversation. Please check your connection.');
     }
   };
 
@@ -86,7 +131,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder={`Search ${userRole === 'PATIENT' ? 'doctors' : 'patients'} by name...`}
+              placeholder={`Search ${userRole === 'PATIENT' ? 'doctors' : 'patients'} by name or ID...`}
               value={searchQuery}
               onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -113,6 +158,8 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
                     <div>
                       <h3 className="font-semibold text-gray-900">{user.name}</h3>
                       <p className="text-sm text-gray-500">{user.role}</p>
+                      {user.hospital && <p className="text-xs text-gray-400">{user.hospital}</p>}
+                      {user.doctorRegNo && <p className="text-xs text-gray-400">ID: {user.doctorRegNo}</p>}
                     </div>
                   </div>
                   <button
@@ -124,14 +171,10 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
                 </div>
               ))}
             </div>
-          ) : searchQuery.trim() ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No {userRole === 'PATIENT' ? 'doctors' : 'patients'} found</p>
-            </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <Search size={48} className="mx-auto mb-4 text-gray-300" />
-              <p>Start typing to search for {userRole === 'PATIENT' ? 'doctors' : 'patients'}</p>
+              <p>No {userRole === 'PATIENT' ? 'doctors' : 'patients'} found</p>
             </div>
           )}
         </div>
@@ -483,7 +526,7 @@ const MessagingDashboard = () => {
       </div>
     );
   }
-
+  
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-200px)] bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
       <SearchUsersModal
