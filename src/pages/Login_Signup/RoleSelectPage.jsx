@@ -1,7 +1,6 @@
 import React from 'react';
 import doctor from "../../assets/images/doctor.png";
 import patient from "../../assets/images/patient.png";
-import admin from "../../assets/images/admin.png";
 import gtMark from "../../assets/images/gtMark.png";
 import { Link } from 'react-router-dom';
 
@@ -34,10 +33,10 @@ export default function RoleSelectPage() {
 
 
                 {/* Cards grid */}
-                <div className="w-full max-w-[1000px] grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
+                <div className="w-full max-w-[800px] grid grid-cols-1 md:grid-cols-2 gap-6 px-4 justify-items-center">
 
                     {/* Doctor Card */}
-                    <Link to="/doctorLogin" className="w-full group">
+                    <Link to="/doctorLogin" className="w-full max-w-[350px] group">
                         <div className="bg-[#E9FCF9] rounded-3xl p-6 flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-[280px] justify-between shadow-lg border border-[#00A696]/10">
                             <div className="w-24 h-24 bg-gradient-to-br from-[#00A696] to-[#00C9B7] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                 <img src={doctor} alt="Doctor" className="w-16 h-16 object-contain filter brightness-0 invert" />
@@ -50,7 +49,7 @@ export default function RoleSelectPage() {
                     </Link>
 
                     {/* Patient Card */}
-                    <Link to="/patientLogin" className="w-full group">
+                    <Link to="/patientLogin" className="w-full max-w-[350px] group">
                         <div className="bg-[#EBF3FE] rounded-3xl p-6 flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-[280px] justify-between shadow-lg border border-[#2273FF]/10">
                             <div className="w-24 h-24 bg-gradient-to-br from-[#2273FF] to-[#4A90FF] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                                 <img src={patient} alt="Patient" className="w-16 h-16 object-contain filter brightness-0 invert" />
