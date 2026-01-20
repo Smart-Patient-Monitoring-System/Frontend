@@ -9,7 +9,7 @@ import doctor from "../../assets/images/doctor.png";
 export default function LoginPageDoctor() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,8 +19,8 @@ export default function LoginPageDoctor() {
     setError("");
     setLoading(true);
 
-    if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password");
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password");
       setLoading(false);
       return;
     }
@@ -31,12 +31,12 @@ export default function LoginPageDoctor() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password, role: "DOCTOR" }),
+        body: JSON.stringify({ email, password, role: "DOCTOR" }),
       });
 
       if (!response.ok) {
         // Try to get error message from response
-        let errorMessage = "Invalid username or password";
+        let errorMessage = "Invalid email or password";
         try {
           const errorData = await response.json();
           if (errorData.message) {
@@ -156,12 +156,12 @@ export default function LoginPageDoctor() {
               </div>
             )}
 
-            <label className="font-semibold text-gray-700">User Name</label>
+            <label className="font-semibold text-gray-700">Email</label>
             <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
             />
 
