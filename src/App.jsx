@@ -7,8 +7,8 @@ import FooterCTA from "./pages/HomePage/components/FooterCTA";
 
 import RoleSelectionPage from "./pages/Login_Signup/RoleSelectPage";
 
-import LoginDoctor from "./pages/Login_Signup/LoginPageDoctor";
-import LoginPatient from "./pages/Login_Signup/LoginPagePatient";
+import LoginDoctor from "./pages/Login_Signup/loginPageDoctor";
+import LoginPatient from "./pages/Login_Signup/loginPagePatient";
 import LoginAdmin from "./pages/Login_Signup/LoginPageAdmin";
 import AdminAccessPage from "./pages/Login_Signup/AdminAccessPage";
 import SignupAdmin from "./pages/Login_Signup/SignupPageAdmin";
