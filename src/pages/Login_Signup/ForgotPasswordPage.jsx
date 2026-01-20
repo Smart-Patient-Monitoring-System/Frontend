@@ -10,11 +10,14 @@ export default function ForgotPasswordPage() {
   const role = searchParams.get("role") || "PATIENT";
 
   const [emailOrUsername, setEmailOrUsername] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState("EMAIL"); // EMAIL | OTP
+  const [resetSessionId, setResetSessionId] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmitEmail = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -27,7 +30,7 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password/request-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +49,52 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      setSuccess("Password reset link has been sent to your email. Please check your inbox.");
+      setResetSessionId(data.resetSessionId);
+      setStep("OTP");
+      setSuccess("OTP has been sent to your email. Please check your inbox.");
+    } catch (err) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitOtp = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+
+    if (!otp.trim()) {
+      setError("Please enter the OTP sent to your email");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resetSessionId,
+          otp: otp.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Invalid or expired OTP");
+        setLoading(false);
+        return;
+      }
+
+      setSuccess("OTP verified. Redirecting...");
+      setTimeout(() => {
+        navigate(`/reset-password?resetSessionId=${encodeURIComponent(resetSessionId)}&role=${role.toUpperCase()}`);
+      }, 500);
     } catch (err) {
       setError("Unable to connect to server. Please try again.");
     } finally {
@@ -102,8 +150,7 @@ export default function ForgotPasswordPage() {
             </div>
           )}
 
-          {!success && (
-            <form onSubmit={handleSubmit}>
+          <form onSubmit={step === "OTP" ? handleSubmitOtp : handleSubmitEmail}>
               <label className="font-semibold text-gray-700">
                 Email or Username
               </label>
@@ -112,8 +159,39 @@ export default function ForgotPasswordPage() {
                 placeholder="Enter your email or username"
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
+                disabled={step === "OTP"}
                 className="w-full h-[52px] mt-2 mb-6 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
               />
+
+              {step === "OTP" && (
+                <>
+                  <label className="font-semibold text-gray-700">OTP</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Enter 6-digit code"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full h-[52px] mt-2 mb-6 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+                  />
+
+                  <div className="mb-4 text-right">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep("EMAIL");
+                        setOtp("");
+                        setResetSessionId("");
+                        setSuccess("");
+                        setError("");
+                      }}
+                      className="text-sm text-[#057EF8] hover:text-[#0DC0BD] hover:underline transition"
+                    >
+                      Back
+                    </button>
+                  </div>
+                </>
+              )}
 
               <button
                 type="submit"
@@ -122,10 +200,9 @@ export default function ForgotPasswordPage() {
                   text-white font-semibold text-lg hover:scale-105 transition
                   disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Sending..." : "Send Reset Link"}
+                {loading ? "Please wait..." : step === "OTP" ? "Verify OTP" : "Send OTP"}
               </button>
             </form>
-          )}
 
           <div className="mt-6 text-center">
             <button

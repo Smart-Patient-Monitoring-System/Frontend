@@ -7,12 +7,11 @@ import heart from "../../assets/images/heart.png";
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tokenFromUrl = searchParams.get("token") || "";
+  const resetSessionIdFromUrl = searchParams.get("resetSessionId") || "";
   const roleFromUrl = searchParams.get("role") || "";
 
-  const [token, setToken] = useState(tokenFromUrl);
+  const [resetSessionId, setResetSessionId] = useState(resetSessionIdFromUrl);
   const [role, setRole] = useState(roleFromUrl);
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,26 +19,21 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl);
+    if (resetSessionIdFromUrl) {
+      setResetSessionId(resetSessionIdFromUrl);
     }
     if (roleFromUrl) {
       setRole(roleFromUrl.toUpperCase());
     }
-  }, [tokenFromUrl, roleFromUrl]);
+  }, [resetSessionIdFromUrl, roleFromUrl]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    if (!token.trim()) {
-      setError("Reset token is required");
-      return;
-    }
-
-    if (!currentPassword.trim()) {
-      setError("Please enter your current password");
+    if (!resetSessionId.trim()) {
+      setError("Reset session is required. Please restart the forgot password process.");
       return;
     }
 
@@ -61,14 +55,13 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password/reset`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          token: token.trim(),
-          currentPassword: currentPassword,
+          resetSessionId: resetSessionId.trim(),
           newPassword: newPassword,
         }),
       });
@@ -139,7 +132,7 @@ export default function ResetPasswordPage() {
             Reset Password
           </h2>
           <p className="text-gray-600 text-center mb-8">
-            Enter your current password and choose a new password
+            Choose a new password
           </p>
 
           {error && (
@@ -155,28 +148,6 @@ export default function ResetPasswordPage() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <label className="font-semibold text-gray-700">
-              Reset Token
-            </label>
-            <input
-              type="text"
-              placeholder="Enter reset token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
-            />
-
-            <label className="font-semibold text-gray-700">
-              Current Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter your current password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
-            />
-
             <label className="font-semibold text-gray-700">
               New Password
             </label>
