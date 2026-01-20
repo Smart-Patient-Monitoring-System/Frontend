@@ -78,8 +78,8 @@ function Hero({ stats }) {
         <div className="relative order-first lg:order-last">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-teal-200">
             <img
-              src="/doc.webp"
-              alt="Healthcare professional using monitoring system"
+              src="doc.webp"
+              alt="doc"
               className="w-full h-auto object-cover"
             />
           </div>
