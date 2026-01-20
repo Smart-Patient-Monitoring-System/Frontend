@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 
 import Header from "./pages/HomePage/components/Header";
 import Hero from "./pages/HomePage/components/Hero";
@@ -9,7 +9,6 @@ import RoleSelectionPage from "./pages/Login_Signup/roleSelectionpage";
 import LoginDoctor from "./pages/Login_Signup/loginPageDoctor";
 import LoginPatient from "./pages/Login_Signup/loginPagePatient";
 import LoginAdmin from "./pages/Login_Signup/loginPageAdmin";
-import LoginPageNurse from "./pages/Login_Signup/loginPageNurse";
 
 import SignupDoctor from "./pages/Login_Signup/signupPageDoctor";
 import SignupPatient from "./pages/Login_Signup/signupPagePatient";
@@ -84,13 +83,9 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/role-selection" element={<RoleSelectionPage />} />
-        {/* Login routes */}
         <Route path="/doctorLogin" element={<LoginDoctor />} />
         <Route path="/patientLogin" element={<LoginPatient />} />
-
         <Route path="/adminLogin" element={<LoginAdmin />} />
-
-        {/* Signup routes */}
         <Route path="/doctorSignup" element={<SignupDoctor />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
 
