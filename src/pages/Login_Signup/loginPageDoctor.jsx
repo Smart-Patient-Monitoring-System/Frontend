@@ -125,13 +125,6 @@ export default function LoginPageDoctor() {
             </div>
           </div>
 
-          {/* SIGN UP */}
-          <button
-            onClick={() => navigate("/doctorSignup")}
-            className="w-full max-w-[420px] h-[52px] bg-white rounded-xl shadow hover:shadow-lg transition"
-          >
-            <span className="font-semibold text-gray-700">Sign Up</span>
-          </button>
         </div>
 
         {/* ================= DIVIDER ================= */}

@@ -11,7 +11,6 @@ import LoginDoctor from "./pages/Login_Signup/LoginPageDoctor";
 import LoginPatient from "./pages/Login_Signup/LoginPagePatient";
 import LoginAdmin from "./pages/Login_Signup/LoginPageAdmin";
 
-import SignupDoctor from "./pages/Login_Signup/SignupPageDoctor";
 import SignupPatient from "./pages/Login_Signup/SignupPagePatient";
 
 import ForgotPasswordPage from "./pages/Login_Signup/ForgotPasswordPage";
@@ -87,7 +86,6 @@ function App() {
         <Route path="/doctorLogin" element={<LoginDoctor />} />
         <Route path="/patientLogin" element={<LoginPatient />} />
         <Route path="/adminLogin" element={<LoginAdmin />} />
-        <Route path="/doctorSignup" element={<SignupDoctor />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
 
         {/* Password reset routes */}
