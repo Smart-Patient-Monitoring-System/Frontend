@@ -13,8 +13,6 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [resetToken, setResetToken] = useState("");
-  const [resetLink, setResetLink] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,10 +46,7 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      // Success - show token and link
-      setResetToken(data.resetToken);
-      setResetLink(data.resetLink);
-      setSuccess("Password reset link generated successfully!");
+      setSuccess("Password reset link has been sent to your email. Please check your inbox.");
     } catch (err) {
       setError("Unable to connect to server. Please try again.");
     } finally {
@@ -104,38 +99,6 @@ export default function ForgotPasswordPage() {
           {success && (
             <div className="mb-4 p-4 bg-green-50 text-green-700 rounded-lg">
               <p className="font-semibold mb-2">{success}</p>
-              {resetToken && (
-                <div className="mt-4 space-y-2">
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                      Reset Token:
-                    </p>
-                    <div className="p-2 bg-gray-100 rounded border break-all text-sm font-mono">
-                      {resetToken}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                      Reset Link:
-                    </p>
-                    <a
-                      href={resetLink}
-                      className="text-sm text-[#057EF8] hover:underline break-all"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {resetLink}
-                    </a>
-                  </div>
-                  <button
-                    onClick={() => navigate(`/reset-password?token=${resetToken}`)}
-                    className="w-full mt-4 h-[48px] rounded-full bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
-                      text-white font-semibold hover:scale-105 transition"
-                  >
-                    Go to Reset Password Page
-                  </button>
-                </div>
-              )}
             </div>
           )}
 

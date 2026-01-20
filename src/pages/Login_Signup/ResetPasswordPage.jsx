@@ -12,6 +12,7 @@ export default function ResetPasswordPage() {
 
   const [token, setToken] = useState(tokenFromUrl);
   const [role, setRole] = useState(roleFromUrl);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,6 +35,11 @@ export default function ResetPasswordPage() {
 
     if (!token.trim()) {
       setError("Reset token is required");
+      return;
+    }
+
+    if (!currentPassword.trim()) {
+      setError("Please enter your current password");
       return;
     }
 
@@ -62,6 +68,7 @@ export default function ResetPasswordPage() {
         },
         body: JSON.stringify({
           token: token.trim(),
+          currentPassword: currentPassword,
           newPassword: newPassword,
         }),
       });
@@ -132,7 +139,7 @@ export default function ResetPasswordPage() {
             Reset Password
           </h2>
           <p className="text-gray-600 text-center mb-8">
-            Enter your reset token and new password
+            Enter your current password and choose a new password
           </p>
 
           {error && (
@@ -156,6 +163,17 @@ export default function ResetPasswordPage() {
               placeholder="Enter reset token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
+              className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+            />
+
+            <label className="font-semibold text-gray-700">
+              Current Password
+            </label>
+            <input
+              type="password"
+              placeholder="Enter your current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
               className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
             />
 
