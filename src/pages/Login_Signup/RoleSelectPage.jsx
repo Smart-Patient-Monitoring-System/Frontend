@@ -62,18 +62,6 @@ export default function RoleSelectPage() {
                         </div>
                     </Link>
 
-                    {/* Admin Card */}
-                    <Link to="/adminLogin" className="w-full group">
-                        <div className="bg-[#F7F3FF] rounded-3xl p-6 flex flex-col items-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer h-[280px] justify-between shadow-lg border border-[#A538FF]/10">
-                            <div className="w-24 h-24 bg-gradient-to-br from-[#A538FF] to-[#C066FF] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <img src={admin} alt="Admin" className="w-16 h-16 object-contain filter brightness-0 invert" />
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <h3 className="font-inter font-bold text-[24px] mb-2 text-gray-800">Admin</h3>
-                                <p className="font-inter text-[14px] text-center text-gray-600 leading-relaxed">System management and analytics</p>
-                            </div>
-                        </div>
-                    </Link>
 
                 </div>
             </div>

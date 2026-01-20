@@ -10,6 +10,8 @@ import RoleSelectionPage from "./pages/Login_Signup/RoleSelectPage";
 import LoginDoctor from "./pages/Login_Signup/LoginPageDoctor";
 import LoginPatient from "./pages/Login_Signup/LoginPagePatient";
 import LoginAdmin from "./pages/Login_Signup/LoginPageAdmin";
+import AdminAccessPage from "./pages/Login_Signup/AdminAccessPage";
+import SignupAdmin from "./pages/Login_Signup/SignupPageAdmin";
 
 import SignupPatient from "./pages/Login_Signup/SignupPagePatient";
 
@@ -85,7 +87,9 @@ function App() {
         <Route path="/role-selection" element={<RoleSelectionPage />} />
         <Route path="/doctorLogin" element={<LoginDoctor />} />
         <Route path="/patientLogin" element={<LoginPatient />} />
+        <Route path="/adminAccess" element={<AdminAccessPage />} />
         <Route path="/adminLogin" element={<LoginAdmin />} />
+        <Route path="/adminSignup" element={<SignupAdmin />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
 
         {/* Password reset routes */}
