@@ -11,12 +11,18 @@
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",
+    "cookie": "^1.1.1",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.10.1",
     "recharts": "^3.6.0",
+    "redux": "^5.0.1",
+    "redux-thunk": "^3.1.0",
+    "set-cookie-parser": "^2.7.2",
+    "sockjs-client": "^1.6.1",
+    "@stomp/stompjs": "^7.0.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

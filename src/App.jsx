@@ -5,13 +5,14 @@ import Hero from "./pages/HomePage/components/Hero";
 import Features from "./pages/HomePage/components/Features";
 import FooterCTA from "./pages/HomePage/components/FooterCTA";
 
-import RoleSelectionPage from "./pages/Login_Signup/roleSelectionpage";
-import LoginDoctor from "./pages/Login_Signup/loginPageDoctor";
-import LoginPatient from "./pages/Login_Signup/loginPagePatient";
-import LoginAdmin from "./pages/Login_Signup/loginPageAdmin";
+import RoleSelectionPage from "./pages/Login_Signup/RoleSelectPage";
 
-import SignupDoctor from "./pages/Login_Signup/signupPageDoctor";
-import SignupPatient from "./pages/Login_Signup/signupPagePatient";
+import LoginDoctor from "./pages/Login_Signup/LoginPageDoctor";
+import LoginPatient from "./pages/Login_Signup/LoginPagePatient";
+import LoginAdmin from "./pages/Login_Signup/LoginPageAdmin";
+
+import SignupDoctor from "./pages/Login_Signup/SignupPageDoctor";
+import SignupPatient from "./pages/Login_Signup/SignupPagePatient";
 
 import ForgotPasswordPage from "./pages/Login_Signup/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/Login_Signup/ResetPasswordPage";

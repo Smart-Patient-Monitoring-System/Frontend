@@ -1,100 +1,378 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, Search, Phone, Video, MoreVertical, User, Smile, Check, CheckCheck, X } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Send, Paperclip, Search, Phone, Video, MoreVertical, User, Smile, Check, CheckCheck, X, UserPlus } from "lucide-react";
+import { Client } from '@stomp/stompjs';
+
+const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const searchUsers = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const endpoint = userRole === 'PATIENT' 
+        ? `/api/chat/search-doctors?query=${encodeURIComponent(query)}`
+        : `/api/chat/search-patients?query=${encodeURIComponent(query)}`;
+
+      const response = await fetch(`http://localhost:8080${endpoint}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data);
+      }
+    } catch (error) {
+      console.error('Error searching users:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setTimeout(() => searchUsers(query), 300);
+  };
+
+  const handleStartChat = async (user) => {
+    try {
+      const conversationData = userRole === 'PATIENT'
+        ? { patient: { id: parseInt(localStorage.getItem('userId')) }, doctor: { id: user.id } }
+        : { patient: { id: user.id }, doctor: { id: parseInt(localStorage.getItem('userId')) } };
+
+      const response = await fetch('http://localhost:8080/api/chat/conversations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(conversationData)
+      });
+
+      if (response.ok) {
+        const conversation = await response.json();
+        onChatStart(conversation);
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Search {userRole === 'PATIENT' ? 'Doctors' : 'Patients'}
+          </h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X size={24} className="text-gray-600" />
+          </button>
+        </div>
+        <div className="p-6 border-b border-gray-200">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder={`Search ${userRole === 'PATIENT' ? 'doctors' : 'patients'} by name...`}
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              autoFocus
+            />
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          {isSearching ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2 text-gray-600">Searching...</p>
+            </div>
+          ) : searchResults.length > 0 ? (
+            <div className="space-y-3">
+              {searchResults.map((user) => (
+                <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
+                      alt={user.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                      <p className="text-sm text-gray-500">{user.role}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleStartChat(user)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <span>Start Chat</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : searchQuery.trim() ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No {userRole === 'PATIENT' ? 'doctors' : 'patients'} found</p>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Search size={48} className="mx-auto mb-4 text-gray-300" />
+              <p>Start typing to search for {userRole === 'PATIENT' ? 'doctors' : 'patients'}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const MessagingDashboard = () => {
   const [selectedChat, setSelectedChat] = useState(null);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [attachments, setAttachments] = useState([]);
+  const [chats, setChats] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [stompClient, setStompClient] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Auto-scroll to bottom
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
+  const userName = localStorage.getItem('userName');
+  const userRole = localStorage.getItem('userRole');
+
+  useEffect(() => {
+    if (token && userId) {
+      setCurrentUser({ id: parseInt(userId), name: userName, role: userRole });
+      loadConversations();
+      connectWebSocket();
+    }
+
+    return () => {
+      if (stompClient) {
+        stompClient.deactivate();
+      }
+    };
+  }, [token, userId]);
+
+  const connectWebSocket = () => {
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      connectHeaders: {},
+      debug: function (str) {
+        console.log('STOMP: ' + str);
+      },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    client.onConnect = () => {
+      console.log('WebSocket Connected');
+      setIsConnected(true);
+
+      client.subscribe(`/user/${userId}/queue/messages`, (message) => {
+        try {
+          const newMessage = JSON.parse(message.body);
+          console.log('Received message:', newMessage);
+          
+          if (selectedChat && newMessage.conversationId === selectedChat.id) {
+            setMessages(prev => {
+              if (prev.find(m => m.id === newMessage.id)) {
+                return prev;
+              }
+              return [...prev, formatMessage(newMessage)];
+            });
+          }
+          
+          loadConversations();
+        } catch (error) {
+          console.error('Error processing received message:', error);
+        }
+      });
+
+      client.subscribe(`/user/${userId}/queue/typing`, (message) => {
+        const typingUserId = JSON.parse(message.body);
+        console.log(`User ${typingUserId} is typing...`);
+      });
+
+      client.subscribe(`/user/${userId}/queue/read-receipt`, (message) => {
+        console.log('Messages read');
+        loadConversations();
+      });
+
+      client.publish({
+        destination: '/app/chat.addUser',
+        body: JSON.stringify({
+          senderId: parseInt(userId),
+          senderName: userName,
+          type: 'JOIN'
+        })
+      });
+    };
+
+    client.onStompError = (frame) => {
+      console.error('STOMP error:', frame);
+      setIsConnected(false);
+    };
+
+    client.onWebSocketError = (error) => {
+      console.error('WebSocket error:', error);
+      setIsConnected(false);
+    };
+
+    client.activate();
+    setStompClient(client);
+  };
+
+  const formatMessage = (msg) => ({
+    id: msg.id,
+    sender: msg.senderId === parseInt(userId) ? 'self' : 'other',
+    text: msg.content,
+    time: formatMessageTime(msg.timestamp),
+    read: msg.read,
+    attachments: msg.attachments || []
+  });
+
+  const loadConversations = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/chat/conversations', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setChats(data.map(conv => ({
+          id: conv.id,
+          name: userRole === 'DOCTOR' ? conv.patient?.name : conv.doctor?.name,
+          role: userRole === 'DOCTOR' ? 'Patient' : conv.doctor?.role,
+          avatar: userRole === 'DOCTOR' ? conv.patient?.avatar : conv.doctor?.avatar,
+          lastMessage: conv.lastMessage || 'No messages yet',
+          timestamp: formatMessageTime(conv.timestamp),
+          unread: conv.unreadCount || 0,
+          online: conv.online || false,
+          participantId: userRole === 'DOCTOR' ? conv.patient?.id : conv.doctor?.id
+        })));
+      }
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    }
+  };
+
+  const loadMessages = async (conversationId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/chat/conversations/${conversationId}/messages`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.map(msg => formatMessage(msg)));
+        markAsRead(conversationId);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const markAsRead = async (conversationId) => {
+    try {
+      await fetch(
+        `http://localhost:8080/api/chat/conversations/${conversationId}/read`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Error marking as read:', error);
+    }
+  };
+
+  const formatMessageTime = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    if (diff < 604800000) return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [selectedChat?.messages, attachments]);
-
-  // Example chat data
-  const chats = [
-    {
-      id: 1,
-      name: "Dr. Emily Chen",
-      role: "Cardiologist",
-      avatar: "https://i.pravatar.cc/150?img=45",
-      lastMessage: "Your test results look good. Let's schedule a follow-up.",
-      timestamp: "10:30 AM",
-      unread: 2,
-      online: true,
-      messages: [
-        { id: 1, sender: "doctor", text: "Hello Sarah! I've reviewed your latest ECG results.", time: "9:45 AM", read: true },
-        { id: 2, sender: "patient", text: "Hi Dr. Chen! How do they look?", time: "9:50 AM", read: true },
-        { id: 3, sender: "doctor", text: "Everything looks normal. Your heart rate is stable and within healthy range.", time: "10:15 AM", read: true },
-        { id: 4, sender: "doctor", text: "Your test results look good. Let's schedule a follow-up.", time: "10:30 AM", read: false }
-      ]
-    },
-    {
-      id: 2,
-      name: "Dr. Michael Torres",
-      role: "General Physician",
-      avatar: "https://i.pravatar.cc/150?img=33",
-      lastMessage: "Please take the medication twice daily with meals.",
-      timestamp: "Yesterday",
-      unread: 0,
-      online: false,
-      messages: [
-        { id: 1, sender: "patient", text: "Doctor, I've been experiencing some headaches.", time: "Yesterday, 2:30 PM", read: true },
-        { id: 2, sender: "doctor", text: "How often are you getting these headaches?", time: "Yesterday, 2:45 PM", read: true },
-        { id: 3, sender: "patient", text: "About 2-3 times a week, usually in the afternoon.", time: "Yesterday, 3:00 PM", read: true },
-        { id: 4, sender: "doctor", text: "I'm prescribing you some medication. Please take the medication twice daily with meals.", time: "Yesterday, 3:15 PM", read: true }
-      ]
-    },
-    {
-      id: 3,
-      name: "Nurse Jennifer Smith",
-      role: "Care Coordinator",
-      avatar: "https://i.pravatar.cc/150?img=38",
-      lastMessage: "Your appointment is confirmed for next Monday at 10 AM.",
-      timestamp: "Dec 1",
-      unread: 0,
-      online: true,
-      messages: [
-        { id: 1, sender: "nurse", text: "Hi Sarah! Just confirming your upcoming appointment.", time: "Dec 1, 11:00 AM", read: true },
-        { id: 2, sender: "patient", text: "Yes, I'll be there!", time: "Dec 1, 11:15 AM", read: true },
-        { id: 3, sender: "nurse", text: "Your appointment is confirmed for next Monday at 10 AM.", time: "Dec 1, 11:20 AM", read: true }
-      ]
-    }
-  ];
+  }, [messages, attachments]);
 
   const filteredChats = chats.filter(chat =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.role.toLowerCase().includes(searchQuery.toLowerCase())
+    chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSendMessage = () => {
-    if ((messageText.trim() || attachments.length) && selectedChat) {
-      const newMessage = {
-        id: selectedChat.messages.length + 1,
-        sender: "patient",
-        text: messageText,
-        attachments: attachments,
-        time: "Just now",
-        read: true
+    if ((messageText.trim() || attachments.length) && selectedChat && stompClient && isConnected) {
+      const message = {
+        conversationId: selectedChat.id,
+        senderId: parseInt(userId),
+        senderName: userName,
+        receiverId: selectedChat.participantId,
+        content: messageText,
+        attachments: attachments.map(f => f.name),
+        type: 'TEXT'
       };
       
-      setSelectedChat({
-        ...selectedChat,
-        messages: [...selectedChat.messages, newMessage],
-        lastMessage: messageText || "Attachment",
-        timestamp: "Just now"
-      });
-      
-      setMessageText("");
-      setAttachments([]);
-      if (textareaRef.current) textareaRef.current.style.height = "auto";
+      try {
+        stompClient.publish({
+          destination: '/app/chat.send',
+          body: JSON.stringify(message)
+        });
+        console.log('Message sent:', message);
+        
+        setMessageText("");
+        setAttachments([]);
+        if (textareaRef.current) {
+          textareaRef.current.style.height = "auto";
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Failed to send message. Please check your connection.');
+      }
     }
   };
 
@@ -114,9 +392,31 @@ const MessagingDashboard = () => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
+  const selectChat = (chat) => {
+    setSelectedChat(chat);
+    loadMessages(chat.id);
+  };
+
+  const handleChatStart = (conversation) => {
+    loadConversations();
+    const newChat = {
+      id: conversation.id,
+      name: userRole === 'DOCTOR' ? conversation.patient?.name : conversation.doctor?.name,
+      role: userRole === 'DOCTOR' ? 'Patient' : conversation.doctor?.role,
+      avatar: userRole === 'DOCTOR' ? conversation.patient?.avatar : conversation.doctor?.avatar,
+      lastMessage: conversation.lastMessage || 'No messages yet',
+      timestamp: formatMessageTime(conversation.timestamp),
+      unread: 0,
+      online: false,
+      participantId: userRole === 'DOCTOR' ? conversation.patient?.id : conversation.doctor?.id
+    };
+    setSelectedChat(newChat);
+    loadMessages(conversation.id);
+  };
+
   const ChatListItem = ({ chat }) => (
     <div
-      onClick={() => setSelectedChat(chat)}
+      onClick={() => selectChat(chat)}
       className={`flex items-start gap-3 p-4 cursor-pointer transition-all border-l-4 ${
         selectedChat?.id === chat.id
           ? "bg-blue-50 border-l-blue-600"
@@ -124,14 +424,18 @@ const MessagingDashboard = () => {
       }`}
     >
       <div className="relative flex-shrink-0">
-        <img src={chat.avatar} alt={chat.name} className="w-12 h-12 rounded-full object-cover" />
+        <img 
+          src={chat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name || 'User')}`} 
+          alt={chat.name} 
+          className="w-12 h-12 rounded-full object-cover" 
+        />
         {chat.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between mb-1">
           <div>
-            <h3 className="font-semibold text-gray-900 truncate">{chat.name}</h3>
-            <p className="text-xs text-gray-500">{chat.role}</p>
+            <h3 className="font-semibold text-gray-900 truncate">{chat.name || 'Unknown'}</h3>
+            <p className="text-xs text-gray-500">{chat.role || 'User'}</p>
           </div>
           <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{chat.timestamp}</span>
         </div>
@@ -146,43 +450,75 @@ const MessagingDashboard = () => {
   );
 
   const MessageBubble = ({ message }) => {
-    const isPatient = message.sender === "patient";
+    const isOwn = message.sender === 'self';
     return (
-      <div className={`flex ${isPatient ? "justify-end" : "justify-start"} mb-4`}>
-        <div className={`max-w-[70%] ${isPatient ? "order-2" : "order-1"}`}>
-          <div className={`rounded-2xl px-4 py-3 ${isPatient ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}>
+      <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}>
+        <div className={`max-w-[70%] ${isOwn ? "order-2" : "order-1"}`}>
+          <div className={`rounded-2xl px-4 py-3 ${isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}>
             <p className="text-sm leading-relaxed">{message.text}</p>
             {message.attachments && message.attachments.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {message.attachments.map((file, i) => (
-                  <div key={i} className="bg-gray-200 px-2 py-1 rounded-lg text-xs truncate max-w-[100px]">{file.name || "Attachment"}</div>
+                  <div key={i} className={`px-2 py-1 rounded-lg text-xs truncate max-w-[100px] ${isOwn ? "bg-blue-500" : "bg-gray-200"}`}>{file}</div>
                 ))}
               </div>
             )}
           </div>
-          <div className={`flex items-center gap-1 mt-1 ${isPatient ? "justify-end" : "justify-start"}`}>
+          <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
             <span className="text-xs text-gray-500">{message.time}</span>
-            {isPatient && <span className="text-blue-600">{message.read ? <CheckCheck size={14} /> : <Check size={14} />}</span>}
+            {isOwn && <span className="text-blue-600">{message.read ? <CheckCheck size={14} /> : <Check size={14} />}</span>}
           </div>
         </div>
       </div>
     );
   };
 
+  if (!token) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <div className="text-center">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Please log in</h3>
+          <p className="text-gray-600">You need to be logged in to access messaging</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-200px)] bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-      {/* Sidebar */}
+      <SearchUsersModal
+        isOpen={showSearchModal}
+        onClose={() => setShowSearchModal(false)}
+        userRole={userRole}
+        token={token}
+        onChatStart={handleChatStart}
+      />
       <div className="w-full md:w-96 border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200 bg-white">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+          <div className="flex items-center gap-2 mb-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              title="Start new chat"
+            >
+              <UserPlus size={20} />
+            </button>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+            <span className="text-xs text-gray-600">
+              {isConnected ? 'Connected' : 'Connecting...'}
+            </span>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -195,14 +531,17 @@ const MessagingDashboard = () => {
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         {selectedChat ? (
           <>
             <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <img src={selectedChat.avatar} alt={selectedChat.name} className="w-10 h-10 rounded-full object-cover" />
+                  <img 
+                    src={selectedChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedChat.name)}`} 
+                    alt={selectedChat.name} 
+                    className="w-10 h-10 rounded-full object-cover" 
+                  />
                   {selectedChat.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>}
                 </div>
                 <div>
@@ -211,15 +550,21 @@ const MessagingDashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Phone size={20} className="text-gray-600 p-2 hover:bg-gray-100 rounded-full" />
-                <Video size={20} className="text-gray-600 p-2 hover:bg-gray-100 rounded-full" />
-                <MoreVertical size={20} className="text-gray-600 p-2 hover:bg-gray-100 rounded-full" />
+                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <Phone size={20} className="text-gray-600" />
+                </button>
+                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <Video size={20} className="text-gray-600" />
+                </button>
+                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <MoreVertical size={20} className="text-gray-600" />
+                </button>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
               <div className="space-y-4">
-                {selectedChat.messages.map(message => <MessageBubble key={message.id} message={message} />)}
+                {messages.map(message => <MessageBubble key={message.id} message={message} />)}
                 <div ref={messagesEndRef} />
               </div>
             </div>
@@ -268,7 +613,7 @@ const MessagingDashboard = () => {
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {attachments.map((file, i) => (
                     <div key={i} className="bg-gray-200 px-2 py-1 rounded-lg flex items-center gap-1 text-xs">
-                      {file.name || "Attachment"}
+                      {file.name}
                       <X size={14} className="cursor-pointer" onClick={() => removeAttachment(i)} />
                     </div>
                   ))}
