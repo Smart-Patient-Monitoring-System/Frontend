@@ -63,7 +63,7 @@ export default function LoginPageDoctor() {
     <div className="w-full min-h-screen bg-gradient-to-br from-[#F8FBFF] to-[#EEF6FF] flex items-center justify-center px-4">
       <div className="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-10 items-center">
 
-        {/* ================= LEFT SECTION ================= */}
+        {/* === LEFT SECTION === */}
         <div className="flex flex-col items-center lg:items-start gap-6">
 
           {/* HOME BUTTON */}
@@ -124,12 +124,12 @@ export default function LoginPageDoctor() {
           </button>
         </div>
 
-        {/* ================= DIVIDER ================= */}
+        {/* === DIVIDER === */}
         <div className="hidden lg:flex justify-center">
           <div className="w-[1px] h-[70vh] bg-gradient-to-b from-transparent via-gray-300 to-transparent" />
         </div>
 
-        {/* ================= RIGHT SECTION ================= */}
+        {/* === RIGHT SECTION === */}
         <div className="flex justify-center items-center">
           <form
             onSubmit={handleLogin}

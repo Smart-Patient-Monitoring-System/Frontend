@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { fetchDoctor } from "./service/docter";
+import { deleteDoctor } from "./service/docter";
+
 
 function UserManagement() {
   const [doctors, setDoctor] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");  
 
   useEffect(() => {
     async function load() {
@@ -20,10 +22,26 @@ function UserManagement() {
     load();
   }, []);
 
-  // ✅ THIS WAS MISSING
   const filteredDoctors = doctors.filter((doc) =>
     doc.name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleDelete = async (doctorId) => {
+    if (!window.confirm("Reject this doctor?")) return;
+  
+    try {
+      await deleteDoctor(doctorId);
+  
+      setDoctor((prev) =>
+        prev.filter((doc) => doc.Id !== doctorId)
+      );
+  
+      alert("Doctor rejected successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to reject doctor");
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
@@ -86,17 +104,17 @@ function UserManagement() {
     {/* RIGHT SIDE – ACTION BUTTONS */}
     <div className="flex flex-col gap-2">
       <button
-        onClick={() => console.log("Edit", doctor.id)}
+        onClick={() => console.log("Edit", doctor.Id)}
         className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
       >
         Edit
       </button>
 
       <button
-        onClick={() => console.log("Delete", doctor.id)}
-        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+          onClick={() => handleDelete(doctor.Id)}
+          className="bg-red-500 text-white text-sm px-4 py-1.5 rounded-full"
       >
-        Delete
+      Delete
       </button>
     </div>
   </div>

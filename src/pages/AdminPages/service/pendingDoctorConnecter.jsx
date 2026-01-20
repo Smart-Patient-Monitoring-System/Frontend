@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/doctor";
+const BASE_URL = "http://localhost:8080/api/pendingdoctor";
 
 async function handleResponse(res) {
   if (!res.ok) {
@@ -19,4 +19,25 @@ async function handleResponse(res) {
 export async function fetchPendingDoctor() {
   const res = await fetch(`${BASE_URL}/get`);
   return handleResponse(res);
+}
+
+export async function deletePendingDoctor(doctorId) {
+  const res = await fetch(
+    `${BASE_URL}/delete/${doctorId}`,
+    {
+      method: "DELETE",
+    }
+  );
+  return handleResponse(res);
+}
+
+export async function acceptDocter(doctorId){
+  const res = await fetch(
+    `${BASE_URL}/accept/${doctorId}`,
+    {
+      method:"POST"
+    }
+  );
+  return handleResponse(res);
+
 }
