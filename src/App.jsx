@@ -1,18 +1,22 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 
 import Header from "./pages/HomePage/components/Header";
 import Hero from "./pages/HomePage/components/Hero";
 import Features from "./pages/HomePage/components/Features";
 import FooterCTA from "./pages/HomePage/components/FooterCTA";
 
-import RoleSelectionPage from "./pages/Login_Signup/roleSelectionpage";
+import RoleSelectionPage from "./pages/Login_Signup/RoleSelectPage";
+
 import LoginDoctor from "./pages/Login_Signup/loginPageDoctor";
 import LoginPatient from "./pages/Login_Signup/loginPagePatient";
 import LoginAdmin from "./pages/Login_Signup/loginPageAdmin";
-import LoginPageNurse from "./pages/Login_Signup/loginPageNurse";
+import AdminAccessPage from "./pages/Login_Signup/AdminAccessPage";
+import SignupAdmin from "./pages/Login_Signup/signupPageAdmin";
 
-import SignupDoctor from "./pages/Login_Signup/signupPageDoctor";
 import SignupPatient from "./pages/Login_Signup/signupPagePatient";
+
+import ForgotPasswordPage from "./pages/Login_Signup/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/Login_Signup/ResetPasswordPage";
 
 import PatientPortal from "./pages/PatientPortal/PatientPortal";
 import AdminDashboard from "./components/AdminPortal/AdminDashboard";
@@ -81,15 +85,16 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/role-selection" element={<RoleSelectionPage />} />
-        {/* Login routes */}
         <Route path="/doctorLogin" element={<LoginDoctor />} />
         <Route path="/patientLogin" element={<LoginPatient />} />
-
+        <Route path="/adminAccess" element={<AdminAccessPage />} />
         <Route path="/adminLogin" element={<LoginAdmin />} />
-
-        {/* Signup routes */}
-        <Route path="/doctorSignup" element={<SignupDoctor />} />
+        <Route path="/adminSignup" element={<SignupAdmin />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
+
+        {/* Password reset routes */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route path="/patient-portal" element={<PatientPortal />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
