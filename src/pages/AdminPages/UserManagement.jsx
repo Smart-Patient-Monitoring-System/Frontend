@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { fetchDoctor } from "./service/docter";
+import { deleteDoctor } from "./service/docter";
 import { API_BASE_URL } from "../../api";
 
 function UserManagement() {
   const [doctors, setDoctor] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -38,10 +40,25 @@ function UserManagement() {
     load();
   }, []);
 
-  // ✅ THIS WAS MISSING
   const filteredDoctors = doctors.filter((doc) =>
     doc.name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleDelete = async (doctorId) => {
+    if (!window.confirm("Reject this doctor?")) return;
+  
+    try {
+      await deleteDoctor(doctorId);
+  
+      setDoctor((prev) =>
+        prev.filter((doc) => doc.Id !== doctorId)
+      );
+  
+      alert("Doctor rejected successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to reject doctor")}
+    };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -104,6 +121,7 @@ function UserManagement() {
       setError("Unable to connect to server. Please try again.");
     } finally {
       setSubmitting(false);
+
     }
   };
 
@@ -137,54 +155,54 @@ function UserManagement() {
         )}
 
         {filteredDoctors.map((doctor) => (
-  <div
-    key={doctor.id}
-    className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
-  >
-    {/* LEFT SIDE – Doctor Info */}
-    <div className="space-y-1">
-      <p className="font-medium text-gray-800">
-        {doctor.name}
-      </p>
+          <div
+            key={doctor.id}
+            className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
+          >
+            {/* LEFT SIDE – Doctor Info */}
+            <div className="space-y-1">
+              <p className="font-medium text-gray-800">
+                {doctor.name}
+              </p>
 
-      <p className="text-sm text-gray-500">
-        {doctor.position} · {doctor.doctorRegNo}
-      </p>
+              <p className="text-sm text-gray-500">
+                {doctor.position} · {doctor.doctorRegNo}
+              </p>
 
-      <p className="text-sm text-gray-500">
-        {doctor.hospital}
-      </p>
+              <p className="text-sm text-gray-500">
+                {doctor.hospital}
+              </p>
 
-      <p className="text-sm text-gray-500">
-        📧 {doctor.email}
-      </p>
+              <p className="text-sm text-gray-500">
+                📧 {doctor.email}
+              </p>
 
-      <p className="text-sm text-gray-500">
-        📞 {doctor.contactNo}
-      </p>
+              <p className="text-sm text-gray-500">
+                📞 {doctor.contactNo}
+              </p>
 
-      <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-        {doctor.gender}
-      </span>
-    </div>
+              <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                {doctor.gender}
+              </span>
+            </div>
 
-    {/* RIGHT SIDE – ACTION BUTTONS */}
-    <div className="flex flex-col gap-2">
-      <button
-        onClick={() => console.log("Edit", doctor.id)}
-        className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-      >
-        Edit
-      </button>
+            {/* RIGHT SIDE – ACTION BUTTONS */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => console.log("Edit", doctor.Id)}
+                className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+              >
+                Edit
+              </button>
 
-      <button
-        onClick={() => console.log("Delete", doctor.id)}
-        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
-      >
-        Delete
-      </button>
-    </div>
-  </div>
+              <button
+                  onClick={() => handleDelete(doctor.Id)}
+                  className="bg-red-500 text-white text-sm px-4 py-1.5 rounded-full"
+              >
+              Delete
+              </button>
+            </div>
+          </div>
 ))}
 
       </div>

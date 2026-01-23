@@ -24,6 +24,7 @@ import SecurityLogs from "../../pages/AdminPages/SecurityLogs";
 
 
 function AdminDashboard() {
+
   const [hasNotification, setHasNotification] = useState(true);
   const navigate = useNavigate();
 
@@ -35,8 +36,7 @@ function AdminDashboard() {
     // Navigate to homepage
     navigate("/");
   };
-
-   const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("users");
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">

@@ -41,7 +41,7 @@ export default function SignupPageDoctor() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/doctor/create`, {
+      const response = await fetch(`${API_BASE_URL}/api/pendingdoctor/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
