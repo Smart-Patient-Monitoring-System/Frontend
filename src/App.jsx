@@ -21,6 +21,7 @@ import ResetPasswordPage from "./pages/Login_Signup/ResetPasswordPage";
 import PatientPortal from "./pages/PatientPortal/PatientPortal";
 import AdminDashboard from "./components/AdminPortal/AdminDashboard";
 import DocDashboard from "./pages/DoctorsPage/DocDashboard";
+import DocViewPatient from "./pages/DoctorViewPatient/PatientPortal";
 
 
 function HomePage() {
@@ -99,6 +100,7 @@ function App() {
         <Route path="/patient-portal" element={<PatientPortal />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/DocDashboard" element={<DocDashboard />} />
+        <Route path="/DocViewPatient" element={<DocViewPatient />} />
       </Routes>
     </Router>
   );
