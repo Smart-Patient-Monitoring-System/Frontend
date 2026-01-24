@@ -12,7 +12,6 @@ import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
-import BookingsTab from "../../components/PatientPortal/BookingsTab";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
@@ -20,7 +19,7 @@ import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
 import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
 
-const PatientPortal = () => {
+const DoctorPatientView = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
   const [showManualEntry, setShowManualEntry] = useState(false);
 
@@ -181,8 +180,6 @@ const PatientPortal = () => {
           {/* Profile */}
           {currentTab === "Profile" && <ProfileTab />}
 
-          {/* Bookings */}
-          {currentTab === "Bookings" && <BookingsTab />}
 
           {/* Emergency Panel */}
           {currentTab === "Emergency Panel" && <EmergencyPanel />}
@@ -212,4 +209,4 @@ const PatientPortal = () => {
   );
 };
 
-export default PatientPortal;
+export default DoctorPatientView;
