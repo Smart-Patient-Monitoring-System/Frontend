@@ -20,3 +20,13 @@ export async function fetchDoctor() {
   const res = await fetch(`${BASE_URL}/get`);
   return handleResponse(res);
 }
+
+export async function deleteDoctor(doctorId) {
+  const res = await fetch(
+    `${BASE_URL}/delete/${doctorId}`,
+    {
+      method: "DELETE",
+    }
+  );
+  return handleResponse(res);
+}
