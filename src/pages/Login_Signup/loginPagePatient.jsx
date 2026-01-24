@@ -71,6 +71,10 @@ export default function LoginPagePatient() {
         })
       );
 
+      localStorage.setItem("patientId", data.patientId);
+      localStorage.setItem("patientName", data.name || data.username);
+
+
       navigate("/patient-portal");
     } catch (err) {
       setError("Unable to connect to server. Please try again.");
@@ -122,6 +126,9 @@ export default function LoginPagePatient() {
           role: data.role?.toLowerCase() || "patient",
         })
       );
+      
+      localStorage.setItem("patientId", data.patientId);
+localStorage.setItem("patientName", data.name || data.username);
 
       navigate("/patient-portal");
     } catch (err) {

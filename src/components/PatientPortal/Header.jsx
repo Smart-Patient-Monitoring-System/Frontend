@@ -9,12 +9,18 @@ const Header = ({ patientName }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
 
-  const handleLogout = () => {
-    // later: clear auth data if needed
-    // localStorage.clear();
-
-    navigate("/"); //  go back to Home page
-  };
+  // In your Header component or wherever logout is handled
+  const displayName = patientName || localStorage.getItem('patientName') || 'Patient';
+const handleLogout = () => {
+  // Clear all stored data
+  localStorage.removeItem('token');
+  localStorage.removeItem("user");
+  localStorage.removeItem('patientId');
+  localStorage.removeItem('patientName');
+  
+  // Redirect to login/home page
+  navigate('/');
+};
 
   return (
     <header className="bg-white w-full shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4">
