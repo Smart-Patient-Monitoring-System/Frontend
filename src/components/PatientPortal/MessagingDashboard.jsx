@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Paperclip, Search, Phone, Video, MoreVertical, User, Smile, Check, CheckCheck, X, UserPlus } from "lucide-react";
 import { Client } from '@stomp/stompjs';
@@ -87,8 +86,11 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
   const handleStartChat = async (user) => {
     try {
+      // ✅ FIX: Get patientId from localStorage
+      const patientId = localStorage.getItem('patientId');
+      
       const endpoint = userRole === 'PATIENT'
-        ? `http://localhost:8080/api/chat/conversations/start?doctorId=${user.id}`
+        ? `http://localhost:8080/api/chat/conversations/start?patientId=${patientId}&doctorId=${user.id}`
         : `http://localhost:8080/api/chat/conversations/start?patientId=${user.id}`;
 
       const response = await fetch(endpoint, {
@@ -104,7 +106,8 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
         onChatStart(conversation);
         onClose();
       } else {
-        console.error('Failed to create conversation:', response.status);
+        const errorText = await response.text();
+        console.error('Failed to create conversation:', response.status, errorText);
         alert('Failed to start conversation. Please try again.');
       }
     } catch (error) {
@@ -120,6 +123,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">
+            {/* ✅ FIX: Show "Search Doctors" for patients */}
             Search {userRole === 'PATIENT' ? 'Doctors' : 'Patients'}
           </h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -197,14 +201,15 @@ const MessagingDashboard = () => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
+  // ✅ FIX: Get correct IDs from localStorage
   const token = localStorage.getItem('token');
-  const userId = localStorage.getItem('userId');
-  const userName = localStorage.getItem('userName');
-  const userRole = localStorage.getItem('userRole');
+  const patientId = localStorage.getItem('patientId');
+  const patientName = localStorage.getItem('patientName');
+  const userRole = 'PATIENT'; // Hardcode for patient portal
 
   useEffect(() => {
-    if (token && userId) {
-      setCurrentUser({ id: parseInt(userId), name: userName, role: userRole });
+    if (token && patientId) {
+      setCurrentUser({ id: parseInt(patientId), name: patientName, role: userRole });
       loadConversations();
       connectWebSocket();
     }
@@ -214,7 +219,7 @@ const MessagingDashboard = () => {
         stompClient.deactivate();
       }
     };
-  }, [token, userId]);
+  }, [token, patientId]);
 
   const connectWebSocket = () => {
     const client = new Client({
@@ -232,7 +237,7 @@ const MessagingDashboard = () => {
       console.log('WebSocket Connected');
       setIsConnected(true);
 
-      client.subscribe(`/user/${userId}/queue/messages`, (message) => {
+      client.subscribe(`/user/${patientId}/queue/messages`, (message) => {
         try {
           const newMessage = JSON.parse(message.body);
           console.log('Received message:', newMessage);
@@ -252,12 +257,12 @@ const MessagingDashboard = () => {
         }
       });
 
-      client.subscribe(`/user/${userId}/queue/typing`, (message) => {
+      client.subscribe(`/user/${patientId}/queue/typing`, (message) => {
         const typingUserId = JSON.parse(message.body);
         console.log(`User ${typingUserId} is typing...`);
       });
 
-      client.subscribe(`/user/${userId}/queue/read-receipt`, (message) => {
+      client.subscribe(`/user/${patientId}/queue/read-receipt`, (message) => {
         console.log('Messages read');
         loadConversations();
       });
@@ -265,8 +270,8 @@ const MessagingDashboard = () => {
       client.publish({
         destination: '/app/chat.addUser',
         body: JSON.stringify({
-          senderId: parseInt(userId),
-          senderName: userName,
+          senderId: parseInt(patientId),
+          senderName: patientName,
           type: 'JOIN'
         })
       });
@@ -288,7 +293,7 @@ const MessagingDashboard = () => {
 
   const formatMessage = (msg) => ({
     id: msg.id,
-    sender: msg.senderId === parseInt(userId) ? 'self' : 'other',
+    sender: msg.senderId === parseInt(patientId) ? 'self' : 'other',
     text: msg.content,
     time: formatMessageTime(msg.timestamp),
     read: msg.read,
@@ -308,14 +313,14 @@ const MessagingDashboard = () => {
         const data = await response.json();
         setChats(data.map(conv => ({
           id: conv.id,
-          name: userRole === 'DOCTOR' ? conv.patient?.name : conv.doctor?.name,
-          role: userRole === 'DOCTOR' ? 'Patient' : conv.doctor?.role,
-          avatar: userRole === 'DOCTOR' ? conv.patient?.avatar : conv.doctor?.avatar,
+          name: conv.doctor?.name || 'Unknown Doctor',
+          role: conv.doctor?.position || 'Doctor',
+          avatar: conv.doctor?.avatar,
           lastMessage: conv.lastMessage || 'No messages yet',
           timestamp: formatMessageTime(conv.timestamp),
           unread: conv.unreadCount || 0,
           online: conv.online || false,
-          participantId: userRole === 'DOCTOR' ? conv.patient?.id : conv.doctor?.id
+          participantId: conv.doctor?.id
         })));
       }
     } catch (error) {
@@ -392,8 +397,8 @@ const MessagingDashboard = () => {
     if ((messageText.trim() || attachments.length) && selectedChat && stompClient && isConnected) {
       const message = {
         conversationId: selectedChat.id,
-        senderId: parseInt(userId),
-        senderName: userName,
+        senderId: parseInt(patientId),
+        senderName: patientName,
         receiverId: selectedChat.participantId,
         content: messageText,
         attachments: attachments.map(f => f.name),
@@ -444,14 +449,14 @@ const MessagingDashboard = () => {
     loadConversations();
     const newChat = {
       id: conversation.id,
-      name: userRole === 'DOCTOR' ? conversation.patient?.name : conversation.doctor?.name,
-      role: userRole === 'DOCTOR' ? 'Patient' : conversation.doctor?.role,
-      avatar: userRole === 'DOCTOR' ? conversation.patient?.avatar : conversation.doctor?.avatar,
+      name: conversation.doctor?.name || 'Unknown Doctor',
+      role: conversation.doctor?.position || 'Doctor',
+      avatar: conversation.doctor?.avatar,
       lastMessage: conversation.lastMessage || 'No messages yet',
       timestamp: formatMessageTime(conversation.timestamp),
       unread: 0,
       online: false,
-      participantId: userRole === 'DOCTOR' ? conversation.patient?.id : conversation.doctor?.id
+      participantId: conversation.doctor?.id
     };
     setSelectedChat(newChat);
     loadMessages(conversation.id);
@@ -478,7 +483,7 @@ const MessagingDashboard = () => {
         <div className="flex items-start justify-between mb-1">
           <div>
             <h3 className="font-semibold text-gray-900 truncate">{chat.name || 'Unknown'}</h3>
-            <p className="text-xs text-gray-500">{chat.role || 'User'}</p>
+            <p className="text-xs text-gray-500">{chat.role || 'Doctor'}</p>
           </div>
           <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{chat.timestamp}</span>
         </div>
@@ -552,7 +557,7 @@ const MessagingDashboard = () => {
             <button
               onClick={() => setShowSearchModal(true)}
               className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              title="Start new chat"
+              title="Start new chat with doctor"
             >
               <UserPlus size={20} />
             </button>
@@ -569,6 +574,12 @@ const MessagingDashboard = () => {
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
               <User size={48} className="mb-4 text-gray-300" />
               <p className="text-center">No conversations found</p>
+              <button
+                onClick={() => setShowSearchModal(true)}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Start a conversation
+              </button>
             </div>
           )}
         </div>
@@ -683,9 +694,15 @@ const MessagingDashboard = () => {
                 <User size={48} className="text-blue-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No Chat Selected</h3>
-              <p className="text-gray-600 max-w-sm">
-                Select a conversation from the left to start messaging with your healthcare providers
+              <p className="text-gray-600 max-w-sm mb-4">
+                Select a conversation from the left or start a new chat with a doctor
               </p>
+              <button
+                onClick={() => setShowSearchModal(true)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Find a Doctor
+              </button>
             </div>
           </div>
         )}

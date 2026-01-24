@@ -63,6 +63,11 @@ export default function LoginPagePatient() {
       }
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.patientId);
+      localStorage.setItem("userRole", "PATIENT");
+
+
+
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -119,6 +124,10 @@ export default function LoginPagePatient() {
       const data = await response.json();
 
       localStorage.setItem("token", data.token);
+
+      localStorage.setItem("userId", data.patientId);
+      localStorage.setItem("userRole", "PATIENT");
+
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -126,9 +135,9 @@ export default function LoginPagePatient() {
           role: data.role?.toLowerCase() || "patient",
         })
       );
-      
+
       localStorage.setItem("patientId", data.patientId);
-localStorage.setItem("patientName", data.name || data.username);
+      localStorage.setItem("patientName", data.name || data.username);
 
       navigate("/patient-portal");
     } catch (err) {
