@@ -86,7 +86,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
   const handleStartChat = async (user) => {
     try {
-      // ✅ FIX: Get patientId from localStorage
+      //  FIX: Get patientId from localStorage
       const patientId = localStorage.getItem('patientId');
       
       const endpoint = userRole === 'PATIENT'
@@ -201,7 +201,7 @@ const MessagingDashboard = () => {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // ✅ FIX: Get correct IDs from localStorage
+  //  FIX: Get correct IDs from localStorage
   const token = localStorage.getItem('token');
   const patientId = localStorage.getItem('patientId');
   const patientName = localStorage.getItem('patientName');
