@@ -1,5 +1,8 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
+if (typeof global === 'undefined') {
+  window.global = window;
+}
 import App from "./App"
 import "./index.css"
 

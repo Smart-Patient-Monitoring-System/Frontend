@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.2.1",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",
@@ -22,11 +23,11 @@
     "redux-thunk": "^3.1.0",
     "set-cookie-parser": "^2.7.2",
     "sockjs-client": "^1.6.1",
-    "@stomp/stompjs": "^7.0.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.2"
+    "vite": "^5.4.2",
+    "vite-plugin-node-polyfills": "^0.25.0"
   }
 }

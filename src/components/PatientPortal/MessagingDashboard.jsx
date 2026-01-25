@@ -1,11 +1,100 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, Search, Phone, Video, MoreVertical, User, Smile, Check, CheckCheck, X, UserPlus } from "lucide-react";
-import { Client } from '@stomp/stompjs';
+import {
+  Send,
+  Paperclip,
+  Search,
+  Phone,
+  Video,
+  MoreVertical,
+  User,
+  Smile,
+  Check,
+  CheckCheck,
+  X,
+  UserPlus,
+} from "lucide-react";
 
+
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught by boundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center h-screen bg-gray-50">
+          <div className="text-center p-8 bg-white rounded-xl shadow-lg max-w-md">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <X size={32} className="text-red-600" />
+            </div>
+            <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
+            <p className="text-gray-600 mb-4">{this.state.error?.message || "Unknown error"}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+/* ===================== Search Users Modal ===================== */
 const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const debounceRef = useRef(null);
+
+  const loadAllDoctors = async () => {
+    setIsSearching(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/chat/doctors", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(
+          data.map((doctor) => ({
+            id: doctor.id,
+            name: doctor.name,
+            role: doctor.position || "Doctor",
+            avatar: doctor.profilePicture || null,
+            hospital: doctor.hospital,
+            doctorRegNo: doctor.doctorRegNo,
+          }))
+        );
+      } else {
+        console.error("Failed to load doctors:", response.status);
+      }
+    } catch (error) {
+      console.error("Error loading doctors:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const searchUsers = async (query) => {
     if (!query.trim()) {
@@ -15,58 +104,35 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
     setIsSearching(true);
     try {
-      const endpoint = userRole === 'PATIENT' 
-        ? `/api/chat/doctors/search?query=${encodeURIComponent(query)}`
-        : `/api/chat/patients/search?query=${encodeURIComponent(query)}`;
+      const endpoint =
+        userRole === "PATIENT"
+          ? `/api/chat/doctors/search?query=${encodeURIComponent(query)}`
+          : `/api/chat/patients/search?query=${encodeURIComponent(query)}`;
 
       const response = await fetch(`http://localhost:8080${endpoint}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
-        setSearchResults(data.map(doctor => ({
-          id: doctor.id,
-          name: doctor.name,
-          role: doctor.position || 'Doctor',
-          avatar: doctor.profilePicture || null,
-          hospital: doctor.hospital,
-          doctorRegNo: doctor.doctorRegNo
-        })));
+        setSearchResults(
+          data.map((doctor) => ({
+            id: doctor.id,
+            name: doctor.name,
+            role: doctor.position || "Doctor",
+            avatar: doctor.profilePicture || null,
+            hospital: doctor.hospital,
+            doctorRegNo: doctor.doctorRegNo,
+          }))
+        );
+      } else {
+        console.error("Search failed:", response.status);
       }
     } catch (error) {
-      console.error('Error searching users:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const loadAllDoctors = async () => {
-    setIsSearching(true);
-    try {
-      const response = await fetch('http://localhost:8080/api/chat/doctors', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.map(doctor => ({
-          id: doctor.id,
-          name: doctor.name,
-          role: doctor.position || 'Doctor',
-          avatar: doctor.profilePicture || null,
-          hospital: doctor.hospital,
-          doctorRegNo: doctor.doctorRegNo
-        })));
-      }
-    } catch (error) {
-      console.error('Error loading doctors:', error);
+      console.error("Error searching users:", error);
     } finally {
       setIsSearching(false);
     }
@@ -76,45 +142,48 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
     if (isOpen) {
       loadAllDoctors();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    setTimeout(() => searchUsers(query), 300);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => searchUsers(query), 300);
   };
 
   const handleStartChat = async (user) => {
-    try {
-      //  FIX: Get patientId from localStorage
-      const patientId = localStorage.getItem('patientId');
-      
-      const endpoint = userRole === 'PATIENT'
-        ? `http://localhost:8080/api/chat/conversations/start?patientId=${patientId}&doctorId=${user.id}`
+  try {
+    //  FIX: Don't send patientId for PATIENT (backend gets it from token)
+    const endpoint =
+      userRole === "PATIENT"
+        ? `http://localhost:8080/api/chat/conversations/start?doctorId=${user.id}`
         : `http://localhost:8080/api/chat/conversations/start?patientId=${user.id}`;
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (response.ok) {
-        const conversation = await response.json();
-        onChatStart(conversation);
-        onClose();
-      } else {
-        const errorText = await response.text();
-        console.error('Failed to create conversation:', response.status, errorText);
-        alert('Failed to start conversation. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-      alert('Error starting conversation. Please check your connection.');
+    if (response.ok) {
+      const conversation = await response.json();
+      onChatStart(conversation);
+      onClose();
+    } else {
+      const errorText = await response.text();
+      console.error("Failed to create conversation:", response.status, errorText);
+      alert("Failed to start conversation. Please try again.");
     }
-  };
+  } catch (error) {
+    console.error("Error creating conversation:", error);
+    alert("Error starting conversation. Please check your connection.");
+  }
+};
+
 
   if (!isOpen) return null;
 
@@ -123,19 +192,19 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">
-            {/* ✅ FIX: Show "Search Doctors" for patients */}
-            Search {userRole === 'PATIENT' ? 'Doctors' : 'Patients'}
+            Search {userRole === "PATIENT" ? "Doctors" : "Patients"}
           </h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <X size={24} className="text-gray-600" />
           </button>
         </div>
+
         <div className="p-6 border-b border-gray-200">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder={`Search ${userRole === 'PATIENT' ? 'doctors' : 'patients'} by name or ID...`}
+              placeholder={`Search ${userRole === "PATIENT" ? "doctors" : "patients"} by name or ID...`}
               value={searchQuery}
               onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -143,6 +212,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
             />
           </div>
         </div>
+
         <div className="flex-1 overflow-y-auto p-6">
           {isSearching ? (
             <div className="text-center py-8">
@@ -152,7 +222,10 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
           ) : searchResults.length > 0 ? (
             <div className="space-y-3">
               {searchResults.map((user) => (
-                <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex items-center gap-3">
                     <img
                       src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`}
@@ -166,6 +239,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
                       {user.doctorRegNo && <p className="text-xs text-gray-400">ID: {user.doctorRegNo}</p>}
                     </div>
                   </div>
+
                   <button
                     onClick={() => handleStartChat(user)}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -178,7 +252,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
           ) : (
             <div className="text-center py-8 text-gray-500">
               <Search size={48} className="mx-auto mb-4 text-gray-300" />
-              <p>No {userRole === 'PATIENT' ? 'doctors' : 'patients'} found</p>
+              <p>No {userRole === "PATIENT" ? "doctors" : "patients"} found</p>
             </div>
           )}
         </div>
@@ -187,6 +261,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
   );
 };
 
+/* ===================== Messaging Dashboard ===================== */
 const MessagingDashboard = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -195,136 +270,203 @@ const MessagingDashboard = () => {
   const [attachments, setAttachments] = useState([]);
   const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [stompClient, setStompClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [error, setError] = useState(null);
+
+  const stompRef = useRef(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  //  FIX: Get correct IDs from localStorage
-  const token = localStorage.getItem('token');
-  const patientId = localStorage.getItem('patientId');
-  const patientName = localStorage.getItem('patientName');
-  const userRole = 'PATIENT'; // Hardcode for patient portal
+  const token = localStorage.getItem("token");
+  const patientId = localStorage.getItem("patientId");
+  const patientName = localStorage.getItem("patientName") || "Patient";
+  const userRole = "PATIENT";
 
   useEffect(() => {
-    if (token && patientId) {
-      setCurrentUser({ id: parseInt(patientId), name: patientName, role: userRole });
+    if (token) {
       loadConversations();
       connectWebSocket();
     }
 
     return () => {
-      if (stompClient) {
-        stompClient.deactivate();
+      if (stompRef.current) {
+        try {
+          stompRef.current.deactivate();
+        } catch (err) {
+          console.error("Error deactivating STOMP:", err);
+        }
+        stompRef.current = null;
       }
     };
-  }, [token, patientId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const connectWebSocket = () => {
-    const client = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
-      connectHeaders: {},
-      debug: function (str) {
-        console.log('STOMP: ' + str);
-      },
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-    });
+  try {
+    if (stompRef.current?.active) return;
 
-    client.onConnect = () => {
-      console.log('WebSocket Connected');
-      setIsConnected(true);
+    //  FIX 1: Use SockJS endpoint (because backend has .withSockJS())
+    const wsUrl = "http://localhost:8080/ws";
 
-      client.subscribe(`/user/${patientId}/queue/messages`, (message) => {
+    const client = {
+      active: false,
+      connected: false,
+      ws: null,          // will store STOMP client
+      sock: null,        // keep SockJS ref
+
+      activate: function () {
         try {
-          const newMessage = JSON.parse(message.body);
-          console.log('Received message:', newMessage);
-          
-          if (selectedChat && newMessage.conversationId === selectedChat.id) {
-            setMessages(prev => {
-              if (prev.find(m => m.id === newMessage.id)) {
-                return prev;
+          // FIX 2: create SockJS socket (NOT new WebSocket)
+          this.sock = new SockJS(wsUrl);
+
+          // FIX 3: STOMP client on top of SockJS
+          this.ws = new Client({
+            webSocketFactory: () => this.sock,
+            reconnectDelay: 5000,
+            debug: (str) => console.log("STOMP:", str),
+          });
+
+          //  FIX 4: set connect handlers
+          this.ws.onConnect = () => {
+            console.log("WebSocket Connected");
+            this.active = true;
+            this.connected = true;
+            setIsConnected(true);
+            setError(null);
+
+            // Subscribe to personal queue (Spring user destination)
+            this.ws.subscribe(`/user/queue/messages`, (msg) => {
+              try {
+                const data = JSON.parse(msg.body);
+                handleIncomingMessage(data);
+              } catch (err) {
+                console.error("Message parse error:", err);
               }
-              return [...prev, formatMessage(newMessage)];
+            });
+          };
+
+          this.ws.onStompError = (frame) => {
+            console.error("STOMP error:", frame);
+            setIsConnected(false);
+            setError("WebSocket connection failed");
+          };
+
+          this.ws.onWebSocketError = (error) => {
+            console.error("WebSocket error:", error);
+            setIsConnected(false);
+            setError("WebSocket connection failed");
+          };
+
+          this.ws.onWebSocketClose = () => {
+            console.log("WebSocket Disconnected");
+            this.active = false;
+            this.connected = false;
+            setIsConnected(false);
+          };
+
+          this.ws.activate();
+        } catch (err) {
+          console.error("WebSocket activation error:", err);
+          setError("Failed to connect to WebSocket");
+        }
+      },
+
+      deactivate: function () {
+        try {
+          if (this.ws) {
+            this.ws.deactivate();
+            this.ws = null;
+          }
+          if (this.sock) {
+            this.sock.close();
+            this.sock = null;
+          }
+        } catch (e) {
+          console.error("Deactivate error:", e);
+        }
+        this.active = false;
+        this.connected = false;
+      },
+
+      //  FIX 5: send via STOMP publish (NOT ws.send)
+      send: function (message) {
+        try {
+          if (this.ws && this.ws.connected) {
+            this.ws.publish({
+              destination: "/app/chat.send",
+              body: JSON.stringify(message),
             });
           }
-          
-          loadConversations();
-        } catch (error) {
-          console.error('Error processing received message:', error);
+        } catch (e) {
+          console.error("Send error:", e);
         }
-      });
-
-      client.subscribe(`/user/${patientId}/queue/typing`, (message) => {
-        const typingUserId = JSON.parse(message.body);
-        console.log(`User ${typingUserId} is typing...`);
-      });
-
-      client.subscribe(`/user/${patientId}/queue/read-receipt`, (message) => {
-        console.log('Messages read');
-        loadConversations();
-      });
-
-      client.publish({
-        destination: '/app/chat.addUser',
-        body: JSON.stringify({
-          senderId: parseInt(patientId),
-          senderName: patientName,
-          type: 'JOIN'
-        })
-      });
-    };
-
-    client.onStompError = (frame) => {
-      console.error('STOMP error:', frame);
-      setIsConnected(false);
-    };
-
-    client.onWebSocketError = (error) => {
-      console.error('WebSocket error:', error);
-      setIsConnected(false);
+      },
     };
 
     client.activate();
-    setStompClient(client);
+    stompRef.current = client;
+  } catch (error) {
+    console.error("WebSocket connection error:", error);
+    setIsConnected(false);
+    setError("Failed to establish WebSocket connection");
+  }
+};
+
+
+
+  const handleIncomingMessage = (newMessage) => {
+    try {
+      if (selectedChat && newMessage.conversationId === selectedChat.id) {
+        setMessages((prev) => {
+          if (prev.find((m) => m.id === newMessage.id)) return prev;
+          return [...prev, formatMessage(newMessage)];
+        });
+      }
+      loadConversations();
+    } catch (err) {
+      console.error("Error processing received message:", err);
+    }
   };
 
   const formatMessage = (msg) => ({
     id: msg.id,
-    sender: msg.senderId === parseInt(patientId) ? 'self' : 'other',
+    sender: msg.senderId === parseInt(patientId, 10) ? "self" : "other",
     text: msg.content,
     time: formatMessageTime(msg.timestamp),
     read: msg.read,
-    attachments: msg.attachments || []
+    attachments: msg.attachments || [],
   });
 
   const loadConversations = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/chat/conversations', {
+      const response = await fetch("http://localhost:8080/api/chat/conversations", {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
-        setChats(data.map(conv => ({
-          id: conv.id,
-          name: conv.doctor?.name || 'Unknown Doctor',
-          role: conv.doctor?.position || 'Doctor',
-          avatar: conv.doctor?.avatar,
-          lastMessage: conv.lastMessage || 'No messages yet',
-          timestamp: formatMessageTime(conv.timestamp),
-          unread: conv.unreadCount || 0,
-          online: conv.online || false,
-          participantId: conv.doctor?.id
-        })));
+        setChats(
+          data.map((conv) => ({
+            id: conv.id,
+            name: conv.doctor?.name || "Unknown Doctor",
+            role: conv.doctor?.position || "Doctor",
+            avatar: conv.doctor?.avatar,
+            lastMessage: conv.lastMessage || "No messages yet",
+            timestamp: formatMessageTime(conv.timestamp),
+            unread: conv.unreadCount || 0,
+            online: conv.online || false,
+            participantId: conv.doctor?.id,
+          }))
+        );
+      } else {
+        console.error("Failed to load conversations:", response.status);
       }
     } catch (error) {
-      console.error('Error loading conversations:', error);
+      console.error("Error loading conversations:", error);
+      setError("Failed to load conversations");
     }
   };
 
@@ -334,93 +476,99 @@ const MessagingDashboard = () => {
         `http://localhost:8080/api/chat/conversations/${conversationId}/messages`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
-      
+
       if (response.ok) {
         const data = await response.json();
-        setMessages(data.map(msg => formatMessage(msg)));
+        setMessages(data.map((msg) => formatMessage(msg)));
         markAsRead(conversationId);
+      } else {
+        console.error("Failed to load messages:", response.status);
       }
     } catch (error) {
-      console.error('Error loading messages:', error);
+      console.error("Error loading messages:", error);
     }
   };
 
   const markAsRead = async (conversationId) => {
     try {
-      await fetch(
-        `http://localhost:8080/api/chat/conversations/${conversationId}/read`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      await fetch(`http://localhost:8080/api/chat/conversations/${conversationId}/read`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
     } catch (error) {
-      console.error('Error marking as read:', error);
+      console.error("Error marking as read:", error);
     }
   };
 
   const formatMessageTime = (timestamp) => {
-    if (!timestamp) return '';
+    if (!timestamp) return "";
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
-    
-    if (diff < 60000) return 'Just now';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    if (diff < 604800000) return date.toLocaleDateString('en-US', { weekday: 'short' });
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000)
+      return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    if (diff < 604800000) return date.toLocaleDateString("en-US", { weekday: "short" });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, attachments]);
 
-  const filteredChats = chats.filter(chat =>
-    chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    chat.role?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredChats = chats.filter(
+    (chat) =>
+      chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      chat.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSendMessage = () => {
-    if ((messageText.trim() || attachments.length) && selectedChat && stompClient && isConnected) {
-      const message = {
-        conversationId: selectedChat.id,
-        senderId: parseInt(patientId),
-        senderName: patientName,
-        receiverId: selectedChat.participantId,
-        content: messageText,
-        attachments: attachments.map(f => f.name),
-        type: 'TEXT'
+    if (!selectedChat || !stompRef.current) return;
+    if (!messageText.trim() && attachments.length === 0) return;
+
+    const message = {
+      conversationId: selectedChat.id,
+      senderId: parseInt(patientId, 10),
+      senderName: patientName,
+      receiverId: selectedChat.participantId,
+      content: messageText,
+      attachments: attachments.map((f) => f.name),
+      type: "TEXT",
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      if (stompRef.current.send) {
+        stompRef.current.send(message);
+      }
+      
+      // Optimistically add message to UI
+      const optimisticMessage = {
+        id: Date.now(),
+        sender: "self",
+        text: messageText,
+        time: "Just now",
+        read: false,
+        attachments: attachments.map((f) => f.name),
       };
       
-      try {
-        stompClient.publish({
-          destination: '/app/chat.send',
-          body: JSON.stringify(message)
-        });
-        console.log('Message sent:', message);
-        
-        setMessageText("");
-        setAttachments([]);
-        if (textareaRef.current) {
-          textareaRef.current.style.height = "auto";
-        }
-      } catch (error) {
-        console.error('Error sending message:', error);
-        alert('Failed to send message. Please check your connection.');
-      }
+      setMessages(prev => [...prev, optimisticMessage]);
+      setMessageText("");
+      setAttachments([]);
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
+    } catch (err) {
+      console.error("Error sending message:", err);
+      alert("Failed to send message. Please try again.");
     }
   };
 
@@ -433,11 +581,11 @@ const MessagingDashboard = () => {
 
   const handleAttachment = (e) => {
     const files = Array.from(e.target.files);
-    setAttachments(prev => [...prev, ...files]);
+    setAttachments((prev) => [...prev, ...files]);
   };
 
   const removeAttachment = (index) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const selectChat = (chat) => {
@@ -449,14 +597,14 @@ const MessagingDashboard = () => {
     loadConversations();
     const newChat = {
       id: conversation.id,
-      name: conversation.doctor?.name || 'Unknown Doctor',
-      role: conversation.doctor?.position || 'Doctor',
+      name: conversation.doctor?.name || "Unknown Doctor",
+      role: conversation.doctor?.position || "Doctor",
       avatar: conversation.doctor?.avatar,
-      lastMessage: conversation.lastMessage || 'No messages yet',
+      lastMessage: conversation.lastMessage || "No messages yet",
       timestamp: formatMessageTime(conversation.timestamp),
       unread: 0,
       online: false,
-      participantId: conversation.doctor?.id
+      participantId: conversation.doctor?.id,
     };
     setSelectedChat(newChat);
     loadMessages(conversation.id);
@@ -472,25 +620,29 @@ const MessagingDashboard = () => {
       }`}
     >
       <div className="relative flex-shrink-0">
-        <img 
-          src={chat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name || 'User')}`} 
-          alt={chat.name} 
-          className="w-12 h-12 rounded-full object-cover" 
+        <img
+          src={chat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name || "User")}`}
+          alt={chat.name}
+          className="w-12 h-12 rounded-full object-cover"
         />
-        {chat.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>}
+        {chat.online && (
+          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between mb-1">
           <div>
-            <h3 className="font-semibold text-gray-900 truncate">{chat.name || 'Unknown'}</h3>
-            <p className="text-xs text-gray-500">{chat.role || 'Doctor'}</p>
+            <h3 className="font-semibold text-gray-900 truncate">{chat.name || "Unknown"}</h3>
+            <p className="text-xs text-gray-500">{chat.role || "Doctor"}</p>
           </div>
           <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{chat.timestamp}</span>
         </div>
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
           {chat.unread > 0 && (
-            <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full font-semibold">{chat.unread}</span>
+            <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full font-semibold">
+              {chat.unread}
+            </span>
           )}
         </div>
       </div>
@@ -498,23 +650,38 @@ const MessagingDashboard = () => {
   );
 
   const MessageBubble = ({ message }) => {
-    const isOwn = message.sender === 'self';
+    const isOwn = message.sender === "self";
     return (
       <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}>
         <div className={`max-w-[70%] ${isOwn ? "order-2" : "order-1"}`}>
-          <div className={`rounded-2xl px-4 py-3 ${isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}>
+          <div
+            className={`rounded-2xl px-4 py-3 ${
+              isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"
+            }`}
+          >
             <p className="text-sm leading-relaxed">{message.text}</p>
-            {message.attachments && message.attachments.length > 0 && (
+            {message.attachments?.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {message.attachments.map((file, i) => (
-                  <div key={i} className={`px-2 py-1 rounded-lg text-xs truncate max-w-[100px] ${isOwn ? "bg-blue-500" : "bg-gray-200"}`}>{file}</div>
+                  <div
+                    key={i}
+                    className={`px-2 py-1 rounded-lg text-xs truncate max-w-[100px] ${
+                      isOwn ? "bg-blue-500" : "bg-gray-200"
+                    }`}
+                  >
+                    {file}
+                  </div>
                 ))}
               </div>
             )}
           </div>
           <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
             <span className="text-xs text-gray-500">{message.time}</span>
-            {isOwn && <span className="text-blue-600">{message.read ? <CheckCheck size={14} /> : <Check size={14} />}</span>}
+            {isOwn && (
+              <span className="text-blue-600">
+                {message.read ? <CheckCheck size={14} /> : <Check size={14} />}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -531,7 +698,7 @@ const MessagingDashboard = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-200px)] bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
       <SearchUsersModal
@@ -541,6 +708,14 @@ const MessagingDashboard = () => {
         token={token}
         onChatStart={handleChatStart}
       />
+
+      {error && (
+        <div className="absolute top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50">
+          {error}
+        </div>
+      )}
+
+      {/* LEFT SIDEBAR */}
       <div className="w-full md:w-96 border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-2 mb-3">
@@ -563,14 +738,15 @@ const MessagingDashboard = () => {
             </button>
           </div>
           <div className="mt-2 flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-orange-500'}`}></div>
-            <span className="text-xs text-gray-600">
-              {isConnected ? 'Connected' : 'Connecting...'}
-            </span>
+            <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-orange-500"}`}></div>
+            <span className="text-xs text-gray-600">{isConnected ? "Connected" : "Connecting..."}</span>
           </div>
         </div>
+
         <div className="flex-1 overflow-y-auto">
-          {filteredChats.length > 0 ? filteredChats.map(chat => <ChatListItem key={chat.id} chat={chat} />) : (
+          {filteredChats.length > 0 ? (
+            filteredChats.map((chat) => <ChatListItem key={chat.id} chat={chat} />)
+          ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
               <User size={48} className="mb-4 text-gray-300" />
               <p className="text-center">No conversations found</p>
@@ -585,22 +761,27 @@ const MessagingDashboard = () => {
         </div>
       </div>
 
+      {/* RIGHT CHAT AREA */}
       <div className="flex-1 flex flex-col">
         {selectedChat ? (
           <>
             <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <img 
-                    src={selectedChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedChat.name)}`} 
-                    alt={selectedChat.name} 
-                    className="w-10 h-10 rounded-full object-cover" 
+                  <img
+                    src={selectedChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedChat.name)}`}
+                    alt={selectedChat.name}
+                    className="w-10 h-10 rounded-full object-cover"
                   />
-                  {selectedChat.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>}
+                  {selectedChat.online && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  )}
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">{selectedChat.name}</h3>
-                  <p className="text-sm text-gray-500">{selectedChat.online ? "Online" : "Offline"} • {selectedChat.role}</p>
+                  <p className="text-sm text-gray-500">
+                    {selectedChat.online ? "Online" : "Offline"} • {selectedChat.role}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -618,7 +799,9 @@ const MessagingDashboard = () => {
 
             <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
               <div className="space-y-4">
-                {messages.map(message => <MessageBubble key={message.id} message={message} />)}
+                {messages.map((message) => (
+                  <MessageBubble key={message.id} message={message} />
+                ))}
                 <div ref={messagesEndRef} />
               </div>
             </div>
@@ -639,11 +822,11 @@ const MessagingDashboard = () => {
                       e.target.style.height = "auto";
                       e.target.style.height = `${e.target.scrollHeight}px`;
                     }}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     placeholder="Type your message..."
                     rows={1}
                     className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-auto"
-                    style={{ maxHeight: '120px' }}
+                    style={{ maxHeight: "120px" }}
                   />
                   <button className="absolute right-3 bottom-3 p-1 hover:bg-gray-100 rounded-full transition-colors">
                     <Smile size={20} className="text-gray-600" />
@@ -673,18 +856,6 @@ const MessagingDashboard = () => {
                   ))}
                 </div>
               )}
-
-              <div className="flex gap-2 mt-3 flex-wrap">
-                <button className="px-3 py-1.5 bg-blue-50 text-blue-600 text-sm rounded-full hover:bg-blue-100 transition-colors">
-                  Request Prescription
-                </button>
-                <button className="px-3 py-1.5 bg-blue-50 text-blue-600 text-sm rounded-full hover:bg-blue-100 transition-colors">
-                  Book Appointment
-                </button>
-                <button className="px-3 py-1.5 bg-blue-50 text-blue-600 text-sm rounded-full hover:bg-blue-100 transition-colors">
-                  Share Test Results
-                </button>
-              </div>
             </div>
           </>
         ) : (
