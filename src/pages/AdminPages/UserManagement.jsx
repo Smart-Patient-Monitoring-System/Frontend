@@ -6,7 +6,6 @@ import { API_BASE_URL } from "../../api";
 function UserManagement() {
   const [doctors, setDoctor] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
