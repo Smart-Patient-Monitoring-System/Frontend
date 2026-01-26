@@ -76,23 +76,28 @@ function UserManagement() {
     };
 
   const handleEdit = (doctor) => {
-  setEditDoctorId(doctor.id || doctor.Id);
+    setEditDoctorId(doctor.id || doctor.Id);
 
-  setEditFormData({
-    name: doctor.name || "",
-    dateOfBirth: doctor.dateOfBirth || "",
-    address: doctor.address || "",
-    email: doctor.email || "",
-    nicNo: doctor.nicNo || "",
-    gender: doctor.gender || "",
-    contactNo: doctor.contactNo || "",
-    doctorRegNo: doctor.doctorRegNo || "",
-    position: doctor.position || "",
-    hospital: doctor.hospital || "",
-  });
+    setEditFormData({
+      name: doctor.name || "",
+      dateOfBirth: doctor.dateOfBirth || "",
+      address: doctor.address || "",
+      email: doctor.email || "",
+      nicNo: doctor.nicNo || "",
+      gender: doctor.gender || "",
+      contactNo: doctor.contactNo || "",
+      doctorRegNo: doctor.doctorRegNo || "",
+      position: doctor.position || "",
+      hospital: doctor.hospital || "",
+    });
 
-  setShowEditModal(true);
-};  
+    setShowEditModal(true);
+  }; 
+  
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -159,6 +164,40 @@ function UserManagement() {
     }
   };
 
+  const handleUpdateDoctor = async (e) => {
+  e.preventDefault();
+
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/admin/doctor/update/${editDoctorId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editFormData),
+      }
+    );
+
+    if (!response.ok) {
+      alert("Failed to update doctor");
+      return;
+    }
+
+    const data = await fetchDoctor();
+    setDoctor(data || []);
+    setShowEditModal(false);
+    alert("Doctor updated successfully");
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
+
+
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
@@ -223,7 +262,7 @@ function UserManagement() {
             {/* RIGHT SIDE – ACTION BUTTONS */}
             <div className="flex flex-col gap-2">
               <button
-                onClick={() => console.log("Edit", doctor.Id)}
+                onClick={() => handleEdit(doctor)}
                 className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
               >
                 Edit
@@ -506,6 +545,116 @@ function UserManagement() {
           </div>
         </div>
       )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Edit Doctor</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateDoctor} className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <input
+                  name="name"
+                  value={editFormData.name}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Name"
+                />
+
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={editFormData.dateOfBirth}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                />
+
+                <input
+                  name="address"
+                  value={editFormData.address}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Address"
+                />
+
+                <input
+                  name="email"
+                  value={editFormData.email}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Email"
+                />
+
+                <input
+                  name="nicNo"
+                  value={editFormData.nicNo}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="NIC"
+                />
+
+                <input
+                  name="contactNo"
+                  value={editFormData.contactNo}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Contact No"
+                />
+
+                <input
+                  name="doctorRegNo"
+                  value={editFormData.doctorRegNo}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Doctor Reg No"
+                />
+
+                <input
+                  name="position"
+                  value={editFormData.position}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Position"
+                />
+
+                <input
+                  name="hospital"
+                  value={editFormData.hospital}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Hospital"
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-6 py-2 border rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg"
+                >
+                  Update Doctor
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
