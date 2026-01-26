@@ -75,6 +75,25 @@ function UserManagement() {
       alert("Failed to reject doctor")}
     };
 
+  const handleEdit = (doctor) => {
+  setEditDoctorId(doctor.id || doctor.Id);
+
+  setEditFormData({
+    name: doctor.name || "",
+    dateOfBirth: doctor.dateOfBirth || "",
+    address: doctor.address || "",
+    email: doctor.email || "",
+    nicNo: doctor.nicNo || "",
+    gender: doctor.gender || "",
+    contactNo: doctor.contactNo || "",
+    doctorRegNo: doctor.doctorRegNo || "",
+    position: doctor.position || "",
+    hospital: doctor.hospital || "",
+  });
+
+  setShowEditModal(true);
+};  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
