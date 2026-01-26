@@ -21,7 +21,7 @@ import ResetPasswordPage from "./pages/Login_Signup/ResetPasswordPage";
 import PatientPortal from "./pages/PatientPortal/PatientPortal";
 import AdminDashboard from "./components/AdminPortal/AdminDashboard";
 import DocDashboard from "./pages/DoctorsPage/DocDashboard";
-import DocViewPatient from "./pages/DoctorViewPatient/PatientPortal";
+import DocViewPatient from "./pages/DoctorViewPatient/DoctorPatientView";
 
 
 function HomePage() {
