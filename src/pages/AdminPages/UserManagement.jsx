@@ -25,6 +25,22 @@ function UserManagement() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editDoctorId, setEditDoctorId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    dateOfBirth: "",
+    address: "",
+    email: "",
+    nicNo: "",
+    gender: "",
+    contactNo: "",
+    doctorRegNo: "",
+    position: "",
+    hospital: "",
+  });
+
+
   useEffect(() => {
     async function load() {
       try {
