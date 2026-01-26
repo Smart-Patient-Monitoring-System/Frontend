@@ -204,11 +204,6 @@ function PatientManagement() {
       <p className="font-medium text-gray-800">
         {patient.nicNo}
       </p>
-
-      <p className="font-medium text-gray-800">
-        {patient.guardiansName}.{patient.guardiansContactNo}
-      </p>
-
     
       <p className="text-sm text-gray-500">
         📞 {patient.contactNo}
@@ -218,9 +213,6 @@ function PatientManagement() {
         {patient.gender}
       </span>
 
-      <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-        {patient.bloodType}
-      </span>
     </div>
 
     {/* RIGHT SIDE – ACTION BUTTONS */}

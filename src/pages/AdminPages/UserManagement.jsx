@@ -196,7 +196,7 @@ function UserManagement() {
 
               <button
                   onClick={() => handleDelete(doctor.Id)}
-                  className="bg-red-500 text-white text-sm px-4 py-1.5 rounded-full"
+                  className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
               >
               Delete
               </button>
