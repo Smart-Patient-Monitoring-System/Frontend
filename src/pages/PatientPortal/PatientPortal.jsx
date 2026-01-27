@@ -12,7 +12,7 @@ import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
-import BookingsTab from "../../components/PatientPortal/bookings/BookingsTab";
+import BookingPage from "../../components/PatientPortal/bookings/BookingPage";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
@@ -178,7 +178,7 @@ const PatientPortal = () => {
           {currentTab === "Profile" && <ProfileTab />}
 
           {/* Bookings */}
-          {currentTab === "Bookings" && <BookingsTab />}
+          {currentTab === "Bookings" && <BookingPage />}
 
           {/* Emergency Panel */}
           {currentTab === "Emergency Panel" && <EmergencyPanel />}
