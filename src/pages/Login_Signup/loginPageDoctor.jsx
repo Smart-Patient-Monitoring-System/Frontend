@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../api";
 
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
@@ -8,46 +9,139 @@ import doctor from "../../assets/images/doctor.png";
 export default function LoginPageDoctor() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState("CREDENTIALS"); // CREDENTIALS | OTP
+  const [loginSessionId, setLoginSessionId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password");
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password");
       setLoading(false);
       return;
     }
 
-    const mockUser = {
-      username,
-      role: "doctor",
-    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, role: "DOCTOR" }),
+      });
 
-    localStorage.setItem("token", "frontend-doctor-demo-token");
-    localStorage.setItem("user", JSON.stringify(mockUser));
+      if (!response.ok) {
+        // Try to get error message from response
+        let errorMessage = "Invalid email or password";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {
+          // If response is not JSON, use default message
+        }
+        setError(errorMessage);
+        setLoading(false);
+        return;
+      }
 
-    setTimeout(() => {
+      const data = await response.json();
+
+      if (data.otpRequired) {
+        setLoginSessionId(data.loginSessionId);
+        setStep("OTP");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          username: data.username,
+          role: data.role?.toLowerCase() || "doctor",
+        })
+      );
+
       navigate("/DocDashboard");
+    } catch (err) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    if (!otp.trim()) {
+      setError("Please enter the OTP sent to your email");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ loginSessionId, otp }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Invalid or expired OTP";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {}
+        setError(errorMessage);
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          username: data.username,
+          role: data.role?.toLowerCase() || "doctor",
+        })
+      );
+
+      navigate("/DocDashboard");
+    } catch (err) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-[#F8FBFF] to-[#EEF6FF] flex items-center justify-center px-4">
       <div className="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-10 items-center">
 
-        {/* ================= LEFT SECTION ================= */}
+        {/* === LEFT SECTION === */}
         <div className="flex flex-col items-center lg:items-start gap-6">
 
           {/* HOME BUTTON */}
           <button
             onClick={() => navigate("/")}
+
             className="relative w-[120px] h-[42px] rounded-full 
             bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
             flex items-center justify-center pl-9
@@ -93,29 +187,24 @@ export default function LoginPageDoctor() {
             </div>
           </div>
 
-          {/* SIGN UP */}
-          <button
-            onClick={() => navigate("/doctorSignup")}
-            className="w-full max-w-[420px] h-[52px] bg-white rounded-xl shadow hover:shadow-lg transition"
-          >
-            <span className="font-semibold text-gray-700">Sign Up</span>
-          </button>
         </div>
 
-        {/* ================= DIVIDER ================= */}
+        {/* === DIVIDER === */}
         <div className="hidden lg:flex justify-center">
           <div className="w-[1px] h-[70vh] bg-gradient-to-b from-transparent via-gray-300 to-transparent" />
         </div>
 
-        {/* ================= RIGHT SECTION ================= */}
+        {/* === RIGHT SECTION === */}
         <div className="flex justify-center items-center">
           <form
-            onSubmit={handleLogin}
+            onSubmit={step === "OTP" ? handleVerifyOtp : handleLogin}
             className="w-full max-w-[480px] bg-white rounded-3xl shadow-xl p-8 sm:p-10"
           >
             <h2 className="text-3xl font-bold text-gray-800">Login</h2>
             <p className="text-gray-600 mb-8">
-              Enter your credentials to continue
+              {step === "OTP"
+                ? "Enter the verification code we sent to your email"
+                : "Enter your credentials to continue"}
             </p>
 
             {error && (
@@ -124,23 +213,66 @@ export default function LoginPageDoctor() {
               </div>
             )}
 
-            <label className="font-semibold text-gray-700">User Name</label>
-            <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
-            />
+            {step !== "OTP" ? (
+              <>
+                <label className="font-semibold text-gray-700">Email</label>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-[52px] mt-2 mb-5 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+                />
 
-            <label className="font-semibold text-gray-700">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-[52px] mt-2 mb-8 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
-            />
+                <label className="font-semibold text-gray-700">Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-[52px] mt-2 mb-2 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+                />
+              </>
+            ) : (
+              <>
+                <label className="font-semibold text-gray-700">OTP</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Enter 6-digit code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="w-full h-[52px] mt-2 mb-2 px-4 rounded-xl border focus:border-[#057EF8] outline-none"
+                />
+
+                <div className="mb-4 text-right">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep("CREDENTIALS");
+                      setOtp("");
+                      setLoginSessionId("");
+                    }}
+                    className="text-sm text-[#057EF8] hover:text-[#0DC0BD] hover:underline transition"
+                  >
+                    Back to login
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Forgot Password Link */}
+            {step !== "OTP" && (
+              <div className="mb-6 text-right">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password?role=DOCTOR")}
+                  className="text-sm text-[#057EF8] hover:text-[#0DC0BD] hover:underline transition"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -149,7 +281,7 @@ export default function LoginPageDoctor() {
               text-white font-semibold text-lg hover:scale-105 transition
               disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Logging in..." : "Log In"}
+              {loading ? "Please wait..." : step === "OTP" ? "Verify OTP" : "Log In"}
             </button>
           </form>
         </div>

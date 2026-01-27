@@ -1,24 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Bell, Settings, LogOut } from 'lucide-react';
 import AlertsCard from "../../components/PatientPortal/AlertsCard";
 import { useNavigate } from "react-router-dom";
 
-
-const Header = ({ patientName }) => {
+const Header = () => {
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  
+  // GET PATIENT NAME FROM LOCALSTORAGE
+  const [patientName, setPatientName] = useState('Patient');
+
+  useEffect(() => {
+    const name = localStorage.getItem('patientName');
+    if (name) {
+      setPatientName(name);
+    }
+  }, []);
 
   const handleLogout = () => {
-    // later: clear auth data if needed
-    // localStorage.clear();
-
-    navigate("/"); //  go back to Home page
+    // Clear all stored data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('patientId');
+    localStorage.removeItem('patientName');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userRole');
+    
+    // Redirect to login/home page
+    navigate('/');
   };
 
   return (
     <header className="bg-white w-full shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4">
-      
       {/* MAIN FLEX */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         
@@ -27,7 +42,6 @@ const Header = ({ patientName }) => {
           <div className="bg-blue-500 rounded-full p-2.5">
             <Heart className="w-6 h-6 text-white" fill="white" />
           </div>
-
           <div>
             <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
               Patient Portal
@@ -40,8 +54,7 @@ const Header = ({ patientName }) => {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-end">
-
-          {/* DARK MODE (YOU CAN REMOVE IF NOT NEEDED) */}
+          {/* DARK MODE */}
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className={`relative w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors ${
@@ -64,8 +77,6 @@ const Header = ({ patientName }) => {
               <Bell className="w-5 h-5 text-gray-700" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-
-            {/* DROPDOWN */}
             {showAlerts && (
               <div className="absolute right-0 mt-3 z-50 w-[260px] sm:w-auto">
                 <AlertsCard />
@@ -79,16 +90,15 @@ const Header = ({ patientName }) => {
           </button>
 
           {/* LOGOUT BUTTON */}
-<button
-  onClick={handleLogout}
-  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors"
->
-  <LogOut className="w-5 h-5 text-gray-700" />
-  <span className="hidden sm:block text-sm font-medium text-gray-700">
-    Logout
-  </span>
-</button>
-
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <LogOut className="w-5 h-5 text-gray-700" />
+            <span className="hidden sm:block text-sm font-medium text-gray-700">
+              Logout
+            </span>
+          </button>
         </div>
       </div>
     </header>

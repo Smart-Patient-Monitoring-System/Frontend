@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { 
@@ -11,22 +11,32 @@ import {
 } from "lucide-react";
 import admin from "../../assets/images/admin.png";
 import UserManagement from "../../pages/AdminPages/UserManagement";
+import PatientManagement from "../../pages/AdminPages/PatientManagement";
+import PendingDoctors from "../../pages/AdminPages/PendingDoctors";
+import AdminManagement from "../../pages/AdminPages/AdminManagement";
 import IotDevices from "../../pages/AdminPages/IotDevices";
 import Analytics from "../../pages/AdminPages/Analytics";
 import SecurityLogs from "../../pages/AdminPages/SecurityLogs";
 
 
 
-function AdminDashboard() {
-  const [hasNotification, setHasNotification] = useState(true);
 
+
+
+function AdminDashboard() {
+
+  const [hasNotification, setHasNotification] = useState(true);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    console.log('Logging out...');
+    // Clear authentication data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    
+    // Navigate to homepage
+    navigate("/");
   };
-
   const [activeTab, setActiveTab] = useState("users");
-
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
@@ -155,6 +165,23 @@ function AdminDashboard() {
         <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
 
           <button
+            onClick={() => setActiveTab("accept")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
+              ${activeTab === "accept"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"}`}
+            style={
+              activeTab === "accept"
+                ? {
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                  }
+                : {}
+            }
+          >
+            Pending Doctors
+          </button>        
+
+          <button
             onClick={() => setActiveTab("users")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
               ${activeTab === "users"
@@ -168,7 +195,24 @@ function AdminDashboard() {
                 : {}
             }
           >
-            User Management
+            Doctor Management
+          </button>
+
+          <button
+            onClick={() => setActiveTab("patients")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
+              ${activeTab === "patients"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"}`}
+            style={
+              activeTab === "patients"
+                ? {
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                  }
+                : {}
+            }
+          >
+            Patient Management
           </button>
 
           <button
@@ -206,6 +250,23 @@ function AdminDashboard() {
           </button>
 
           <button
+            onClick={() => setActiveTab("admins")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
+              ${activeTab === "admins"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"}`}
+            style={
+              activeTab === "admins"
+                ? {
+                    background: "linear-gradient(45deg, #A538FF 0%, #C066FF 100%)"
+                  }
+                : {}
+            }
+          >
+            Admin Management
+          </button>
+
+          <button
             onClick={() => setActiveTab("logs")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
               ${activeTab === "logs"
@@ -226,6 +287,9 @@ function AdminDashboard() {
       </div>
        <div className="px-6 mt-6">
         {activeTab === "users" && <UserManagement />}
+        {activeTab === "accept" && <PendingDoctors />}        
+        {activeTab === "patients" && <PatientManagement />}
+        {activeTab === "admins" && <AdminManagement />}
         {activeTab === "iot" && <IotDevices />}
         {activeTab === "analytics" && <Analytics />}
         {activeTab === "logs" && <SecurityLogs />}

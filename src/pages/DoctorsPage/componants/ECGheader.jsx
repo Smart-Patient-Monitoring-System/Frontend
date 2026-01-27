@@ -25,8 +25,7 @@ function ECGheader({ onAnalyze }) {
         <div className="flex gap-3">
           <button
             onClick={() => setOpenModal(true)}
-            className="px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-2xl flex items-center gap-2"
-          >
+            className="px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-2xl flex items-center gap-2">
             <Upload size={18} /> Import XML/CSV
           </button>
 
