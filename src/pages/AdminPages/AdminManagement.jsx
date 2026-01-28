@@ -210,7 +210,7 @@ function AdminManagement() {
             resetForm();
             setShowModal(true);
           }}
-          className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm px-4 py-1.5 rounded-full hover:shadow-lg transition"
+          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm px-4 py-1.5 rounded-full hover:shadow-lg transition"
         >
           Add Admin
         </button>

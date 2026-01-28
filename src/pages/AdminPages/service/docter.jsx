@@ -22,11 +22,24 @@ export async function fetchDoctor() {
 }
 
 export async function deleteDoctor(doctorId) {
-  const res = await fetch(
-    `${BASE_URL}/delete/${doctorId}`,
-    {
-      method: "DELETE",
-    }
-  );
+  const res = await fetch(`${BASE_URL}/delete/${doctorId}`, {
+    method: "DELETE",
+  });
+  return handleResponse(res);
+}
+
+
+export async function updateDoctor(doctorId, data) {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/update/${doctorId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
   return handleResponse(res);
 }

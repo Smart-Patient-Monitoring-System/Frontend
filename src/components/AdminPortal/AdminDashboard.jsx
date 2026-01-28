@@ -164,22 +164,7 @@ function AdminDashboard() {
       <div className="px-6 mt-8">
         <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
 
-          <button
-            onClick={() => setActiveTab("accept")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "accept"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"}`}
-            style={
-              activeTab === "accept"
-                ? {
-                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
-                  }
-                : {}
-            }
-          >
-            Pending Doctors
-          </button>        
+                  
 
           <button
             onClick={() => setActiveTab("users")}
@@ -233,6 +218,23 @@ function AdminDashboard() {
           </button>
 
           <button
+            onClick={() => setActiveTab("accept")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
+              ${activeTab === "accept"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"}`}
+            style={
+              activeTab === "accept"
+                ? {
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                  }
+                : {}
+            }
+          >
+            Pending Doctors
+          </button>
+
+          <button
             onClick={() => setActiveTab("analytics")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
               ${activeTab === "analytics"
@@ -258,7 +260,7 @@ function AdminDashboard() {
             style={
               activeTab === "admins"
                 ? {
-                    background: "linear-gradient(45deg, #A538FF 0%, #C066FF 100%)"
+                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
                   }
                 : {}
             }
