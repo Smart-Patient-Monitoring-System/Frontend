@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchPatient } from "./service/patientconnecter";
+import { fetchPatient, deletePatient, updatePatient } from "./service/patientconnecter";
 import { API_BASE_URL } from "../../api";
 
 function PatientManagement() {
@@ -34,6 +34,33 @@ function PatientManagement() {
     const [error, setError] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editPatientId, setEditPatientId] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+      name: "",
+      dateOfBirth: "",
+      address: "",
+      email: "",
+      nicNo: "",
+      gender: "",
+      contactNo: "",
+      guardiansName: "",
+      guardiansContactNo: "",
+      username: "",
+      password: "",
+      bloodType: "",
+      city: "",
+      district: "",
+      dispostalCodet: "",
+      guardianRelationship: "",
+      guardianEmail: "",
+      medicalConditions: "",
+      allergies: "",
+      currentMedications: "",
+      pastSurgeries: "",
+      emergencyNotes: "",
+      });
+
   useEffect(() => {
     async function load() {
       try {
@@ -53,10 +80,48 @@ function PatientManagement() {
     pt.name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleDelete = async (PatientId) => {
+      if (!window.confirm("Reject this Patient?")) return;
+    
+      try {
+        await deletePatient(PatientId);
+    
+        setPatient((prev) =>
+          prev.filter((pt) => pt.Id !== PatientId)
+        );
+    
+        alert("Patient rejected successfully");
+      } catch (error) {
+        console.error(error);
+        alert("Failed to reject Patient")}
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };  
+  };
+
+  const handleEdit = (patient) => {
+    setEditPatientId(patient.id || patient.Id);
+
+    setEditFormData({
+      name: patient.name || "",
+      dateOfBirth: patient.dateOfBirth || "",
+      address: patient.address || "",
+      email: patient.email || "",
+      nicNo: patient.nicNo || "",
+      gender: patient.gender || "",
+      contactNo: patient.contactNo || "",
+    });
+
+    setShowEditModal(true);
+  };   
+  
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleCreatePatient = async (e) => {
       e.preventDefault();
@@ -146,7 +211,22 @@ function PatientManagement() {
         
             }
           };
-
+    const handleUpdatePatient = async (e) => {
+        e.preventDefault();
+    
+        try {
+          await updatePatient(editPatientId, editFormData);
+    
+          const data = await fetchPatient();
+          setPatient(data || []);
+          setShowEditModal(false);
+    
+          alert("Patient updated successfully");
+        } catch (err) {
+          console.error(err);
+          alert(err.message || "Failed to update Patient");
+        }
+      };      
 
 
   return (
@@ -217,21 +297,21 @@ function PatientManagement() {
 
     {/* RIGHT SIDE – ACTION BUTTONS */}
     <div className="flex flex-col gap-2">
-      <button
-        onClick={() => console.log("Edit", patient.id)}
-        className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-      >
-        Edit
-      </button>
+              <button
+                onClick={() => handleEdit(patient)}
+                className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+              >
+                Edit
+              </button>
 
-      <button
-        onClick={() => console.log("Delete", patient.id)}
-        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
-      >
-        Delete
-      </button>
-    </div>
-  </div>
+              <button
+                  onClick={() => handleDelete(patient.Id)}
+                  className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+              >
+              Delete
+              </button>
+            </div>
+          </div>
 ))}
 
       </div>
@@ -503,7 +583,7 @@ function PatientManagement() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    District Postal Codet <span className="text-red-500">*</span>
+                    District Postal Code <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -634,6 +714,235 @@ function PatientManagement() {
           </div>
         </div>
       )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Edit Patient</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdatePatient} className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <input
+                  name="name"
+                  value={editFormData.name}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Name"
+                />
+
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={editFormData.dateOfBirth}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                />
+
+                <input
+                  name="address"
+                  value={editFormData.address}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Address"
+                />
+
+                <input
+                  name="email"
+                  value={editFormData.email}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Email"
+                />
+
+                <input
+                  name="nicNo"
+                  value={editFormData.nicNo}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="NIC"
+                />
+
+                <input
+                  name="contactNo"
+                  value={editFormData.contactNo}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Contact No"
+                />
+
+                <select
+                  name="gender"
+                  value={editFormData.gender}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                <input
+                  name="contactNo"
+                  value={editFormData.contactNo}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Contact Number"
+                />
+
+                <input
+                  name="guardiansName"
+                  value={editFormData.guardiansName}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Guardian's Name"
+                />
+
+                <input
+                  name="guardiansContactNo"
+                  value={editFormData.guardiansContactNo}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Guardian's Contact Number"
+                />
+
+                <input
+                  name="username"
+                  value={editFormData.username}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Username"
+                />
+
+                <input
+                  type="password"
+                  name="password"
+                  value={editFormData.password}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Password"
+                />
+
+                <input
+                  name="bloodType"
+                  value={editFormData.bloodType}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Blood Type"
+                />
+
+                <input
+                  name="city"
+                  value={editFormData.city}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="City"
+                />
+
+                <input
+                  name="district"
+                  value={editFormData.district}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="District"
+                />
+
+                <input
+                  name="dispostalCodet"
+                  value={editFormData.dispostalCodet}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Postal Code"
+                />
+
+                <input
+                  name="guardianRelationship"
+                  value={editFormData.guardianRelationship}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Guardian Relationship"
+                />
+
+                <input
+                  type="email"
+                  name="guardianEmail"
+                  value={editFormData.guardianEmail}
+                  onChange={handleEditInputChange}
+                  className="w-full h-10 px-3 rounded-lg border"
+                  placeholder="Guardian Email"
+                />
+
+                <textarea
+                  name="medicalConditions"
+                  value={editFormData.medicalConditions}
+                  onChange={handleEditInputChange}
+                  className="w-full px-3 py-2 rounded-lg border"
+                  placeholder="Medical Conditions"
+                />
+
+                <textarea
+                  name="allergies"
+                  value={editFormData.allergies}
+                  onChange={handleEditInputChange}
+                  className="w-full px-3 py-2 rounded-lg border"
+                  placeholder="Allergies"
+                />
+
+                <textarea
+                  name="currentMedications"
+                  value={editFormData.currentMedications}
+                  onChange={handleEditInputChange}
+                  className="w-full px-3 py-2 rounded-lg border"
+                  placeholder="Current Medications"
+                />
+
+                <textarea
+                  name="pastSurgeries"
+                  value={editFormData.pastSurgeries}
+                  onChange={handleEditInputChange}
+                  className="w-full px-3 py-2 rounded-lg border"
+                  placeholder="Past Surgeries"
+                />
+
+                <textarea
+                  name="emergencyNotes"
+                  value={editFormData.emergencyNotes}
+                  onChange={handleEditInputChange}
+                  className="w-full px-3 py-2 rounded-lg border"
+                  placeholder="Emergency Notes"
+                />
+
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-6 py-2 border rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg"
+                >
+                  Update Patient
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { fetchDoctor } from "./service/docter";
-import { deleteDoctor } from "./service/docter";
 import { API_BASE_URL } from "../../api";
+import { fetchDoctor, deleteDoctor, updateDoctor } from "./service/docter";
 
 function UserManagement() {
   const [doctors, setDoctor] = useState([]);
@@ -58,6 +57,8 @@ function UserManagement() {
   const filteredDoctors = doctors.filter((doc) =>
     doc.name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  
 
   const handleDelete = async (doctorId) => {
     if (!window.confirm("Reject this doctor?")) return;
@@ -164,38 +165,23 @@ function UserManagement() {
     }
   };
 
-  const handleUpdateDoctor = async (e) => {
-  e.preventDefault();
+    const handleUpdateDoctor = async (e) => {
+    e.preventDefault();
 
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      await updateDoctor(editDoctorId, editFormData);
 
-    const response = await fetch(
-      `${API_BASE_URL}/api/admin/doctor/update/${editDoctorId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(editFormData),
-      }
-    );
+      const data = await fetchDoctor();
+      setDoctor(data || []);
+      setShowEditModal(false);
 
-    if (!response.ok) {
-      alert("Failed to update doctor");
-      return;
+      alert("Doctor updated successfully");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to update doctor");
     }
+  };
 
-    const data = await fetchDoctor();
-    setDoctor(data || []);
-    setShowEditModal(false);
-    alert("Doctor updated successfully");
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-};
 
 
   return (
