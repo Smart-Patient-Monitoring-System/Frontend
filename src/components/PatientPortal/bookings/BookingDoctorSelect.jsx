@@ -11,7 +11,7 @@ export default function DoctorSelect({ selectedDoctor, setSelectedDoctor }) {
   }, []);
 
   const handleChange = (e) => {
-    const doctor = doctors.find((d) => d.id === parseInt(e.target.value));
+    const doctor = doctors.find((d) => d.id === Number(e.target.value));
     setSelectedDoctor(doctor || null);
   };
 

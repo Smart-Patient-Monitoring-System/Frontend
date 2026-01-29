@@ -17,10 +17,10 @@ export default function AdminConfirmAppointments() {
   const confirm = async (a) => {
     const params =
       a.appointmentType === "Physical"
-        ? { physicalLocation: input[a.appointmentId] }
-        : { zoomLink: input[a.appointmentId] };
+        ? { physicalLocation: input[a.id] }
+        : { zoomLink: input[a.id] };
 
-    await confirmAppointment(a.appointmentId, params);
+    await confirmAppointment(a.id, params);
     load();
   };
 
@@ -29,31 +29,15 @@ export default function AdminConfirmAppointments() {
       <h1 className="text-2xl font-bold mb-4">Admin Confirm Appointments</h1>
 
       {appointments.map((a) => (
-        <div key={a.appointmentId} className="border p-4 mb-4 rounded shadow">
-          <p>
-            <b>Doctor:</b> {a.doctorName}
-          </p>
-          <p>
-            <b>Specialty:</b> {a.specialty}
-          </p>
-          <p>
-            <b>Type:</b> {a.appointmentType}
-          </p>
-          <p>
-            <b>Date:</b> {a.bookingDate}
-          </p>
-          <p>
-            <b>Time:</b> {a.bookingTime}
-          </p>
-          <p>
-            <b>Status:</b> {a.appointmentStatus}
-          </p>
-          <p>
-            <b>Payment:</b> {a.paymentStatus}
-          </p>
-          <p>
-            <b>Location / Link:</b> {a.locationOrLink}
-          </p>
+        <div key={a.id} className="border p-4 mb-4 rounded shadow">
+          <p><b>Doctor:</b> {a.doctorName}</p>
+          <p><b>Specialty:</b> {a.specialty}</p>
+          <p><b>Type:</b> {a.appointmentType}</p>
+          <p><b>Date:</b> {a.bookingDate}</p>
+          <p><b>Time:</b> {a.bookingTime}</p>
+          <p><b>Status:</b> {a.appointmentStatus}</p>
+          <p><b>Payment:</b> {a.paymentStatus}</p>
+          <p><b>Location / Link:</b> {a.locationOrLink}</p>
 
           {a.appointmentStatus === "PENDING" &&
             a.paymentStatus === "SUCCESS" && (
@@ -66,7 +50,7 @@ export default function AdminConfirmAppointments() {
                       : "Enter meeting link"
                   }
                   onChange={(e) =>
-                    setInput({ ...input, [a.appointmentId]: e.target.value })
+                    setInput({ ...input, [a.id]: e.target.value })
                   }
                 />
                 <button

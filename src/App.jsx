@@ -23,6 +23,9 @@ import AdminDashboard from "./components/AdminPortal/AdminDashboard";
 import DocDashboard from "./pages/DoctorsPage/DocDashboard";
 import DocViewPatient from "./pages/DoctorViewPatient/DoctorPatientView";
 
+import AdminConfirmAppointments from "./components/PatientPortal/bookings/AdminConfirmAppointments";
+
+
 function HomePage() {
   const stats = [
     { value: "24/7", label: "Monitoring" },
@@ -101,6 +104,10 @@ function App() {
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/DocDashboard" element={<DocDashboard />} />
         <Route path="/DocViewPatient" element={<DocViewPatient />} />
+
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/AdminDashboard/confirm-appointments" element={<AdminConfirmAppointments />} />
+
       </Routes>
     </Router>
   );

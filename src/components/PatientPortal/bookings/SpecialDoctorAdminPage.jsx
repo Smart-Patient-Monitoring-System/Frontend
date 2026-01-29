@@ -13,7 +13,7 @@ import DoctorAvailabilityModal from "./DoctorAvailabilityModal";
 import { saveAvailability } from "../../../api/api";
 
 export default function DoctorAdmin() {
-  const navigate = useNavigate(); // ✅ NEW
+  const navigate = useNavigate(); //  NEW
 
   const [doctors, setDoctors] = useState([]);
   const [showForm, setShowForm] = useState(false);

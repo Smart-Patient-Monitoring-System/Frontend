@@ -17,8 +17,9 @@ export default function BookingModal({ setShowModal, onBookingSuccess }) {
     const fetchTypes = async () => {
       try {
         const types = await getAppointmentTypes();
-        setAppointmentTypes(types);
-        if (types.length > 0) setSelectedTypeId(types[0].id);
+setAppointmentTypes(types || []);
+if (types?.length) setSelectedTypeId(types[0].id);
+
       } catch (err) {
         console.error("Failed to fetch appointment types:", err);
       }
@@ -27,9 +28,10 @@ export default function BookingModal({ setShowModal, onBookingSuccess }) {
   }, []);
 
   const handleBooking = async () => {
-    if (!selectedDoctor || !date || !selectedTime || !reason) {
-      return alert("Please fill all fields");
-    }
+    if (!selectedDoctor || !date || !selectedTime || !reason || !selectedTypeId) {
+  return alert("Please fill all fields (including appointment type)");
+}
+
 
     const appointmentData = {
       doctorId: selectedDoctor.id,
@@ -62,9 +64,11 @@ export default function BookingModal({ setShowModal, onBookingSuccess }) {
 
       alert("Appointment booked successfully! Click 'Pay Now' to pay.");
     } catch (err) {
-      console.error(err);
-      alert("Error booking appointment");
-    }
+  console.log("BOOKING ERROR FULL:", err);
+  console.log("BOOKING ERROR DATA:", err.response?.data);
+  alert(err.response?.data?.error || err.response?.data?.message || "Error booking appointment");
+}
+
   };
 
   const handlePayNow = () => {
@@ -99,16 +103,21 @@ export default function BookingModal({ setShowModal, onBookingSuccess }) {
         />
 
         <select
-          className="w-full border p-2 mt-3"
-          value={selectedTypeId || ""}
-          onChange={(e) => setSelectedTypeId(Number(e.target.value))}
-        >
-          {appointmentTypes.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.typeName}
-            </option>
-          ))}
-        </select>
+  className="w-full border p-2 mt-3"
+  value={selectedTypeId ?? ""}
+  onChange={(e) => setSelectedTypeId(Number(e.target.value))}
+>
+  <option value="" disabled>
+    -- Choose appointment type --
+  </option>
+
+  {appointmentTypes.map((type) => (
+    <option key={type.id} value={type.id}>
+      {type.typeName}
+    </option>
+  ))}
+</select>
+
 
         <textarea
           className="w-full border p-2 mt-3"

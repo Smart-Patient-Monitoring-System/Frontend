@@ -5,7 +5,16 @@ const API = axios.create({
 });
 
 /* =========================
-   Specail DOCTOR CRUD (ADMIN)
+   Attach JWT token (if exists)
+========================= */
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+/* =========================
+   SPECIAL DOCTOR CRUD (ADMIN)
 ========================= */
 export const getDoctors = async () => {
   const res = await API.get("/doctors");
@@ -29,11 +38,12 @@ export const deleteDoctor = async (doctorId) => {
 
 /* =========================
    DOCTOR AVAILABILITY
+   (Assumes you have AvailabilityController paths like these)
 ========================= */
 export const getAvailableSlots = async (doctorId, date) => {
-  const res = await API.get(
-    `/availability/doctor/${doctorId}?date=${date}`
-  );
+  const res = await API.get(`/availability/doctor/${doctorId}`, {
+    params: { date },
+  });
   return res.data;
 };
 
@@ -60,32 +70,19 @@ export const deleteAvailabilitySlot = async (id) => {
    APPOINTMENTS
 ========================= */
 export const bookAppointment = async (data) => {
+  // POST /api/appointments/book
   const res = await API.post("/appointments/book", data);
   return res.data;
 };
 
 export const getAppointmentTypes = async () => {
+  // GET /api/appointment-types
   const res = await API.get("/appointment-types");
   return res.data;
 };
 
-/* =========================
-   ADMIN – APPOINTMENTS
-========================= */
-
-// 🔹 Pending appointments
-export const getPendingAppointments = async () => {
-  const res = await API.get("/admin/appointments/pending");
-  return res.data;
-};
-
-// ------------------------
-// Admin – Get All Appointments
-// ------------------------
-
-
-
-//Get user appointments (only successful payments)
+// This matches your current backend controller:
+// GET /api/appointments/user/success
 export const getUserAppointments = async () => {
   try {
     const res = await API.get("/appointments/user/success");
@@ -96,18 +93,26 @@ export const getUserAppointments = async () => {
   }
 };
 
+/* =========================
+   ADMIN – APPOINTMENTS
+========================= */
 
+// This matches AdminAppointmentController:
+// GET /api/admin/appointments
 export const getAllAppointments = async () => {
   const res = await API.get("/admin/appointments");
   return res.data;
 };
 
-export const confirmAppointment = async (id, params) => {
-  const query = new URLSearchParams(params).toString();
-  return API.post(`/admin/appointments/confirm/${id}?${query}`);
+// This matches AdminAppointmentController:
+// POST /api/admin/appointments/confirm/{id}?physicalLocation=... OR ?zoomLink=...
+export const confirmAppointment = async (appointmentId, params) => {
+  const res = await API.post(
+    `/admin/appointments/confirm/${appointmentId}`,
+    null,
+    { params } // axios will convert this to query string
+  );
+  return res.data;
 };
-
-
-
 
 export default API;
