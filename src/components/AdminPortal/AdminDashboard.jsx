@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { 
+import {
   Bell,
   Settings,
   Activity,
   Users,
   UserCircle,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 import admin from "../../assets/images/admin.png";
 import UserManagement from "../../pages/AdminPages/UserManagement";
@@ -17,14 +17,9 @@ import AdminManagement from "../../pages/AdminPages/AdminManagement";
 import IotDevices from "../../pages/AdminPages/IotDevices";
 import Analytics from "../../pages/AdminPages/Analytics";
 import SecurityLogs from "../../pages/AdminPages/SecurityLogs";
-
-
-
-
-
+import SpecialDoctorAdminPage from "../PatientPortal/bookings/SpecialDoctorAdminPage";
 
 function AdminDashboard() {
-
   const [hasNotification, setHasNotification] = useState(true);
   const navigate = useNavigate();
 
@@ -32,7 +27,7 @@ function AdminDashboard() {
     // Clear authentication data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    
+
     // Navigate to homepage
     navigate("/");
   };
@@ -40,18 +35,17 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
-
       {/* ================= HEADER ================= */}
       <header className="bg-white shadow-sm w-full">
         <div className="max-w-full px-4 sm:px-6 md:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-
             {/* Left */}
             <div className="flex items-center gap-3">
               <div
                 className="rounded-lg p-2.5 shadow-xl flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(45deg, #00BAC5 0%, #0090EE 100%)'
+                  background:
+                    "linear-gradient(45deg, #00BAC5 0%, #0090EE 100%)",
                 }}
               >
                 <img
@@ -66,14 +60,14 @@ function AdminDashboard() {
                   Admin Portal
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Welcome, <span className="font-semibold">Section 7</span> Janith
+                  Welcome, <span className="font-semibold">Section 7</span>{" "}
+                  Janith
                 </p>
               </div>
             </div>
 
             {/* Right */}
             <div className="flex items-center gap-3">
-
               {/* Notification */}
               <button
                 className="p-2 hover:bg-gray-100 rounded-lg relative"
@@ -95,7 +89,8 @@ function AdminDashboard() {
                 onClick={handleLogout}
                 className="rounded-lg px-4 py-2 shadow-xl text-white font-medium"
                 style={{
-                  background: 'linear-gradient(45deg, #BE1111 0%, #260303 100%)'
+                  background:
+                    "linear-gradient(45deg, #BE1111 0%, #260303 100%)",
                 }}
               >
                 Log Out
@@ -108,7 +103,6 @@ function AdminDashboard() {
       {/* ================= STATS CARDS ================= */}
       <div className="px-6 mt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
           {/* Total Users */}
           <div className="bg-[#EEF4FF] rounded-2xl p-5 shadow-md relative">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
@@ -156,7 +150,6 @@ function AdminDashboard() {
               Stable
             </span>
           </div>
-
         </div>
       </div>
 
@@ -169,13 +162,16 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveTab("users")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "users"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"}`}
+              ${
+                activeTab === "users"
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             style={
               activeTab === "users"
                 ? {
-                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                    background:
+                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
                   }
                 : {}
             }
@@ -186,13 +182,16 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveTab("patients")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "patients"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"}`}
+              ${
+                activeTab === "patients"
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             style={
               activeTab === "patients"
                 ? {
-                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                    background:
+                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
                   }
                 : {}
             }
@@ -203,13 +202,16 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveTab("iot")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "iot"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"}`}
+              ${
+                activeTab === "iot"
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             style={
               activeTab === "iot"
                 ? {
-                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                    background:
+                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
                   }
                 : {}
             }
@@ -237,13 +239,16 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveTab("analytics")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "analytics"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"}`}
+              ${
+                activeTab === "analytics"
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             style={
               activeTab === "analytics"
                 ? {
-                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                    background:
+                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
                   }
                 : {}
             }
@@ -254,9 +259,11 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveTab("admins")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "admins"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"}`}
+              ${
+                activeTab === "admins"
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             style={
               activeTab === "admins"
                 ? {
@@ -271,13 +278,16 @@ function AdminDashboard() {
           <button
             onClick={() => setActiveTab("logs")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${activeTab === "logs"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"}`}
+              ${
+                activeTab === "logs"
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             style={
               activeTab === "logs"
                 ? {
-                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
+                    background:
+                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
                   }
                 : {}
             }
@@ -285,18 +295,37 @@ function AdminDashboard() {
             Security Logs
           </button>
 
+          <button
+            onClick={() => setActiveTab("booking")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
+    ${
+      activeTab === "booking"
+        ? "text-white shadow-md"
+        : "text-gray-600 hover:bg-gray-100"
+    }`}
+            style={
+              activeTab === "booking"
+                ? {
+                    background:
+                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
+                  }
+                : {}
+            }
+          >
+            Booking
+          </button>
         </div>
       </div>
-       <div className="px-6 mt-6">
+      <div className="px-6 mt-6">
         {activeTab === "users" && <UserManagement />}
-        {activeTab === "accept" && <PendingDoctors />}        
+        {activeTab === "accept" && <PendingDoctors />}
         {activeTab === "patients" && <PatientManagement />}
         {activeTab === "admins" && <AdminManagement />}
         {activeTab === "iot" && <IotDevices />}
         {activeTab === "analytics" && <Analytics />}
         {activeTab === "logs" && <SecurityLogs />}
-       </div>      
-
+        {activeTab === "booking" && <SpecialDoctorAdminPage />}
+      </div>
     </div>
   );
 }
