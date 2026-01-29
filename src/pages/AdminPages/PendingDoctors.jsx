@@ -121,14 +121,14 @@ const handleAccept = async (doctorId) => {
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleAccept(pendingdoctor.Id)}
-                className="bg-yellow-400 hover:bg-yellow-500 text-white text-sm px-4 py-1.5 rounded-full"
+                className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
               >
                 Accept
               </button>
 
               <button
                     onClick={() => handleDelete(pendingdoctor.Id)}
-                    className="bg-red-500 text-white text-sm px-4 py-1.5 rounded-full"
+                    className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
               >
               Reject
               </button>

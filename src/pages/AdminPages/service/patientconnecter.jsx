@@ -20,3 +20,25 @@ export async function fetchPatient() {
   const res = await fetch(`${BASE_URL}/get`);
   return handleResponse(res);
 }
+
+export async function deletePatient(patientId) {
+  const res = await fetch(`${BASE_URL}/delete/${patientId}`, {
+    method: "DELETE",
+  });
+  return handleResponse(res);
+}
+
+export async function updatePatient(PatientId, data) {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/update/${PatientId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse(res);
+}
