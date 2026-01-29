@@ -23,6 +23,8 @@ import AdminDashboard from "./components/AdminPortal/AdminDashboard";
 import DocDashboard from "./pages/DoctorsPage/DocDashboard";
 import DocViewPatient from "./pages/DoctorViewPatient/DoctorPatientView";
 
+import AdminConfirmAppointments from "./components/PatientPortal/bookings/AdminConfirmAppointments";
+
 
 function HomePage() {
   const stats = [
@@ -36,7 +38,8 @@ function HomePage() {
       id: 1,
       icon: "activity",
       title: "Real-Time Vitals",
-      description: "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
+      description:
+        "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
     },
     {
       id: 2,
@@ -101,6 +104,10 @@ function App() {
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/DocDashboard" element={<DocDashboard />} />
         <Route path="/DocViewPatient" element={<DocViewPatient />} />
+
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/AdminDashboard/confirm-appointments" element={<AdminConfirmAppointments />} />
+
       </Routes>
     </Router>
   );

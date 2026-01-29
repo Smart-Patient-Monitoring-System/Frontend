@@ -12,7 +12,7 @@ import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
 import Dashboard from "../../components/PatientPortal/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
-import BookingsTab from "../../components/PatientPortal/BookingsTab";
+import BookingPage from "../../components/PatientPortal/bookings/BookingPage";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
 import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
@@ -153,7 +153,6 @@ const PatientPortal = () => {
                   Tablet+: 2 columns
               */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-                
                 {/* Column 1 — Appointments + Reports */}
                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
                   <AppointmentsCard />
@@ -165,15 +164,12 @@ const PatientPortal = () => {
                   <MedicationsCard />
                   <EmergencyCard />
                 </div>
-
               </div>
             </div>
           )}
 
           {/* Vitals History */}
-          {currentTab === "Real-Time Vitals" && (
-            <RealtimeGraphs />
-          )}
+          {currentTab === "Real-Time Vitals" && <RealtimeGraphs />}
 
           {/* Full-page ECG */}
           {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} />}
@@ -182,7 +178,7 @@ const PatientPortal = () => {
           {currentTab === "Profile" && <ProfileTab />}
 
           {/* Bookings */}
-          {currentTab === "Bookings" && <BookingsTab />}
+          {currentTab === "Bookings" && <BookingPage />}
 
           {/* Emergency Panel */}
           {currentTab === "Emergency Panel" && <EmergencyPanel />}
