@@ -12,12 +12,15 @@ import {
   CheckCheck,
   X,
   UserPlus,
+  Trash2,
+  Eraser,
+  Info,
+  PhoneOff,
 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-
 
 /* ===================== Error Boundary ===================== */
 class ErrorBoundary extends React.Component {
@@ -39,8 +42,12 @@ class ErrorBoundary extends React.Component {
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <X size={32} className="text-red-600" />
             </div>
-            <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
-            <p className="text-gray-600 mb-4">{this.state.error?.message || "Unknown error"}</p>
+            <h2 className="text-xl font-bold text-red-600 mb-2">
+              Something went wrong
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {this.state.error?.message || "Unknown error"}
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -78,8 +85,6 @@ function formatMessageTime(timestamp) {
 }
 
 function getOtherUser(conv, userRole) {
-  // If I'm PATIENT → other is DOCTOR
-  // If I'm DOCTOR  → other is PATIENT
   return userRole === "PATIENT" ? conv?.doctor : conv?.patient;
 }
 
@@ -90,16 +95,12 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
   const [isSearching, setIsSearching] = useState(false);
   const debounceRef = useRef(null);
 
-  // PATIENT searches DOCTORS; DOCTOR searches PATIENTS
   const loadInitialList = async () => {
     setIsSearching(true);
     try {
       const endpoint = userRole === "PATIENT" ? "/api/chat/doctors" : "/api/chat/patients";
       const response = await fetch(`${API_BASE}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -109,16 +110,11 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
       }
 
       const data = await response.json();
-
-      // Normalize to {id,name,role,avatar,extra...}
       const normalized = (Array.isArray(data) ? data : []).map((u) => ({
         id: u.id,
         name: u.name,
-        role:
-          userRole === "PATIENT"
-            ? (u.position || "Doctor")
-            : ("Patient"),
-        avatar: u.avatar || null, // if you add later
+        role: userRole === "PATIENT" ? (u.position || "Doctor") : "Patient",
+        avatar: u.avatar || null,
         hospital: u.hospital,
         doctorRegNo: u.doctorRegNo,
       }));
@@ -146,10 +142,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
           : `/api/chat/patients/search?query=${encodeURIComponent(query)}`;
 
       const response = await fetch(`${API_BASE}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -159,14 +152,10 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
       }
 
       const data = await response.json();
-
       const normalized = (Array.isArray(data) ? data : []).map((u) => ({
         id: u.id,
         name: u.name,
-        role:
-          userRole === "PATIENT"
-            ? (u.position || "Doctor")
-            : ("Patient"),
+        role: userRole === "PATIENT" ? (u.position || "Doctor") : "Patient",
         avatar: u.avatar || null,
         hospital: u.hospital,
         doctorRegNo: u.doctorRegNo,
@@ -196,7 +185,6 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
   const handleStartChat = async (user) => {
     try {
-      // Patient starts with doctorId, doctor starts with patientId
       const endpoint =
         userRole === "PATIENT"
           ? `${API_BASE}/api/chat/conversations/start?doctorId=${user.id}`
@@ -204,10 +192,7 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
 
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -302,26 +287,56 @@ const SearchUsersModal = ({ isOpen, onClose, userRole, token, onChatStart }) => 
   );
 };
 
-/* ===================== Main Dashboard (Shared) ===================== */
+/* ===================== Main Dashboard ===================== */
 const MessagingDashboard = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [attachments, setAttachments] = useState([]);
+
+  const [localFiles, setLocalFiles] = useState([]); // [{ file, previewUrl }]
+  const [uploadedAttachments, setUploadedAttachments] = useState([]); // [{ fileName, url, contentType, size }]
+
   const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
 
+  // emoji
+  const [showEmoji, setShowEmoji] = useState(false);
+
+  // menu
+  const [showMenu, setShowMenu] = useState(false);
+
+  // profile modal
+  const [showProfile, setShowProfile] = useState(false);
+
+  // call modal state
+  const [callState, setCallState] = useState({
+    open: false,
+    mode: null, // "OUTGOING" | "INCOMING" | "ACTIVE"
+    callType: null, // "AUDIO" | "VIDEO"
+    fromName: "",
+    fromUserId: null,
+    toUserId: null,
+  });
+
   const stompRef = useRef(null);
+  const callSubRef = useRef(null);
+
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
   const token = localStorage.getItem("token");
   const userId = safeNumber(localStorage.getItem("userId"));
   const userName = localStorage.getItem("userName") || "User";
-  const userRole = localStorage.getItem("userRole") || "PATIENT"; // PATIENT / DOCTOR
+  const userRole = localStorage.getItem("userRole") || "PATIENT";
+
+  const onEmojiClick = (emojiData) => {
+    setMessageText((prev) => prev + emojiData.emoji);
+    setShowEmoji(false);
+    textareaRef.current?.focus();
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -331,6 +346,11 @@ const MessagingDashboard = () => {
 
     return () => {
       try {
+        // unsubscribe call topic
+        if (callSubRef.current) {
+          callSubRef.current.unsubscribe();
+          callSubRef.current = null;
+        }
         stompRef.current?.deactivate?.();
       } catch (e) {
         console.error("Deactivate error:", e);
@@ -343,7 +363,22 @@ const MessagingDashboard = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, attachments]);
+  }, [messages, localFiles]);
+
+  // cleanup preview urls on unmount
+  useEffect(() => {
+    return () => {
+      localFiles.forEach((x) => x.previewUrl && URL.revokeObjectURL(x.previewUrl));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // close menu when clicking outside
+  useEffect(() => {
+    const onDocClick = () => setShowMenu(false);
+    if (showMenu) document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [showMenu]);
 
   const connectWebSocket = () => {
     try {
@@ -362,6 +397,7 @@ const MessagingDashboard = () => {
         setIsConnected(true);
         setError(null);
 
+        // chat messages
         stomp.subscribe(`/user/queue/messages`, (msg) => {
           try {
             const data = JSON.parse(msg.body);
@@ -370,6 +406,11 @@ const MessagingDashboard = () => {
             console.error("Message parse error:", err);
           }
         });
+
+        // if a chat is already selected, (re)subscribe to its call topic after reconnect
+        if (selectedChat?.id) {
+          subscribeToCallTopic(stomp, selectedChat.id);
+        }
       };
 
       stomp.onStompError = (frame) => {
@@ -384,7 +425,6 @@ const MessagingDashboard = () => {
 
       stomp.activate();
 
-      // store wrapper with same API you used before
       stompRef.current = {
         active: true,
         ws: stomp,
@@ -404,14 +444,124 @@ const MessagingDashboard = () => {
     }
   };
 
-  // ==========================emoji section =======================
-const [showEmoji, setShowEmoji] = useState(false);
-const onEmojiClick = (emojiData) => {
-  setMessageText((prev) => prev + emojiData.emoji);
-  setShowEmoji(false);
-  textareaRef.current?.focus();
-};
+  /* ===================== CALL (Option B) ===================== */
+  const subscribeToCallTopic = (stomp, conversationId) => {
+    try {
+      if (!stomp?.connected || !conversationId) return;
 
+      // unsubscribe old one
+      if (callSubRef.current) {
+        callSubRef.current.unsubscribe();
+        callSubRef.current = null;
+      }
+
+      callSubRef.current = stomp.subscribe(`/topic/call/${conversationId}`, (msg) => {
+        try {
+          const signal = JSON.parse(msg.body);
+
+          // ignore my own signals
+          if (signal?.fromUserId === userId) return;
+
+          handleCallSignal(signal);
+        } catch (e) {
+          console.error("Call signal parse error:", e);
+        }
+      });
+    } catch (e) {
+      console.error("subscribeToCallTopic error:", e);
+    }
+  };
+
+  const sendCallSignal = (type, callType, payload = null) => {
+    const stomp = stompRef.current?.ws;
+    if (!stomp?.connected || !selectedChat?.id) return;
+
+    const signal = {
+      conversationId: selectedChat.id,
+      fromUserId: userId,
+      toUserId: selectedChat.participantId,
+      type, // OFFER, ANSWER, HANGUP
+      callType, // AUDIO, VIDEO
+      payload,
+    };
+
+    stomp.publish({
+      destination: "/app/call.signal",
+      body: JSON.stringify(signal),
+    });
+  };
+
+  const handleCallSignal = (signal) => {
+    // signal: {conversationId, fromUserId, toUserId, type, callType, payload}
+    if (!signal?.type) return;
+
+    if (signal.type === "OFFER") {
+      // incoming call
+      setCallState({
+        open: true,
+        mode: "INCOMING",
+        callType: signal.callType || "AUDIO",
+        fromName: selectedChat?.name || "User",
+        fromUserId: signal.fromUserId,
+        toUserId: signal.toUserId,
+      });
+      return;
+    }
+
+    if (signal.type === "ANSWER") {
+      if (signal.payload?.accepted) {
+        // call accepted
+        setCallState((prev) => ({
+          ...prev,
+          open: true,
+          mode: "ACTIVE",
+        }));
+      } else {
+        // rejected
+        setCallState({ open: false, mode: null, callType: null, fromName: "", fromUserId: null, toUserId: null });
+        alert("Call rejected ❌");
+      }
+      return;
+    }
+
+    if (signal.type === "HANGUP") {
+      setCallState({ open: false, mode: null, callType: null, fromName: "", fromUserId: null, toUserId: null });
+      alert("Call ended");
+      return;
+    }
+  };
+
+  const startOutgoingCall = (callType) => {
+    if (!selectedChat?.id) return;
+
+    setCallState({
+      open: true,
+      mode: "OUTGOING",
+      callType,
+      fromName: selectedChat?.name || "User",
+      fromUserId: userId,
+      toUserId: selectedChat.participantId,
+    });
+
+    sendCallSignal("OFFER", callType, { ringing: true });
+  };
+
+  const acceptCall = () => {
+    sendCallSignal("ANSWER", callState.callType, { accepted: true });
+    setCallState((prev) => ({ ...prev, mode: "ACTIVE" }));
+  };
+
+  const rejectCall = () => {
+    sendCallSignal("ANSWER", callState.callType, { accepted: false });
+    setCallState({ open: false, mode: null, callType: null, fromName: "", fromUserId: null, toUserId: null });
+  };
+
+  const hangupCall = () => {
+    sendCallSignal("HANGUP", callState.callType, { ended: true });
+    setCallState({ open: false, mode: null, callType: null, fromName: "", fromUserId: null, toUserId: null });
+  };
+
+  /* ===================== CHAT ===================== */
   const formatMessage = (msg) => ({
     id: msg.id,
     sender: msg.senderId === userId ? "self" : "other",
@@ -419,6 +569,7 @@ const onEmojiClick = (emojiData) => {
     time: formatMessageTime(msg.timestamp),
     read: msg.read,
     attachments: msg.attachments || [],
+    type: msg.type || "TEXT",
   });
 
   const handleIncomingMessage = (newMessage) => {
@@ -438,10 +589,7 @@ const onEmojiClick = (emojiData) => {
   const loadConversations = async () => {
     try {
       const response = await fetch(`${API_BASE}/api/chat/conversations`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -454,7 +602,6 @@ const onEmojiClick = (emojiData) => {
       setChats(
         (Array.isArray(data) ? data : []).map((conv) => {
           const other = getOtherUser(conv, userRole);
-
           return {
             id: conv.id,
             name: other?.name || "Unknown",
@@ -465,6 +612,7 @@ const onEmojiClick = (emojiData) => {
             unread: conv.unreadCount || 0,
             online: other?.online || false,
             participantId: other?.id || null,
+            otherRaw: other || null,
           };
         })
       );
@@ -477,10 +625,7 @@ const onEmojiClick = (emojiData) => {
   const loadMessages = async (conversationId) => {
     try {
       const response = await fetch(`${API_BASE}/api/chat/conversations/${conversationId}/messages`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -500,20 +645,65 @@ const onEmojiClick = (emojiData) => {
     try {
       await fetch(`${API_BASE}/api/chat/conversations/${conversationId}/read`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
     } catch (err) {
       console.error("Error marking as read:", err);
     }
   };
 
+  const handleAttachment = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const withPreview = files.map((file) => ({
+      file,
+      previewUrl: file.type?.startsWith("image/") ? URL.createObjectURL(file) : null,
+    }));
+    setLocalFiles((prev) => [...prev, ...withPreview]);
+
+    try {
+      const form = new FormData();
+      files.forEach((f) => form.append("files", f));
+
+      const res = await fetch(`${API_BASE}/api/chat/attachments/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      const metas = await res.json();
+      setUploadedAttachments((prev) => [...prev, ...(Array.isArray(metas) ? metas : [])]);
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("File upload failed");
+      setLocalFiles((prev) => prev.slice(0, prev.length - files.length));
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const removeAttachment = (index) => {
+    setLocalFiles((prev) => {
+      const next = [...prev];
+      const removed = next.splice(index, 1)[0];
+      if (removed?.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+      return next;
+    });
+
+    setUploadedAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSendMessage = () => {
     if (!selectedChat || !stompRef.current) return;
-    if (!messageText.trim() && attachments.length === 0) return;
+    if (!messageText.trim() && uploadedAttachments.length === 0) return;
     if (!userId || !selectedChat.participantId) return;
+
+    const hasFiles = uploadedAttachments.length > 0;
+    const firstType = uploadedAttachments[0]?.contentType || "";
+    const msgType = hasFiles ? (firstType.startsWith("image/") ? "IMAGE" : "FILE") : "TEXT";
 
     const message = {
       conversationId: selectedChat.id,
@@ -521,27 +711,28 @@ const onEmojiClick = (emojiData) => {
       senderName: userName,
       receiverId: selectedChat.participantId,
       content: messageText,
-      attachments: attachments.map((f) => f.name),
-      type: "TEXT",
+      attachments: uploadedAttachments,
+      type: msgType,
       timestamp: new Date().toISOString(),
     };
 
     try {
       stompRef.current.send(message);
 
-      // optimistic UI
       const optimistic = {
         id: Date.now(),
         sender: "self",
         text: messageText,
         time: "Just now",
         read: false,
-        attachments: attachments.map((f) => f.name),
+        attachments: uploadedAttachments,
+        type: msgType,
       };
 
       setMessages((prev) => [...prev, optimistic]);
       setMessageText("");
-      setAttachments([]);
+      setUploadedAttachments([]);
+      setLocalFiles([]);
       if (textareaRef.current) textareaRef.current.style.height = "auto";
     } catch (err) {
       console.error("Error sending message:", err);
@@ -556,18 +747,13 @@ const onEmojiClick = (emojiData) => {
     }
   };
 
-  const handleAttachment = (e) => {
-    const files = Array.from(e.target.files || []);
-    setAttachments((prev) => [...prev, ...files]);
-  };
-
-  const removeAttachment = (index) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const selectChat = (chat) => {
     setSelectedChat(chat);
     loadMessages(chat.id);
+
+    // subscribe to call topic for this conversation
+    const stomp = stompRef.current?.ws;
+    if (stomp?.connected) subscribeToCallTopic(stomp, chat.id);
   };
 
   const handleChatStart = (conversation) => {
@@ -583,11 +769,15 @@ const onEmojiClick = (emojiData) => {
       unread: 0,
       online: other?.online || false,
       participantId: other?.id || null,
+      otherRaw: other || null,
     };
 
     setSelectedChat(newChat);
     loadConversations();
     loadMessages(conversation.id);
+
+    const stomp = stompRef.current?.ws;
+    if (stomp?.connected) subscribeToCallTopic(stomp, conversation.id);
   };
 
   const filteredChats = chats.filter((c) => {
@@ -595,13 +785,31 @@ const onEmojiClick = (emojiData) => {
     return (c.name || "").toLowerCase().includes(q) || (c.role || "").toLowerCase().includes(q);
   });
 
+  /* ===================== MENU ACTIONS ===================== */
+  const clearChatLocal = () => {
+    if (!selectedChat) return;
+    const ok = window.confirm("Clear messages in this chat (frontend only)?");
+    if (!ok) return;
+    setMessages([]);
+    setShowMenu(false);
+  };
+
+  const deleteConversationLocal = () => {
+    if (!selectedChat) return;
+    const ok = window.confirm("Remove this conversation from UI (frontend only)?");
+    if (!ok) return;
+
+    setChats((prev) => prev.filter((c) => c.id !== selectedChat.id));
+    setSelectedChat(null);
+    setMessages([]);
+    setShowMenu(false);
+  };
+
   const ChatListItem = ({ chat }) => (
     <div
       onClick={() => selectChat(chat)}
       className={`flex items-start gap-3 p-4 cursor-pointer transition-all border-l-4 ${
-        selectedChat?.id === chat.id
-          ? "bg-blue-50 border-l-blue-600"
-          : "hover:bg-gray-50 border-l-transparent"
+        selectedChat?.id === chat.id ? "bg-blue-50 border-l-blue-600" : "hover:bg-gray-50 border-l-transparent"
       }`}
     >
       <div className="relative flex-shrink-0">
@@ -610,9 +818,7 @@ const onEmojiClick = (emojiData) => {
           alt={chat.name}
           className="w-12 h-12 rounded-full object-cover"
         />
-        {chat.online && (
-          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-        )}
+        {chat.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between mb-1">
@@ -625,9 +831,7 @@ const onEmojiClick = (emojiData) => {
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
           {chat.unread > 0 && (
-            <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full font-semibold">
-              {chat.unread}
-            </span>
+            <span className="ml-2 px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full font-semibold">{chat.unread}</span>
           )}
         </div>
       </div>
@@ -639,33 +843,38 @@ const onEmojiClick = (emojiData) => {
     return (
       <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}>
         <div className={`max-w-[70%] ${isOwn ? "order-2" : "order-1"}`}>
-          <div
-            className={`rounded-2xl px-4 py-3 ${
-              isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"
-            }`}
-          >
-            <p className="text-sm leading-relaxed">{message.text}</p>
+          <div className={`rounded-2xl px-4 py-3 ${isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}>
+            {!!message.text && <p className="text-sm leading-relaxed">{message.text}</p>}
+
             {message.attachments?.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {message.attachments.map((file, i) => (
-                  <div
-                    key={i}
-                    className={`px-2 py-1 rounded-lg text-xs truncate max-w-[100px] ${
-                      isOwn ? "bg-blue-500" : "bg-gray-200"
-                    }`}
-                  >
-                    {file}
-                  </div>
-                ))}
+              <div className="mt-2 flex flex-col gap-2">
+                {message.attachments.map((att, i) => {
+                  const isImg = att?.contentType?.startsWith("image/");
+                  return (
+                    <div key={i}>
+                      {isImg ? (
+                        <img src={att.url} alt={att.fileName || "image"} className="max-w-[240px] rounded-lg border" />
+                      ) : (
+                        <a
+                          href={att.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`text-xs underline ${isOwn ? "text-white" : "text-blue-600"}`}
+                        >
+                          {att.fileName || "Download file"}
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
+
           <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
             <span className="text-xs text-gray-500">{message.time}</span>
             {isOwn && (
-              <span className="text-blue-600">
-                {message.read ? <CheckCheck size={14} /> : <Check size={14} />}
-              </span>
+              <span className="text-blue-600">{message.read ? <CheckCheck size={14} /> : <Check size={14} />}</span>
             )}
           </div>
         </div>
@@ -686,6 +895,111 @@ const onEmojiClick = (emojiData) => {
 
   return (
     <ErrorBoundary>
+      {/* CALL MODAL */}
+      {callState.open && (
+        <div className="fixed inset-0 bg-black/40 z-[999] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">
+                  {callState.mode === "INCOMING" ? "Incoming call" : callState.mode === "OUTGOING" ? "Calling" : "In call"}
+                </p>
+                <h3 className="text-xl font-bold text-gray-900">
+                  {selectedChat?.name || callState.fromName || "User"}{" "}
+                  <span className="text-sm font-medium text-gray-500">({callState.callType})</span>
+                </h3>
+              </div>
+              <button onClick={hangupCall} className="p-2 rounded-full hover:bg-gray-100" title="Close / Hangup">
+                <X />
+              </button>
+            </div>
+
+            <div className="mt-6 flex gap-3 justify-center">
+              {callState.mode === "INCOMING" && (
+                <>
+                  <button
+                    onClick={acceptCall}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={rejectCall}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    Reject
+                  </button>
+                </>
+              )}
+
+              {callState.mode === "OUTGOING" && (
+                <button
+                  onClick={hangupCall}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                >
+                  <PhoneOff size={18} /> Cancel
+                </button>
+              )}
+
+              {callState.mode === "ACTIVE" && (
+                <button
+                  onClick={hangupCall}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                >
+                  <PhoneOff size={18} /> Hang up
+                </button>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs text-gray-500 text-center">
+              (This is signaling UI. Next step is WebRTC audio/video streaming.)
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* PROFILE MODAL */}
+      {showProfile && selectedChat && (
+        <div className="fixed inset-0 bg-black/40 z-[999] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-xl p-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">Profile</h3>
+              <button onClick={() => setShowProfile(false)} className="p-2 rounded-full hover:bg-gray-100">
+                <X />
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-center gap-3">
+              <img
+                src={selectedChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedChat.name || "User")}`}
+                alt={selectedChat.name}
+                className="w-14 h-14 rounded-full object-cover"
+              />
+              <div>
+                <p className="font-semibold text-gray-900">{selectedChat.name}</p>
+                <p className="text-sm text-gray-600">{selectedChat.role}</p>
+                <p className="text-xs text-gray-500">User ID: {selectedChat.participantId ?? "N/A"}</p>
+              </div>
+            </div>
+
+            <div className="mt-5 text-sm text-gray-700">
+              <p className="text-xs text-gray-500">
+                (If you have doctor/patient extra fields, you can show them here.)
+              </p>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowProfile(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row h-[calc(100vh-200px)] bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
         <SearchUsersModal
           isOpen={showSearchModal}
@@ -753,6 +1067,7 @@ const onEmojiClick = (emojiData) => {
         <div className="flex-1 flex flex-col">
           {selectedChat ? (
             <>
+              {/* TOP BAR */}
               <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative">
@@ -775,19 +1090,72 @@ const onEmojiClick = (emojiData) => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button className="p-2 hover:bg-gray-100 rounded-full">
+
+                {/* RIGHT ICONS */}
+                <div className="flex items-center gap-2 relative">
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    title="Audio call"
+                    onClick={() => startOutgoingCall("AUDIO")}
+                    disabled={!isConnected}
+                  >
                     <Phone size={20} className="text-gray-600" />
                   </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full">
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    title="Video call"
+                    onClick={() => startOutgoingCall("VIDEO")}
+                    disabled={!isConnected}
+                  >
                     <Video size={20} className="text-gray-600" />
                   </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full">
+
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    title="More"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu((s) => !s);
+                    }}
+                  >
                     <MoreVertical size={20} className="text-gray-600" />
                   </button>
+
+                  {/* DROPDOWN MENU */}
+                  {showMenu && (
+                    <div
+                      className="absolute right-0 top-12 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                        onClick={() => {
+                          setShowProfile(true);
+                          setShowMenu(false);
+                        }}
+                      >
+                        <Info size={16} /> View profile
+                      </button>
+
+                      <button
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                        onClick={clearChatLocal}
+                      >
+                        <Eraser size={16} /> Clear chat (UI)
+                      </button>
+
+                      <button
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-2 text-sm text-red-600"
+                        onClick={deleteConversationLocal}
+                      >
+                        <Trash2 size={16} /> Remove conversation (UI)
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
+              {/* MESSAGES */}
               <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
                 <div className="space-y-4">
                   {messages.map((m) => (
@@ -797,6 +1165,7 @@ const onEmojiClick = (emojiData) => {
                 </div>
               </div>
 
+              {/* INPUT */}
               <div className="p-4 bg-white border-t border-gray-200">
                 <div className="flex items-end gap-3">
                   <label className="p-2 hover:bg-gray-100 rounded-full cursor-pointer flex-shrink-0">
@@ -819,29 +1188,29 @@ const onEmojiClick = (emojiData) => {
                       className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none overflow-auto"
                       style={{ maxHeight: "120px" }}
                     />
+
                     <div className="relative">
-  <button
-    type="button"
-    onClick={() => setShowEmoji((s) => !s)}
-    className="absolute right-3 bottom-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
-  >
-    <Smile size={20} className="text-gray-600" />
-  </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowEmoji((s) => !s)}
+                        className="absolute right-3 bottom-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <Smile size={20} className="text-gray-600" />
+                      </button>
 
-  {showEmoji && (
-    <div className="absolute right-0 bottom-14 z-50">
-      <EmojiPicker onEmojiClick={onEmojiClick} />
-    </div>
-  )}
-</div>
-
+                      {showEmoji && (
+                        <div className="absolute right-0 bottom-14 z-50">
+                          <EmojiPicker onEmojiClick={onEmojiClick} />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <button
                     onClick={handleSendMessage}
-                    disabled={!messageText.trim() && attachments.length === 0}
+                    disabled={!messageText.trim() && uploadedAttachments.length === 0}
                     className={`p-3 rounded-full transition-colors flex-shrink-0 ${
-                      messageText.trim() || attachments.length
+                      messageText.trim() || uploadedAttachments.length
                         ? "bg-blue-600 hover:bg-blue-700 text-white"
                         : "bg-gray-200 text-gray-400 cursor-not-allowed"
                     }`}
@@ -850,11 +1219,23 @@ const onEmojiClick = (emojiData) => {
                   </button>
                 </div>
 
-                {attachments.length > 0 && (
+                {/* PREVIEW AREA */}
+                {localFiles.length > 0 && (
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    {attachments.map((file, i) => (
-                      <div key={i} className="bg-gray-200 px-2 py-1 rounded-lg flex items-center gap-1 text-xs">
-                        {file.name}
+                    {localFiles.map((item, i) => (
+                      <div
+                        key={i}
+                        className="bg-gray-200 px-2 py-1 rounded-lg flex items-center gap-2 text-xs"
+                      >
+                        {item.previewUrl ? (
+                          <img
+                            src={item.previewUrl}
+                            alt="preview"
+                            className="w-10 h-10 object-cover rounded"
+                          />
+                        ) : (
+                          <span className="max-w-[140px] truncate">{item.file.name}</span>
+                        )}
                         <X size={14} className="cursor-pointer" onClick={() => removeAttachment(i)} />
                       </div>
                     ))}
@@ -869,9 +1250,7 @@ const onEmojiClick = (emojiData) => {
                   <User size={48} className="text-blue-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No Chat Selected</h3>
-                <p className="text-gray-600 max-w-sm mb-4">
-                  Select a conversation from the left or start a new chat
-                </p>
+                <p className="text-gray-600 max-w-sm mb-4">Select a conversation from the left or start a new chat</p>
                 <button
                   onClick={() => setShowSearchModal(true)}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
