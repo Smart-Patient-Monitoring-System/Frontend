@@ -18,6 +18,8 @@ import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
 import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
+import DoctorNotesCard from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorNotesCard";
+import AssignedCareTeamCard from "../../pages/DoctorViewPatient/DoctorViewComponents/AssignedCareTeamCard";
 
 const DoctorPatientView = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -106,95 +108,85 @@ const DoctorPatientView = () => {
 
         {/* Main Content - Responsive padding */}
         <div className="p-3 sm:p-4 md:p-5 lg:p-6">
-          {/* Overview Tab */}
+          {/* Overview Tab - Simplified to match screenshot */}
           {currentTab === "Overview" && (
-            <div className="space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-10">
-              {/* Vitals - Responsive grid 
-                  Mobile: 1 column
-                  Small mobile (>480px): 2 columns
-                  Tablet: 2 columns
-                  Laptop+: 4 columns
-              */}
-              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-                {vitals.map((vital, index) => (
-                  <VitalCard key={index} {...vital} />
-                ))}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+              
+              {/* Left Column - Vitals and Graph */}
+              <div className="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
+                {/* Vitals Grid */}
+                <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
+                  {vitals.map((vital, index) => (
+                    <VitalCard key={index} {...vital} />
+                  ))}
+                </div>
+
+                {/* Vital Trends Graph */}
+                <GraphCard />
               </div>
 
-              {/* Graph + Health Risk 
-                  Mobile/Tablet: Stack vertically
-                  Laptop+: 2:1 ratio
-              */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-                <div className="lg:col-span-2">
-                  <GraphCard />
-                </div>
-                <div>
-                  <HealthRiskCard />
-                </div>
-              </div>
-
-              {/* ECG + Health Tips 
-                  Mobile/Tablet: Stack vertically
-                  Laptop+: 2:1 ratio
-              */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-                <div className="lg:col-span-2">
-                  <ECGMonitor />
-                </div>
-                <div>
-                  <HealthTipsCard />
-                </div>
-              </div>
-
-              {/* Appointments + Emergency AND Medications + Reports 
-                  Mobile: All stack vertically
-                  Tablet+: 2 columns
-              */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-                
-                {/* Column 1 — Appointments + Reports */}
-                <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                  <AppointmentsCard />
-                  <ReportsCard />
-                </div>
-
-                {/* Column 2 — Medications + Emergency */}
-                <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                  <MedicationsCard />
-                  <EmergencyCard />
-                </div>
-
+              {/* Right Column - Doctor's Notes and Care Team */}
+              <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                <DoctorNotesCard />
+                <AssignedCareTeamCard />
               </div>
             </div>
           )}
 
-          {/* Vitals History */}
+          {/* Real-Time Vitals Tab */}
           {currentTab === "Real-Time Vitals" && (
             <RealtimeGraphs />
           )}
 
-          {/* Full-page ECG */}
-          {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} />}
-
-          {/* Profile */}
-          {currentTab === "Profile" && <ProfileTab />}
-
-
-          {/* Emergency Panel */}
-          {currentTab === "Emergency Panel" && <EmergencyPanel />}
-
-          {/* Messaging */}
-          {currentTab === "Messaging" && <MessagingDashboard />}
-
-          {/* Medical Records */}
-          {currentTab === "Medical Records" && (
+          {/* ECG Readings Tab */}
+          {currentTab === "ECG Readings" && (
             <div className="space-y-4 sm:space-y-5 md:space-y-6">
-              <ReportsCard />
+              <ECGMonitor isFullPage={true} />
             </div>
           )}
 
-          {/* AI Assistant - Responsive height */}
+          {/* Medical Records Tab */}
+          {currentTab === "Medical Records" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+              <ReportsCard />
+              <MedicationsCard />
+            </div>
+          )}
+
+          {/* Health Insights Tab */}
+          {currentTab === "Health Insights" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+              <div className="lg:col-span-2">
+                <HealthRiskCard />
+              </div>
+              <div>
+                <HealthTipsCard />
+              </div>
+            </div>
+          )}
+
+          {/* Appointments Tab */}
+          {currentTab === "Appointments" && (
+            <div className="max-w-4xl">
+              <AppointmentsCard />
+            </div>
+          )}
+
+          {/* Emergency Panel Tab */}
+          {currentTab === "Emergency Panel" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+              <EmergencyPanel />
+              <EmergencyCard />
+            </div>
+          )}
+
+          {/* Messaging Tab */}
+          {currentTab === "Messaging" && <MessagingDashboard />}
+
+          {/* Profile Tab */}
+          {currentTab === "Profile" && <ProfileTab />}
+
+          {/* AI Health Assistant - Responsive height */}
           {currentTab === "AI Health Assistant" && (
             <div className="w-full h-[calc(100vh-200px)] sm:h-[calc(100vh-240px)] md:h-[calc(100vh-260px)] lg:h-[calc(100vh-280px)] max-w-7xl mx-auto">
               <FloatingChatbot isFullScreen={true} />
