@@ -1,19 +1,17 @@
 import { useState } from "react";
-
-import Header from "../../components/PatientPortal/Header";
-import PatientInfoCard from "../../components/PatientPortal/PatientInfoCard";
+import { useNavigate, useLocation } from "react-router-dom";
+import Header from "../../pages/DoctorViewPatient/DoctorViewComponents/Header";
+import PatientInfoCard from "../../pages/DoctorViewPatient/DoctorViewComponents/PatientInfoCard";
 import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
 import ReportsCard from "../../components/PatientPortal/ReportsCard";
 import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
-import EmergencyCard from "../../components/PatientPortal/EmergencyCard";
 import VitalCard from "../../components/PatientPortal/VitalCard";
 import GraphCard from "../../components/PatientPortal/GraphCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
-import Dashboard from "../../components/PatientPortal/Dashboard";
+import Dashboard from "../../pages/DoctorViewPatient/DoctorViewComponents/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
-import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
@@ -24,6 +22,15 @@ import AssignedCareTeamCard from "../../pages/DoctorViewPatient/DoctorViewCompon
 const DoctorPatientView = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
   const [showManualEntry, setShowManualEntry] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const patientId =
+    location.state?.patientId || localStorage.getItem("profilePatientId");
+
+  const patientName =
+    location.state?.patientName || localStorage.getItem("profilePatientName");
 
   const vitals = [
     {
@@ -72,21 +79,35 @@ const DoctorPatientView = () => {
     },
   ];
 
+  if (!patientId) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+          No patient selected. Please go back and click “View”.
+          <button
+            className="ml-3 px-4 py-2 bg-red-600 text-white rounded-lg"
+            onClick={() => navigate("/doctor-dashboard")}
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <>
       {/* Header */}
-      <Header patientName="Sarah" />
+      <Header
+        isDoctorView={true}
+        profileName={patientName}
+        backPath="/doctor-dashboard"
+      />
 
       {/* Patient Info - Responsive padding */}
       <div className="w-full bg-gray-100 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
-        <PatientInfoCard
-          name="Sarah Johnson"
-          patientId="P-2024-001"
-          room="Room 204-B"
-          age={34}
-          bloodType="A+"
-          imageUrl="https://i.pravatar.cc/300?img=12"
-        />
+        <PatientInfoCard isDoctorView={true} patientId={patientId} />
       </div>
 
       {/* Dashboard (Tabs + Manual Entry Button) */}
@@ -173,15 +194,10 @@ const DoctorPatientView = () => {
           )}
 
           {/* Emergency Panel Tab */}
-          {currentTab === "Emergency Panel" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-              <EmergencyPanel />
-              <EmergencyCard />
-            </div>
-          )}
+          {currentTab === "Emergency Panel" && <EmergencyPanel />}
 
           {/* Messaging Tab */}
-          {currentTab === "Messaging" && <MessagingDashboard />}
+          {currentTab === "Doctor Notes" && <DoctorNotesCard />}
 
           {/* Profile Tab */}
           {currentTab === "Profile" && <ProfileTab />}

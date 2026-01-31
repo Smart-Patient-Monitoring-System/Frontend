@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import CriticalAlertPage from "./CriticalAlertPage";
 import ECGReaderPage from "./ECGReaderPage";
+
+import DoctorMessagesPanel from "../../components/PatientPortal/MessagingDashboard";
+
 import { useNavigate } from "react-router-dom";
 import {
   Heart,
@@ -10,14 +13,12 @@ import {
   AlertTriangle,
   FileText,
   Search,
-  Clock,
-  Thermometer,
-  Droplets,
   Eye,
   Users,
   AlertCircle,
   TrendingUp,
   Wifi,
+  MessageSquare, // NEW ICON for Messaging
 } from "lucide-react";
 
 /* ===================== Config ===================== */
@@ -120,7 +121,7 @@ function DocDashboard() {
     role: "",
   });
 
-  // ✅ Patients (from backend)
+  // Patients (from backend)
   const [patients, setPatients] = useState([]);
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [patientsError, setPatientsError] = useState("");
@@ -258,9 +259,7 @@ function DocDashboard() {
                 </h1>
 
                 <p className="hidden sm:flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-                  Welcome,{" "}
-                  <span className="font-semibold">Dr. {doctorInfo.name}</span>
-
+                  Welcome, <span className="font-semibold">Dr. {doctorInfo.name}</span>
                   {doctorInfo.role ? (
                     <span className="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
                       {doctorInfo.role}
@@ -279,7 +278,7 @@ function DocDashboard() {
               >
                 <Bell className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black" />
                 {hasNotification && (
-                  <span className="absolute top-1 right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-500 rounded-full"></span>
+                  <span className="absolute top-1 right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-500 rounded-full" />
                 )}
               </button>
 
@@ -359,6 +358,19 @@ function DocDashboard() {
               >
                 <FileText className="w-5 h-5" />
                 <span className="font-medium">Reports</span>
+              </button>
+
+              {/*  UPDATED: Messaging button + icon */}
+              <button
+                onClick={() => setActiveTab("messaging")}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
+                  activeTab === "messaging"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                    : "hover:bg-gray-50 text-gray-700"
+                }`}
+              >
+                <MessageSquare className="w-5 h-5" />
+                <span className="font-medium">Messaging</span>
               </button>
             </div>
           </div>
@@ -451,9 +463,7 @@ function DocDashboard() {
               {/* Table */}
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-800">
-                    Patient Overview
-                  </h2>
+                  <h2 className="text-xl font-bold text-gray-800">Patient Overview</h2>
                   <p className="text-gray-600 text-sm mt-1">
                     Assigned patients list (vitals will show once IoT data is connected)
                   </p>
@@ -513,9 +523,7 @@ function DocDashboard() {
                         <tr key={patient.rawId ?? index} className="hover:bg-gray-50">
                           <td className="py-4 px-4">
                             <div>
-                              <div className="font-medium text-gray-900">
-                                {patient.name}
-                              </div>
+                              <div className="font-medium text-gray-900">{patient.name}</div>
                               <div className="text-sm text-gray-500">
                                 {patient.id} - {patient.age}
                               </div>
@@ -529,9 +537,17 @@ function DocDashboard() {
 
                           <td className="py-4 px-4">
                             <button
-                              className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium"
-                              onClick={() => navigate("/DocViewPatient")}
-                            >
+  className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium"
+  onClick={() =>
+    navigate("/DocViewPatient", {
+      state: {
+        patientId: patient.rawId,          //  IMPORTANT
+        patientName: patient.name,         // optional
+        returnTo: "/DocDashboard",         // back route that exists in App.jsx
+      },
+    })
+  }
+>
                               <Eye className="w-4 h-4" />
                               View
                             </button>
@@ -547,6 +563,9 @@ function DocDashboard() {
 
           {activeTab === "ecg-reader" && <ECGReaderPage />}
           {activeTab === "critical-alerts" && <CriticalAlertPage />}
+
+          {/* NEW: Messaging tab renders here */}
+          {activeTab === "messaging" && <DoctorMessagesPanel />}
         </main>
       </div>
     </div>
