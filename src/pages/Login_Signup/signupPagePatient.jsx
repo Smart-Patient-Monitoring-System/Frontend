@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import sup from "../../assets/images/sup.jpg";
 import FormRow from "../../components/signup/formRow";
 import { API_BASE_URL } from "../../api";
+
 
 export default function SignupPagePatient() {
   const navigate = useNavigate();
@@ -11,10 +12,10 @@ export default function SignupPagePatient() {
   const [name, setName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState(""); // ✅ added
-  const [district, setDistrict] = useState(""); // ✅ added
-  const [postalCode, setPostalCode] = useState(""); // ✅ added
-  const [hospital, setHospital] = useState(""); // ✅ added (NOT NULL in DB)
+  const [city, setCity] = useState(""); // added
+  const [district, setDistrict] = useState(""); // added
+  const [postalCode, setPostalCode] = useState(""); //  added
+  const [hospital, setHospital] = useState(""); // added (NOT NULL in DB)
 
   const [email, setEmail] = useState("");
   const [nicNo, setNicNo] = useState("");
@@ -43,6 +44,8 @@ export default function SignupPagePatient() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hospitals, setHospitals] = useState([]);
+
 
   const handleSignup = async () => {
     setError("");
@@ -133,6 +136,22 @@ export default function SignupPagePatient() {
     }
   };
 
+  useEffect(() => {
+  const loadHospitals = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/public/hospitals`);
+      const data = await res.json();
+      setHospitals(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.log("Failed to load hospitals", e);
+      setHospitals([]);
+    }
+  };
+
+  loadHospitals();
+}, []);
+
+
   const guardianLabel =
     guardianType === "SPOUSE"
       ? "Spouse Name"
@@ -179,7 +198,23 @@ export default function SignupPagePatient() {
             <FormRow label="City" value={city} onChange={(e) => setCity(e.target.value)} required />
             <FormRow label="District" value={district} onChange={(e) => setDistrict(e.target.value)} required />
             <FormRow label="Postal Code" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} required />
-            <FormRow label="Hospital" value={hospital} onChange={(e) => setHospital(e.target.value)} required />
+            <FormRow label="Hospital">
+  <select
+    value={hospital}
+    onChange={(e) => setHospital(e.target.value)}
+    required
+    className="w-full h-11 bg-white/35 backdrop-blur-md rounded-full px-5 border border-white/40 text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#00BAC5]/50"
+  >
+    <option value="">Select hospital</option>
+
+    {hospitals.map((h) => (
+      <option key={h} value={h}>
+        {h}
+      </option>
+    ))}
+  </select>
+</FormRow>
+
 
             {/* Gender */}
             <FormRow label="Gender">
@@ -236,7 +271,7 @@ export default function SignupPagePatient() {
               />
             </FormRow>
 
-            {/* ✅ Added */}
+            {/* Added */}
             <FormRow label="Medical Conditions">
               <textarea
                 value={medicalConditions}
@@ -274,7 +309,7 @@ export default function SignupPagePatient() {
               </select>
             </FormRow>
 
-            {/* ✅ Added */}
+            {/* Added */}
             <FormRow
               label="Guardian Relationship (text)"
               value={guardianRelationship}

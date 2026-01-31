@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { fetchPatient, deletePatient, updatePatient } from "./service/patientconnecter";
+import {
+  fetchPatient,
+  deletePatient,
+  updatePatient,
+} from "./service/patientconnecter";
 import { API_BASE_URL } from "../../api";
 
 function PatientManagement() {
@@ -7,59 +11,72 @@ function PatientManagement() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({
-      name: "",
-      dateOfBirth: "",
-      address: "",
-      email: "",
-      nicNo: "",
-      gender: "",
-      contactNo: "",
-      guardiansName: "",
-      guardiansContactNo: "",
-      username: "",
-      password: "",
-      bloodType: "",
-      city: "",
-      district: "",
-      dispostalCodet: "",
-      guardianRelationship: "",
-      guardianEmail: "",
-      medicalConditions: "",
-      allergies: "",
-      currentMedications: "",
-      pastSurgeries: "",
-      emergencyNotes: "",
-    });
-    const [error, setError] = useState("");
-    const [submitting, setSubmitting] = useState(false);
 
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editPatientId, setEditPatientId] = useState(null);
-    const [editFormData, setEditFormData] = useState({
-      name: "",
-      dateOfBirth: "",
-      address: "",
-      email: "",
-      nicNo: "",
-      gender: "",
-      contactNo: "",
-      guardiansName: "",
-      guardiansContactNo: "",
-      username: "",
-      password: "",
-      bloodType: "",
-      city: "",
-      district: "",
-      dispostalCodet: "",
-      guardianRelationship: "",
-      guardianEmail: "",
-      medicalConditions: "",
-      allergies: "",
-      currentMedications: "",
-      pastSurgeries: "",
-      emergencyNotes: "",
-      });
+  // ✅ hospitals dropdown data
+  const [hospitals, setHospitals] = useState([]);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    dateOfBirth: "",
+    address: "",
+    email: "",
+    nicNo: "",
+    gender: "",
+    contactNo: "",
+    guardiansName: "",
+    guardiansContactNo: "",
+    username: "",
+    password: "",
+    bloodType: "",
+    city: "",
+    district: "",
+    dispostalCodet: "",
+
+    // ✅ added
+    hospital: "",
+
+    guardianRelationship: "",
+    guardianEmail: "",
+    medicalConditions: "",
+    allergies: "",
+    currentMedications: "",
+    pastSurgeries: "",
+    emergencyNotes: "",
+  });
+
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editPatientId, setEditPatientId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    dateOfBirth: "",
+    address: "",
+    email: "",
+    nicNo: "",
+    gender: "",
+    contactNo: "",
+    guardiansName: "",
+    guardiansContactNo: "",
+    username: "",
+    password: "",
+    bloodType: "",
+    city: "",
+    district: "",
+    dispostalCodet: "",
+
+    // ✅ added
+    hospital: "",
+
+    guardianRelationship: "",
+    guardianEmail: "",
+    medicalConditions: "",
+    allergies: "",
+    currentMedications: "",
+    pastSurgeries: "",
+    emergencyNotes: "",
+  });
 
   useEffect(() => {
     async function load() {
@@ -75,25 +92,40 @@ function PatientManagement() {
     load();
   }, []);
 
+  // ✅ load hospitals list
+  useEffect(() => {
+    const loadHospitals = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/public/hospitals`);
+        const data = await res.json();
+        setHospitals(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.log("Failed to load hospitals", e);
+        setHospitals([]);
+      }
+    };
+
+    loadHospitals();
+  }, []);
+
   // search bar
   const filteredPatients = patients.filter((pt) =>
     pt.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleDelete = async (PatientId) => {
-      if (!window.confirm("Reject this Patient?")) return;
-    
-      try {
-        await deletePatient(PatientId);
-    
-        setPatient((prev) =>
-          prev.filter((pt) => pt.Id !== PatientId)
-        );
-    
-        alert("Patient rejected successfully");
-      } catch (error) {
-        console.error(error);
-        alert("Failed to reject Patient")}
+    if (!window.confirm("Reject this Patient?")) return;
+
+    try {
+      await deletePatient(PatientId);
+
+      setPatient((prev) => prev.filter((pt) => pt.Id !== PatientId));
+
+      alert("Patient rejected successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to reject Patient");
+    }
   };
 
   const handleInputChange = (e) => {
@@ -112,11 +144,13 @@ function PatientManagement() {
       nicNo: patient.nicNo || "",
       gender: patient.gender || "",
       contactNo: patient.contactNo || "",
+
+      // ✅ added
+      hospital: patient.hospital || "",
     });
 
     setShowEditModal(true);
-  };   
-  
+  };
 
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
@@ -124,116 +158,121 @@ function PatientManagement() {
   };
 
   const handleCreatePatient = async (e) => {
-      e.preventDefault();
+    e.preventDefault();
+    setError("");
+
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.username ||
+      !formData.password ||
+      !formData.address ||
+      !formData.dateOfBirth ||
+      !formData.allergies ||
+      !formData.nicNo ||
+      !formData.gender ||
+      !formData.contactNo ||
+      !formData.bloodType ||
+      !formData.city ||
+      !formData.currentMedications ||
+      !formData.dispostalCodet ||
+      !formData.district ||
+      !formData.guardianEmail ||
+      !formData.guardianRelationship ||
+      !formData.guardiansContactNo ||
+      !formData.guardiansName ||
+      !formData.medicalConditions ||
+      !formData.hospital // ✅ added
+    ) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_BASE_URL}/api/admin/patient/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        setError(text || "Failed to create Patient");
+        setSubmitting(false);
+        return;
+      }
+
+      // Reset form and close modal
+      setFormData({
+        name: "",
+        dateOfBirth: "",
+        address: "",
+        email: "",
+        nicNo: "",
+        gender: "",
+        contactNo: "",
+        guardiansName: "",
+        guardiansContactNo: "",
+        username: "",
+        password: "",
+        bloodType: "",
+        city: "",
+        district: "",
+        dispostalCodet: "",
+
+        // ✅ added
+        hospital: "",
+
+        guardianRelationship: "",
+        guardianEmail: "",
+        medicalConditions: "",
+        allergies: "",
+        currentMedications: "",
+        pastSurgeries: "",
+        emergencyNotes: "",
+        createdAt: "",
+        updatedAt: "",
+      });
+
+      setShowModal(false);
       setError("");
-  
-      if (
-          !formData.name ||
-          !formData.email ||
-          !formData.username ||
-          !formData.password ||
-          !formData.address ||
-          !formData.dateOfBirth ||
-          !formData.allergies ||
-          !formData.nicNo ||
-          !formData.gender ||
-          !formData.contactNo ||
-          !formData.bloodType ||
-          !formData.city ||
-          !formData.currentMedications ||
-          !formData.dispostalCodet ||
-          !formData.district ||
-          !formData.guardianEmail ||
-          !formData.guardianRelationship ||
-          !formData.guardiansContactNo ||
-          !formData.guardiansName ||
-          !formData.medicalConditions
-        ) {
-          setError("Please fill in all required fields");
-          return;
-          }
-  
-      setSubmitting(true);
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/api/admin/patient/create`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        });
-  
-        if (!response.ok) {
-          const text = await response.text();
-          setError(text || "Failed to create Patient");
-          setSubmitting(false);
-          return;
-        }
-  
-        // Reset form and close modal
-        setFormData({
-          name: "",
-          dateOfBirth: "",
-          address: "",
-          email: "",
-          nicNo: "",
-          gender: "",
-          contactNo: "",
-          guardiansName: "",
-          guardiansContactNo: "",
-          username: "",
-          password: "",
-          bloodType: "",
-          city: "",
-          district: "",
-          dispostalCodet: "",
-          guardianRelationship: "",
-          guardianEmail: "",
-          medicalConditions: "",
-          allergies: "",
-          currentMedications: "",
-          pastSurgeries: "",
-          emergencyNotes: "",
-          createdAt: "",
-          updatedAt: "",
-        });
-        setShowModal(false);
-        setError("");
 
-        const data = await fetchPatient();
-              setPatient(data || []);
-            } catch (e) {
-              setError("Unable to connect to server. Please try again.");
-            } finally {
-              setSubmitting(false);
-        
-            }
-          };
-    const handleUpdatePatient = async (e) => {
-        e.preventDefault();
-    
-        try {
-          await updatePatient(editPatientId, editFormData);
-    
-          const data = await fetchPatient();
-          setPatient(data || []);
-          setShowEditModal(false);
-    
-          alert("Patient updated successfully");
-        } catch (err) {
-          console.error(err);
-          alert(err.message || "Failed to update Patient");
-        }
-      };      
+      const data = await fetchPatient();
+      setPatient(data || []);
+    } catch (e) {
+      setError("Unable to connect to server. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
+  const handleUpdatePatient = async (e) => {
+    e.preventDefault();
+
+    try {
+      await updatePatient(editPatientId, editFormData);
+
+      const data = await fetchPatient();
+      setPatient(data || []);
+      setShowEditModal(false);
+
+      alert("Patient updated successfully");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to update Patient");
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-gray-800">Patients</h3>
-        <button 
+        <button
           onClick={() => setShowModal(true)}
           className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm px-4 py-1.5 rounded-full hover:shadow-lg transition"
         >
@@ -250,53 +289,38 @@ function PatientManagement() {
       />
 
       <div className="space-y-3">
-        {loading && (
-          <p className="text-sm text-gray-500">Loading...</p>
-        )}
+        {loading && <p className="text-sm text-gray-500">Loading...</p>}
 
         {!loading && filteredPatients.length === 0 && (
           <p className="text-sm text-gray-500">No Patient found</p>
         )}
 
         {filteredPatients.map((patient) => (
-  <div
-    key={patient.id}
-    className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
-  >
-    {/* Patient Info */}
-    <div className="space-y-1">
-      <p className="font-medium text-gray-800">
-        {patient.name}
-      </p>
+          <div
+            key={patient.id}
+            className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
+          >
+            {/* Patient Info */}
+            <div className="space-y-1">
+              <p className="font-medium text-gray-800">{patient.name}</p>
 
-      <p className="text-sm text-gray-500">
-        {patient.dateOfBirth} 
-      </p>
+              <p className="text-sm text-gray-500">{patient.dateOfBirth}</p>
 
-      <p className="text-sm text-gray-500">
-        {patient.address}
-      </p>
+              <p className="text-sm text-gray-500">{patient.address}</p>
 
-      <p className="text-sm text-gray-500">
-        📧 {patient.email}
-      </p>
+              <p className="text-sm text-gray-500">📧 {patient.email}</p>
 
-      <p className="font-medium text-gray-800">
-        {patient.nicNo}
-      </p>
-    
-      <p className="text-sm text-gray-500">
-        📞 {patient.contactNo}
-      </p>
+              <p className="font-medium text-gray-800">{patient.nicNo}</p>
 
-      <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-        {patient.gender}
-      </span>
+              <p className="text-sm text-gray-500">📞 {patient.contactNo}</p>
 
-    </div>
+              <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                {patient.gender}
+              </span>
+            </div>
 
-    {/* RIGHT SIDE – ACTION BUTTONS */}
-    <div className="flex flex-col gap-2">
+            {/* RIGHT SIDE – ACTION BUTTONS */}
+            <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleEdit(patient)}
                 className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
@@ -305,15 +329,14 @@ function PatientManagement() {
               </button>
 
               <button
-                  onClick={() => handleDelete(patient.Id)}
-                  className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+                onClick={() => handleDelete(patient.Id)}
+                className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
               >
-              Delete
+                Delete
               </button>
             </div>
           </div>
-))}
-
+        ))}
       </div>
 
       {/* Create Patient Modal */}
@@ -322,13 +345,15 @@ function PatientManagement() {
           <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Create New Patient</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Create New Patient
+                </h2>
                 <button
                   onClick={() => {
                     setShowModal(false);
                     setError("");
                     setFormData({
-                      name: "", 
+                      name: "",
                       dateOfBirth: "",
                       address: "",
                       email: "",
@@ -343,6 +368,10 @@ function PatientManagement() {
                       city: "",
                       district: "",
                       dispostalCodet: "",
+
+                      // ✅ added
+                      hospital: "",
+
                       guardianRelationship: "",
                       guardianEmail: "",
                       medicalConditions: "",
@@ -552,10 +581,10 @@ function PatientManagement() {
                     className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      City <span className="text-red-500">*</span>
+                    City <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -593,6 +622,27 @@ function PatientManagement() {
                     required
                     className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
                   />
+                </div>
+
+                {/* ✅ Hospital dropdown (added) */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Hospital <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="hospital"
+                    value={formData.hospital}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Select hospital</option>
+                    {hospitals.map((h) => (
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -639,7 +689,7 @@ function PatientManagement() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Allergies  <span className="text-red-500">*</span>
+                    Allergies <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -653,7 +703,7 @@ function PatientManagement() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Current Medications  <span className="text-red-500">*</span>
+                    Current Medications <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -664,7 +714,6 @@ function PatientManagement() {
                     className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
                   />
                 </div>
-
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
@@ -689,6 +738,10 @@ function PatientManagement() {
                       city: "",
                       district: "",
                       dispostalCodet: "",
+
+                      // ✅ added
+                      hospital: "",
+
                       guardianRelationship: "",
                       guardianEmail: "",
                       medicalConditions: "",
@@ -730,7 +783,6 @@ function PatientManagement() {
 
             <form onSubmit={handleUpdatePatient} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                 <input
                   name="name"
                   value={editFormData.name}
@@ -864,6 +916,26 @@ function PatientManagement() {
                   placeholder="Postal Code"
                 />
 
+                {/* ✅ Hospital dropdown (added) */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Hospital
+                  </label>
+                  <select
+                    name="hospital"
+                    value={editFormData.hospital}
+                    onChange={handleEditInputChange}
+                    className="w-full h-10 px-3 rounded-lg border bg-white"
+                  >
+                    <option value="">Select hospital</option>
+                    {hospitals.map((h) => (
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <input
                   name="guardianRelationship"
                   value={editFormData.guardianRelationship}
@@ -920,7 +992,6 @@ function PatientManagement() {
                   className="w-full px-3 py-2 rounded-lg border"
                   placeholder="Emergency Notes"
                 />
-
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
@@ -942,7 +1013,6 @@ function PatientManagement() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
