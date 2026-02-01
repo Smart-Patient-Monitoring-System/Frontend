@@ -12,13 +12,24 @@ const HealthDataTab = () => {
     const [workoutSessions, setWorkoutSessions] = useState([]);
     const [selectedSessionId, setSelectedSessionId] = useState(null);
     const [aggregatedData, setAggregatedData] = useState(null);
+    const [patientId, setPatientId] = useState(null);
 
-    // Load sessions from backend on mount
+    // Get patient ID from localStorage on mount
+    useEffect(() => {
+        try {
+            const id = healthDataApi.getPatientId();
+            setPatientId(id);
+        } catch (error) {
+            console.error('Error getting patient ID:', error);
+        }
+    }, []);
+
+    // Load sessions from backend when patientId is available
     useEffect(() => {
         const loadSessions = async () => {
+            if (!patientId) return;
+            
             try {
-                // TODO: Replace with actual patient ID from authentication context
-                const patientId = 'patient123';
                 const sessions = await healthDataApi.getWorkoutSessions(patientId);
 
                 // Convert backend format to frontend format
@@ -43,7 +54,7 @@ const HealthDataTab = () => {
         };
 
         loadSessions();
-    }, []);
+    }, [patientId]);
 
     // Get the selected session or most recent session for display
     const currentSession = selectedSessionId
@@ -118,7 +129,9 @@ const HealthDataTab = () => {
 
             // Save to backend
             try {
-                const patientId = 'patient123'; // TODO: get from auth context
+                if (!patientId) {
+                    throw new Error('Patient ID not found. Please login again.');
+                }
                 const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
                 const file = new File([blob], fileName, { type: 'application/json' });
 
@@ -171,7 +184,9 @@ const HealthDataTab = () => {
 
     const handleDeleteSession = async (sessionId) => {
         try {
-            const patientId = 'patient123'; // TODO: get from auth context
+            if (!patientId) {
+                throw new Error('Patient ID not found. Please login again.');
+            }
             await healthDataApi.deleteWorkoutSession(parseInt(sessionId), patientId);
         } catch (error) {
             console.error('Error deleting session:', error);
