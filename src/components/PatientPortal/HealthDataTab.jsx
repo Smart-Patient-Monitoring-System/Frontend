@@ -8,53 +8,89 @@ import { parseAppleHealthData, parseGoogleFitData, parseCustomHealthData, aggreg
 import * as healthDataApi from '../../services/healthDataApi';
 import WorkoutSessionTimeline from './WorkoutSessionTimeline';
 
+// Parse healthData from backend based on source (Apple Health, Google Fit, or Custom)
+const parseSessionHealthData = (session) => {
+    const raw = session.healthData;
+    if (!raw) return null;
+    try {
+        if (session.source === 'Apple Health' && raw.data) {
+            return parseAppleHealthData(raw);
+        }
+        if (session.source === 'Google Fit' && raw.bucket) {
+            return parseGoogleFitData(raw);
+        }
+        // Custom or fallback: inner data object or full object
+        const data = raw.data != null ? raw.data : raw;
+        return parseCustomHealthData(data);
+    } catch (err) {
+        console.warn('Failed to parse health data for session', session.id, err);
+        return null;
+    }
+};
+
+// Empty health data shape so UI doesn't break when parse fails
+const emptyHealthData = () => ({
+    steps: [], heartRate: [], spo2: [], sleep: [], calories: [], distance: [],
+    workouts: [], flights: [], weight: [],
+    activityRings: { move: { current: 0, goal: 600 }, exercise: { current: 0, goal: 30 }, stand: { current: 0, goal: 12 } }
+});
+
 const HealthDataTab = () => {
     const [workoutSessions, setWorkoutSessions] = useState([]);
     const [selectedSessionId, setSelectedSessionId] = useState(null);
     const [aggregatedData, setAggregatedData] = useState(null);
-    const [patientId, setPatientId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(null);
 
-    // Get patient ID from localStorage on mount
+    // Load sessions from backend on mount and when returning to tab (e.g. after refresh)
     useEffect(() => {
-        try {
-            const id = healthDataApi.getPatientId();
-            setPatientId(id);
-        } catch (error) {
-            console.error('Error getting patient ID:', error);
-        }
-    }, []);
-
-    // Load sessions from backend when patientId is available
-    useEffect(() => {
+        let cancelled = false;
         const loadSessions = async () => {
-            if (!patientId) return;
-            
+            const patientId = localStorage.getItem('patientId');
+            const token = localStorage.getItem('token');
+            if (!patientId || !token) {
+                setLoading(false);
+                setLoadError('Please log in to view your health data.');
+                setWorkoutSessions([]);
+                return;
+            }
+            setLoadError(null);
+            setLoading(true);
             try {
                 const sessions = await healthDataApi.getWorkoutSessions(patientId);
-
-                // Convert backend format to frontend format
-                const formattedSessions = sessions.map(session => ({
-                    id: session.id.toString(),
-                    name: session.name,
-                    uploadDate: session.uploadDate,
-                    healthData: parseCustomHealthData(session.healthData.data),
-                    source: session.source
-                }));
-
+                if (cancelled) return;
+                const list = Array.isArray(sessions) ? sessions : [];
+                const formattedSessions = list.map(session => {
+                    const healthData = parseSessionHealthData(session) || emptyHealthData();
+                    return {
+                        id: String(session.id),
+                        name: session.name || 'Untitled',
+                        uploadDate: session.uploadDate,
+                        healthData,
+                        source: session.source || 'Custom Health Data'
+                    };
+                });
                 setWorkoutSessions(formattedSessions);
-
-                // Set aggregated data for first session
                 if (formattedSessions.length > 0) {
-                    const aggregated = aggregateHealthData(formattedSessions[0].healthData);
-                    setAggregatedData(aggregated);
+                    setAggregatedData(aggregateHealthData(formattedSessions[0].healthData));
+                } else {
+                    setAggregatedData(null);
                 }
             } catch (error) {
+                if (cancelled) return;
                 console.error('Error loading workout sessions:', error);
+                setLoadError(error?.response?.status === 401
+                    ? 'Session expired. Please log in again.'
+                    : 'Failed to load health data. Please try again.');
+                setWorkoutSessions([]);
+                setAggregatedData(null);
+            } finally {
+                if (!cancelled) setLoading(false);
             }
         };
-
         loadSessions();
-    }, [patientId]);
+        return () => { cancelled = true; };
+    }, []);
 
     // Get the selected session or most recent session for display
     const currentSession = selectedSessionId
@@ -129,13 +165,14 @@ const HealthDataTab = () => {
 
             // Save to backend
             try {
-                if (!patientId) {
+                const patientIdFromStorage = localStorage.getItem('patientId');
+                if (!patientIdFromStorage) {
                     throw new Error('Patient ID not found. Please login again.');
                 }
                 const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
                 const file = new File([blob], fileName, { type: 'application/json' });
 
-                const response = await healthDataApi.uploadWorkoutSession(patientId, metadata.name, file);
+                const response = await healthDataApi.uploadWorkoutSession(patientIdFromStorage, metadata.name, file);
                 const backendSession = response.session;
 
                 const newSession = {
@@ -184,10 +221,11 @@ const HealthDataTab = () => {
 
     const handleDeleteSession = async (sessionId) => {
         try {
-            if (!patientId) {
+            const patientIdFromStorage = localStorage.getItem('patientId');
+            if (!patientIdFromStorage) {
                 throw new Error('Patient ID not found. Please login again.');
             }
-            await healthDataApi.deleteWorkoutSession(parseInt(sessionId), patientId);
+            await healthDataApi.deleteWorkoutSession(parseInt(sessionId), patientIdFromStorage);
         } catch (error) {
             console.error('Error deleting session:', error);
         }
@@ -246,7 +284,26 @@ const HealthDataTab = () => {
 
     return (
         <div className="space-y-6">
-            <HealthDataUpload onDataUploaded={handleDataUploaded} />
+            {loading && (
+                <div className="bg-white rounded-2xl shadow-md p-8 text-center">
+                    <div className="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-gray-600 font-medium">Loading your health data...</p>
+                </div>
+            )}
+
+            {loadError && !loading && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+                    <p className="text-amber-800 font-medium mb-3">{loadError}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium"
+                    >
+                        Retry
+                    </button>
+                </div>
+            )}
+
+            {!loading && <HealthDataUpload onDataUploaded={handleDataUploaded} />}
 
             {workoutSessions.length > 0 && (
                 <WorkoutSessionTimeline
@@ -415,7 +472,7 @@ const HealthDataTab = () => {
                 </>
             )}
 
-            {!healthData && (
+            {!healthData && !loadError && !loading && (
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-12 text-center border-2 border-dashed border-blue-200">
                     <div className="max-w-md mx-auto">
                         <Activity className="w-20 h-20 text-blue-400 mx-auto mb-4" />
