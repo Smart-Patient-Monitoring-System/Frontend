@@ -19,6 +19,7 @@ import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
 import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
+import HealthDataTab from "../../components/PatientPortal/HealthDataTab";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
@@ -192,6 +193,9 @@ const PatientPortal = () => {
               <ReportsCard />
             </div>
           )}
+
+          {/* Health Data */}
+          {currentTab === "Health Data" && <HealthDataTab />}
 
           {/* AI Assistant - Responsive height */}
           {currentTab === "AI Health Assistant" && (

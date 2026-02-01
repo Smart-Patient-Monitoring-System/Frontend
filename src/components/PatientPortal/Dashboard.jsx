@@ -13,6 +13,7 @@ const Dashboard = ({ onTabChange }) => {
     "Bookings",
     "Emergency Panel",
     "Medical Records",
+    "Health Data",
     "Messaging",
     "AI Health Assistant"
   ];
@@ -53,11 +54,10 @@ const Dashboard = ({ onTabChange }) => {
               <button
                 key={tab}
                 onClick={() => handleTabClick(tab)}
-                className={`w-full text-left px-4 py-3 rounded-lg font-medium text-sm transition-all ${
-                  activeTab === tab
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium text-sm transition-all ${activeTab === tab
                     ? "bg-blue-500 text-white"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 {tab}
               </button>
@@ -75,11 +75,10 @@ const Dashboard = ({ onTabChange }) => {
               <button
                 key={tab}
                 onClick={() => handleTabClick(tab)}
-                className={`px-4 xl:px-6 py-2 rounded-full font-medium text-xs xl:text-sm transition-all duration-200 whitespace-nowrap ${
-                  activeTab === tab
+                className={`px-4 xl:px-6 py-2 rounded-full font-medium text-xs xl:text-sm transition-all duration-200 whitespace-nowrap ${activeTab === tab
                     ? "bg-blue-500 text-white shadow-md"
                     : "bg-transparent text-gray-600 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 {tab}
               </button>
@@ -103,11 +102,10 @@ const Dashboard = ({ onTabChange }) => {
             <button
               key={tab}
               onClick={() => handleTabClick(tab)}
-              className={`px-4 py-2 rounded-full font-medium text-xs transition-all whitespace-nowrap ${
-                activeTab === tab
+              className={`px-4 py-2 rounded-full font-medium text-xs transition-all whitespace-nowrap ${activeTab === tab
                   ? "bg-blue-500 text-white shadow-md"
                   : "bg-transparent text-gray-600 hover:bg-gray-100"
-              }`}
+                }`}
             >
               {tab}
             </button>
