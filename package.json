@@ -8,12 +8,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@stomp/stompjs": "^7.2.1",
+    "@stomp/stompjs": "^7.3.0",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",
     "cookie": "^1.1.1",
-    "emoji-picker-react": "^4.17.1",
+    "emoji-picker-react": "^4.17.3",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
