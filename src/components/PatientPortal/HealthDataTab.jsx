@@ -187,7 +187,7 @@ const HealthDataTab = () => {
             setAggregatedData(aggregated);
         } catch (error) {
             console.error('Error processing health data:', error);
-            const msg = error.response?.data?.message || error.message || 'Error processing health data. Please check the file format.';
+            const msg = error.response?.data?.message || error.response?.data?.error || error.message || 'Error processing health data. Please check the file format.';
             // We re-throw so the child component can show the error state
             throw new Error(msg);
         }

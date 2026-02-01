@@ -77,12 +77,20 @@ const HealthDataUpload = ({ onDataUploaded }) => {
                     if (onDataUploaded) {
                         await onDataUploaded(jsonData, pendingFile.name, metadata);
                     }
+
                     setUploadStatus('success');
+                    // setTimeout(() => setUploadStatus("idle"), 3000); 
                     setPendingFile(null);
                 } catch (error) {
                     console.error("Upload error:", error);
                     setUploadStatus('error');
-                    setErrorMessage(error.message || 'Error processing file');
+
+                    if (error.message && error.message.includes("Duplicate")) {
+                        setErrorMessage("Duplicate Upload: This file has already been uploaded.");
+                    } else {
+                        setErrorMessage(error.message || 'Error processing file');
+                    }
+
                     setPendingFile(null);
                 } finally {
                     setUploading(false);
