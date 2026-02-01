@@ -133,7 +133,7 @@ const HealthDataTab = () => {
                 // Provide detailed error message about the JSON structure
                 const foundKeys = Object.keys(jsonData).join(', ');
                 console.error('Unrecognized JSON structure. Found keys:', foundKeys);
-                console.log('Full JSON structure:', jsonData);
+
 
                 // Additional diagnostics for 'data' key
                 let additionalInfo = '';
@@ -164,45 +164,32 @@ const HealthDataTab = () => {
             }
 
             // Save to backend
-            try {
-                const patientIdFromStorage = localStorage.getItem('patientId');
-                if (!patientIdFromStorage) {
-                    throw new Error('Patient ID not found. Please login again.');
-                }
-                const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
-                const file = new File([blob], fileName, { type: 'application/json' });
-
-                const response = await healthDataApi.uploadWorkoutSession(patientIdFromStorage, metadata.name, file);
-                const backendSession = response.session;
-
-                const newSession = {
-                    id: backendSession.id.toString(),
-                    name: backendSession.name,
-                    uploadDate: backendSession.uploadDate,
-                    healthData: parsedData,
-                    source: backendSession.source
-                };
-
-                setWorkoutSessions(prev => [newSession, ...prev]);
-                const aggregated = aggregateHealthData(parsedData);
-                setAggregatedData(aggregated);
-            } catch (apiError) {
-                console.error('Backend error:', apiError);
-                // Fallback to local storage
-                const newSession = {
-                    id: Date.now().toString(),
-                    name: metadata.name,
-                    uploadDate: workoutDate.toISOString().split('T')[0],
-                    healthData: parsedData,
-                    source: source
-                };
-                setWorkoutSessions(prev => [newSession, ...prev]);
-                const aggregated = aggregateHealthData(parsedData);
-                setAggregatedData(aggregated);
+            const patientIdFromStorage = localStorage.getItem('patientId');
+            if (!patientIdFromStorage) {
+                throw new Error('Patient ID not found. Please login again.');
             }
+            const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
+            const file = new File([blob], fileName, { type: 'application/json' });
+
+            const response = await healthDataApi.uploadWorkoutSession(patientIdFromStorage, metadata.name, file);
+            const backendSession = response.session;
+
+            const newSession = {
+                id: backendSession.id.toString(),
+                name: backendSession.name,
+                uploadDate: backendSession.uploadDate,
+                healthData: parsedData,
+                source: backendSession.source
+            };
+
+            setWorkoutSessions(prev => [newSession, ...prev]);
+            const aggregated = aggregateHealthData(parsedData);
+            setAggregatedData(aggregated);
         } catch (error) {
             console.error('Error processing health data:', error);
-            alert(error.message || 'Error processing health data. Please check the file format.');
+            const msg = error.response?.data?.message || error.message || 'Error processing health data. Please check the file format.';
+            // We re-throw so the child component can show the error state
+            throw new Error(msg);
         }
     };
 

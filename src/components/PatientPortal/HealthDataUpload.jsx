@@ -74,16 +74,15 @@ const HealthDataUpload = ({ onDataUploaded }) => {
                 try {
                     const jsonData = JSON.parse(e.target.result);
 
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-
-                    setUploadStatus('success');
                     if (onDataUploaded) {
-                        onDataUploaded(jsonData, pendingFile.name, metadata);
+                        await onDataUploaded(jsonData, pendingFile.name, metadata);
                     }
+                    setUploadStatus('success');
                     setPendingFile(null);
                 } catch (error) {
+                    console.error("Upload error:", error);
                     setUploadStatus('error');
-                    setErrorMessage('Invalid JSON format. Please check your file.');
+                    setErrorMessage(error.message || 'Error processing file');
                     setPendingFile(null);
                 } finally {
                     setUploading(false);
