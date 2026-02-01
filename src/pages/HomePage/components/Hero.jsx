@@ -28,9 +28,38 @@ function Hero({ stats }) {
           <div className="mb-8 sm:mb-12">
             <button
               onClick={() => navigate("/role-selection")}
-              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:from-teal-700 hover:to-cyan-700 transition-all shadow-lg hover:shadow-xl"
+              className="
+                relative
+                inline-flex items-center gap-3
+                bg-white
+                text-teal-700
+                px-8 sm:px-10 py-4 sm:py-5
+                rounded-xl
+                font-bold text-base sm:text-lg
+                border-2 border-teal-600
+                shadow-[0_4px_0_0_rgb(13,148,136)]
+                transition-all duration-200 ease-out
+                hover:shadow-[0_2px_0_0_rgb(13,148,136)]
+                hover:translate-y-0.5
+                active:shadow-[0_0_0_0_rgb(13,148,136)]
+                active:translate-y-1
+                group
+                overflow-hidden
+              "
             >
-              SIGN-UP
+              {/* Background pattern on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-50 to-cyan-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              {/* Button content */}
+              <span className="relative z-10 flex items-center gap-3">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <span className="tracking-wide">GET STARTED</span>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
             </button>
           </div>
 
@@ -49,8 +78,8 @@ function Hero({ stats }) {
         <div className="relative order-first lg:order-last">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-teal-200">
             <img
-              src="/download.jpg"
-              alt="Healthcare professional using monitoring system"
+              src="doc.webp"
+              alt="doc"
               className="w-full h-auto object-cover"
             />
           </div>
