@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import CriticalAlertPage from "./CriticalAlertPage";
 import ECGReaderPage from "./ECGReaderPage";
 
-import DoctorMessagesPanel from "../../components/PatientPortal/MessagingDashboard";
+import DoctorMessagesPanel from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorMessagingDashboard"; 
+
 
 import { useNavigate } from "react-router-dom";
 import {
@@ -538,19 +539,25 @@ function DocDashboard() {
                           <td className="py-4 px-4">
                             <button
   className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium"
-  onClick={() =>
+  onClick={() => {
+    // save for refresh-safety
+    localStorage.setItem("profilePatientId", String(patient.rawId || ""));
+    localStorage.setItem("profilePatientName", patient.name || "");
+
+    // navigate with state (best way)
     navigate("/DocViewPatient", {
       state: {
-        patientId: patient.rawId,          //  IMPORTANT
-        patientName: patient.name,         // optional
-        returnTo: "/DocDashboard",         // back route that exists in App.jsx
+        patientId: patient.rawId,
+        patientName: patient.name,
+        returnTo: "/DocDashboard",
       },
-    })
-  }
+    });
+  }}
 >
-                              <Eye className="w-4 h-4" />
-                              View
-                            </button>
+  <Eye className="w-4 h-4" />
+  View
+</button>
+
                           </td>
                         </tr>
                       ))}

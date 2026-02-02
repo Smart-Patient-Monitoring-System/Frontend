@@ -86,7 +86,7 @@ const DoctorPatientView = () => {
           No patient selected. Please go back and click “View”.
           <button
             className="ml-3 px-4 py-2 bg-red-600 text-white rounded-lg"
-            onClick={() => navigate("/doctor-dashboard")}
+            onClick={() => navigate("/DocDashboard")}
           >
             Go Back
           </button>
@@ -102,7 +102,7 @@ const DoctorPatientView = () => {
       <Header
         isDoctorView={true}
         profileName={patientName}
-        backPath="/doctor-dashboard"
+        backPath="/DocDashboard"
       />
 
       {/* Patient Info - Responsive padding */}

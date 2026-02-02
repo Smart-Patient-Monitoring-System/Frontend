@@ -38,7 +38,6 @@ export default function LoginPageDoctor() {
       });
 
       if (!response.ok) {
-        // Try to get error message from response
         let errorMessage = "Invalid email or password";
         try {
           const errorData = await response.json();
@@ -55,6 +54,14 @@ export default function LoginPageDoctor() {
 
       const data = await response.json();
 
+      // 🔍 DIAGNOSTIC: Log the entire API response
+      console.log("===========================================");
+      console.log("🔍 FULL API RESPONSE FROM LOGIN:");
+      console.log(JSON.stringify(data, null, 2));
+      console.log("===========================================");
+      console.log("Available fields:", Object.keys(data));
+      console.log("===========================================");
+
       if (data.otpRequired) {
         setLoginSessionId(data.loginSessionId);
         setStep("OTP");
@@ -62,17 +69,94 @@ export default function LoginPageDoctor() {
         return;
       }
 
+      // Store token
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", "DOCTOR");
+
+      // 🔍 Try ALL possible ID field names
+      const possibleIdFields = [
+        'doctorId', 'id', 'userId', 'user_id', 'doctor_id', 
+        'user', 'doctorID', 'userID', 'ID', 'Id'
+      ];
+      
+      let foundId = null;
+      for (const field of possibleIdFields) {
+        if (data[field] !== undefined && data[field] !== null) {
+          foundId = data[field];
+          console.log(`✅ Found ID in field "${field}":`, foundId);
+          
+          // If it's an object (like data.user), try to extract ID from it
+          if (typeof foundId === 'object' && foundId !== null) {
+            const nestedId = foundId.id || foundId.doctorId || foundId.userId;
+            if (nestedId !== undefined && nestedId !== null) {
+              console.log(`✅ Found nested ID:`, nestedId);
+              foundId = nestedId;
+            }
+          }
+          break;
+        }
+      }
+
+      if (foundId) {
+        localStorage.setItem("userId", foundId.toString());
+        console.log("✅ Stored userId:", foundId);
+      } else {
+        console.error("❌ Could not find doctor ID in any known field!");
+        console.error("Available data:", data);
+      }
+
+      // 🔍 Try ALL possible name field names
+      const possibleNameFields = [
+        'name', 'username', 'doctorName', 'fullName', 'full_name',
+        'doctor_name', 'userName', 'user_name', 'displayName'
+      ];
+      
+      let foundName = null;
+      for (const field of possibleNameFields) {
+        if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
+          foundName = data[field];
+          console.log(`✅ Found name in field "${field}":`, foundName);
+          
+          // If it's an object (like data.user), try to extract name from it
+          if (typeof foundName === 'object' && foundName !== null) {
+            const nestedName = foundName.name || foundName.username || foundName.fullName;
+            if (nestedName !== undefined && nestedName !== null && nestedName !== '') {
+              console.log(`✅ Found nested name:`, nestedName);
+              foundName = nestedName;
+            }
+          }
+          break;
+        }
+      }
+
+      if (foundName) {
+        localStorage.setItem("userName", foundName);
+        console.log("✅ Stored userName:", foundName);
+      } else {
+        console.warn("⚠️ Could not find doctor name - using default");
+        localStorage.setItem("userName", "Doctor");
+      }
+
+      // Store user object for compatibility
       localStorage.setItem(
         "user",
         JSON.stringify({
-          username: data.username,
-          role: data.role?.toLowerCase() || "doctor",
+          username: foundName || data.username || "Doctor",
+          role: "doctor",
         })
       );
 
+      console.log("===========================================");
+      console.log("✅ FINAL LOCALSTORAGE VALUES:");
+      console.log("Token:", localStorage.getItem("token")?.substring(0, 30) + "...");
+      console.log("User ID:", localStorage.getItem("userId"));
+      console.log("User Name:", localStorage.getItem("userName"));
+      console.log("User Role:", localStorage.getItem("userRole"));
+      console.log("===========================================");
+
       navigate("/DocDashboard");
     } catch (err) {
+      console.error("❌ Login error:", err);
       setError("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
@@ -114,17 +198,102 @@ export default function LoginPageDoctor() {
 
       const data = await response.json();
 
+      // 🔍 DIAGNOSTIC: Log the entire API response
+      console.log("===========================================");
+      console.log("🔍 FULL API RESPONSE FROM OTP VERIFICATION:");
+      console.log(JSON.stringify(data, null, 2));
+      console.log("===========================================");
+      console.log("Available fields:", Object.keys(data));
+      console.log("===========================================");
+
+      // Store token
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", "DOCTOR");
+
+      // 🔍 Try ALL possible ID field names
+      const possibleIdFields = [
+        'doctorId', 'id', 'userId', 'user_id', 'doctor_id', 
+        'user', 'doctorID', 'userID', 'ID', 'Id'
+      ];
+      
+      let foundId = null;
+      for (const field of possibleIdFields) {
+        if (data[field] !== undefined && data[field] !== null) {
+          foundId = data[field];
+          console.log(`✅ Found ID in field "${field}":`, foundId);
+          
+          // If it's an object (like data.user), try to extract ID from it
+          if (typeof foundId === 'object' && foundId !== null) {
+            const nestedId = foundId.id || foundId.doctorId || foundId.userId;
+            if (nestedId !== undefined && nestedId !== null) {
+              console.log(`✅ Found nested ID:`, nestedId);
+              foundId = nestedId;
+            }
+          }
+          break;
+        }
+      }
+
+      if (foundId) {
+        localStorage.setItem("userId", foundId.toString());
+        console.log("✅ Stored userId:", foundId);
+      } else {
+        console.error("❌ Could not find doctor ID in any known field!");
+        console.error("Available data:", data);
+      }
+
+      // 🔍 Try ALL possible name field names
+      const possibleNameFields = [
+        'name', 'username', 'doctorName', 'fullName', 'full_name',
+        'doctor_name', 'userName', 'user_name', 'displayName'
+      ];
+      
+      let foundName = null;
+      for (const field of possibleNameFields) {
+        if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
+          foundName = data[field];
+          console.log(`✅ Found name in field "${field}":`, foundName);
+          
+          // If it's an object (like data.user), try to extract name from it
+          if (typeof foundName === 'object' && foundName !== null) {
+            const nestedName = foundName.name || foundName.username || foundName.fullName;
+            if (nestedName !== undefined && nestedName !== null && nestedName !== '') {
+              console.log(`✅ Found nested name:`, nestedName);
+              foundName = nestedName;
+            }
+          }
+          break;
+        }
+      }
+
+      if (foundName) {
+        localStorage.setItem("userName", foundName);
+        console.log("✅ Stored userName:", foundName);
+      } else {
+        console.warn("⚠️ Could not find doctor name - using default");
+        localStorage.setItem("userName", "Doctor");
+      }
+
+      // Store user object for compatibility
       localStorage.setItem(
         "user",
         JSON.stringify({
-          username: data.username,
-          role: data.role?.toLowerCase() || "doctor",
+          username: foundName || data.username || "Doctor",
+          role: "doctor",
         })
       );
 
+      console.log("===========================================");
+      console.log("✅ FINAL LOCALSTORAGE VALUES:");
+      console.log("Token:", localStorage.getItem("token")?.substring(0, 30) + "...");
+      console.log("User ID:", localStorage.getItem("userId"));
+      console.log("User Name:", localStorage.getItem("userName"));
+      console.log("User Role:", localStorage.getItem("userRole"));
+      console.log("===========================================");
+
       navigate("/DocDashboard");
     } catch (err) {
+      console.error("❌ OTP verification error:", err);
       setError("Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
@@ -141,7 +310,6 @@ export default function LoginPageDoctor() {
           {/* HOME BUTTON */}
           <button
             onClick={() => navigate("/")}
-
             className="relative w-[120px] h-[42px] rounded-full 
             bg-gradient-to-r from-[#057EF8] to-[#0DC0BD]
             flex items-center justify-center pl-9

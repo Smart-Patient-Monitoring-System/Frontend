@@ -6,8 +6,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 const Header = ({
   profileName: profileNameProp,
   isDoctorView = true,
-  // ✅ your real route in App.jsx
-  backPath = "/DocDashboard",
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,6 +14,9 @@ const Header = ({
   const [showAlerts, setShowAlerts] = useState(false);
   const [profileName, setProfileName] = useState("Patient");
 
+  // where to return (from navigate state)
+  const returnTo = location.state?.returnTo || "/DocDashboard";
+
   useEffect(() => {
     if (profileNameProp) {
       setProfileName(profileNameProp);
@@ -23,34 +24,21 @@ const Header = ({
     }
 
     const name =
+      location.state?.patientName ||
       localStorage.getItem("profilePatientName") ||
       localStorage.getItem("patientName");
 
     if (name) setProfileName(name);
-  }, [profileNameProp]);
+  }, [profileNameProp, location.state]);
 
-  // ✅ best back logic: use state.returnTo if available, else go back, else default dashboard
   const handleBack = () => {
-    const returnTo = location.state?.returnTo;
-
-    if (returnTo) {
-      navigate(returnTo);
-      return;
-    }
-
-    // if user came from another page, go back
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-
-    // fallback
-    navigate(backPath);
+    // go back to the dashboard that opened this view
+    navigate(returnTo);
   };
 
   const title = isDoctorView ? "Patient Profile" : "Patient Portal";
   const subtitle = isDoctorView
-    ? `Welcome to ${profileName}'s profile`
+    ? `Viewing ${profileName}'s profile`
     : `Welcome back, ${profileName}`;
 
   return (
@@ -74,11 +62,11 @@ const Header = ({
 
         {/* RIGHT */}
         <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-end">
+          {/* GO BACK */}
           {isDoctorView && (
             <button
               onClick={handleBack}
               className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg border border-blue-200 transition-colors"
-              title="Back to Doctor Dashboard"
               type="button"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -86,7 +74,7 @@ const Header = ({
             </button>
           )}
 
-          {/* DARK MODE (UI only) */}
+          {/* DARK MODE UI toggle only */}
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className={`relative w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors ${
