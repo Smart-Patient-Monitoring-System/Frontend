@@ -28,7 +28,6 @@ export async function deleteDoctor(doctorId) {
   return handleResponse(res);
 }
 
-
 export async function updateDoctor(doctorId, data) {
   const token = localStorage.getItem("token");
 

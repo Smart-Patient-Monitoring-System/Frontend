@@ -203,7 +203,7 @@ function PatientManagement() {
         setError("");
 
         const data = await fetchPatient();
-              setPatient(data || []);
+              setPatient(response.data || []);
             } catch (e) {
               setError("Unable to connect to server. Please try again.");
             } finally {
@@ -305,7 +305,7 @@ function PatientManagement() {
               </button>
 
               <button
-                  onClick={() => handleDelete(patient.Id)}
+                  onClick={() => handleDelete(patient.id)}
                   className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
               >
               Delete
