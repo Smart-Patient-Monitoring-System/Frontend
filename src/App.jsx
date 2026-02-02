@@ -105,8 +105,7 @@ function App() {
         <Route path="/DocDashboard" element={<DocDashboard />} />
         <Route path="/DocViewPatient" element={<DocViewPatient />} />
 
-        <Route path="/AdminDashboard" element={<AdminDashboard />} />
-        <Route path="/AdminDashboard/confirm-appointments" element={<AdminConfirmAppointments />} />
+        <Route path="/AdminDashboard/AdminConfirmAppointments" element={<AdminConfirmAppointments />} />
 
       </Routes>
     </Router>
