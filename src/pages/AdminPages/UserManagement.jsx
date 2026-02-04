@@ -39,6 +39,8 @@ function UserManagement() {
     hospital: "",
   });
 
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -58,8 +60,6 @@ function UserManagement() {
     doc.name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  
-
   const handleDelete = async (doctorId) => {
     if (!window.confirm("Reject this doctor?")) return;
   
@@ -73,8 +73,9 @@ function UserManagement() {
       alert("Doctor rejected successfully");
     } catch (error) {
       console.error(error);
-      alert("Failed to reject doctor")}
-    };
+      alert("Failed to reject doctor");
+    }
+  };
 
   const handleEdit = (doctor) => {
     setEditDoctorId(doctor.id || doctor.Id);
@@ -94,6 +95,12 @@ function UserManagement() {
 
     setShowEditModal(true);
   }; 
+
+  // New handler for View button
+  const handleView = (doctor) => {
+    setSelectedDoctor(doctor);
+    setShowViewModal(true);
+  };
   
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
@@ -161,11 +168,10 @@ function UserManagement() {
       setError("Unable to connect to server. Please try again.");
     } finally {
       setSubmitting(false);
-
     }
   };
 
-    const handleUpdateDoctor = async (e) => {
+  const handleUpdateDoctor = async (e) => {
     e.preventDefault();
 
     try {
@@ -181,8 +187,6 @@ function UserManagement() {
       alert(err.message || "Failed to update doctor");
     }
   };
-
-
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
@@ -216,37 +220,27 @@ function UserManagement() {
         {filteredDoctors.map((doctor) => (
           <div
             key={doctor.id}
-            className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
+            className="flex justify-between items-center bg-gray-50 p-4 rounded-xl"
           >
-            {/* LEFT SIDE – Doctor Info */}
+            {/* LEFT SIDE – Doctor Info (simplified) */}
             <div className="space-y-1">
               <p className="font-medium text-gray-800">
                 {doctor.name}
               </p>
-
               <p className="text-sm text-gray-500">
-                {doctor.position} · {doctor.doctorRegNo}
+                {doctor.position}
               </p>
-
-              <p className="text-sm text-gray-500">
-                {doctor.hospital}
-              </p>
-
-              <p className="text-sm text-gray-500">
-                📧 {doctor.email}
-              </p>
-
-              <p className="text-sm text-gray-500">
-                📞 {doctor.contactNo}
-              </p>
-
-              <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-                {doctor.gender}
-              </span>
             </div>
 
             {/* RIGHT SIDE – ACTION BUTTONS */}
-            <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleView(doctor)}
+                className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+              >
+                View
+              </button>
+
               <button
                 onClick={() => handleEdit(doctor)}
                 className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
@@ -255,16 +249,71 @@ function UserManagement() {
               </button>
 
               <button
-                  onClick={() => handleDelete(doctor.Id)}
-                  className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+                onClick={() => handleDelete(doctor.Id)}
+                className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
               >
-              Delete
+                Delete
               </button>
             </div>
           </div>
-))}
-
+        ))}
       </div>
+
+      {/* View Doctor Modal */}
+        {showViewModal && selectedDoctor && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden">
+              
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex justify-between items-center">
+                <h2 className="text-white text-xl font-semibold">
+                  Doctor Profile
+                </h2>
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="text-white text-2xl hover:opacity-80"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  {/* Left column */}
+                  <InfoItem label="Full Name" value={selectedDoctor.name} />
+                  <InfoItem label="Doctor Registration No" value={selectedDoctor.doctorRegNo} />
+                  <InfoItem label="Position" value={selectedDoctor.position} />
+                  <InfoItem label="Hospital" value={selectedDoctor.hospital} />
+                  <InfoItem label="Email" value={selectedDoctor.email} />
+                  <InfoItem label="Contact Number" value={selectedDoctor.contactNo} />
+
+                  {/* Right column */}
+                  <InfoItem label="Date of Birth" value={selectedDoctor.dateOfBirth} />
+                  <InfoItem label="Gender" value={selectedDoctor.gender} />
+                  <InfoItem label="NIC Number" value={selectedDoctor.nicNo} />
+
+                  {/* Full width */}
+                  <div className="md:col-span-2">
+                    <InfoItem label="Address" value={selectedDoctor.address} />
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 flex justify-end">
+                  <button
+                    onClick={() => setShowViewModal(false)}
+                    className="px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
 
       {/* Create Doctor Modal */}
       {showModal && (
@@ -532,6 +581,7 @@ function UserManagement() {
         </div>
       )}
 
+      {/* Edit Doctor Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -547,7 +597,6 @@ function UserManagement() {
 
             <form onSubmit={handleUpdateDoctor} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                 <input
                   name="name"
                   value={editFormData.name}
@@ -640,9 +689,20 @@ function UserManagement() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
+
+const InfoItem = ({ label, value }) => (
+  <div className="bg-gray-50 rounded-xl p-4">
+    <p className="text-xs text-gray-500 font-semibold mb-1">
+      {label}
+    </p>
+    <p className="text-gray-800 font-medium">
+      {value || "-"}
+    </p>
+  </div>
+);
+
 
 export default UserManagement;
