@@ -25,6 +25,8 @@ const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
   const [showManualEntry, setShowManualEntry] = useState(false);
 
+  const patientId = localStorage.getItem("patientId");
+
   const vitals = [
     {
       title: "Heart Rate",
@@ -157,7 +159,7 @@ const PatientPortal = () => {
                 {/* Column 1 — Appointments + Reports */}
                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
                   <AppointmentsCard />
-                  <ReportsCard />
+                  <ReportsCard  patientId={patientId}/>
                 </div>
 
                 {/* Column 2 — Medications + Emergency */}
@@ -190,12 +192,12 @@ const PatientPortal = () => {
           {/* Medical Records */}
           {currentTab === "Medical Records" && (
             <div className="space-y-4 sm:space-y-5 md:space-y-6">
-              <ReportsCard />
+              <ReportsCard  patientId={patientId}/>
             </div>
           )}
 
           {/* Health Data */}
-          {currentTab === "Health Data" && <HealthDataTab />}
+          {currentTab === "Health Data from smart watch" && <HealthDataTab />}
 
           {/* AI Assistant - Responsive height */}
           {currentTab === "AI Health Assistant" && (
