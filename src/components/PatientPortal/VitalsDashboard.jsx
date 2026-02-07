@@ -10,14 +10,23 @@ export default function VitalsDashboard({ patientId, refreshKey = 0 }) {
   const fetchLatestVitals = async () => {
     if (!patientId || !token) return;
 
-    const res = await fetch(`${API_BASE}/api/patients/${patientId}/medical-summary`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `${API_BASE}/api/patients/${patientId}/medical-summary`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
     if (!res.ok) return;
 
     const data = await res.json();
-    setLatestVitals(data?.latestVitals || null);
+
+    //  IMPORTANT: sometimes backend puts data in payload, sometimes flattened
+    // we support BOTH to avoid undefined issues
+    const raw = data?.latestVitals || null;
+    const payload = raw?.payload || raw || null;
+
+    setLatestVitals(payload);
   };
 
   useEffect(() => {
@@ -29,9 +38,10 @@ export default function VitalsDashboard({ patientId, refreshKey = 0 }) {
   const temp = latestVitals?.temp ?? "--";
   const spo2 = latestVitals?.spo2 ?? "--";
   const bp = latestVitals?.bp ?? "--";
+  const sugar = latestVitals?.sugarLevel ?? "--";
 
-  // optional (if you add sugarLevel into payload)
-  const sugar = latestVitals?.sugarLevel ?? null;
+  //  If sugar is "--" (not available), don't show it.
+  const showSugar = sugar !== "--" && sugar !== null && sugar !== undefined && sugar !== "";
 
   const cards = [
     {
@@ -80,8 +90,8 @@ export default function VitalsDashboard({ patientId, refreshKey = 0 }) {
     },
   ];
 
-  // If you want sugar card as 5th (optional)
-  if (sugar !== null) {
+  // Sugar level card (5th)
+  if (showSugar) {
     cards.push({
       title: "Sugar Level",
       value: sugar,
@@ -95,6 +105,9 @@ export default function VitalsDashboard({ patientId, refreshKey = 0 }) {
     });
   }
 
+  // IMPORTANT:
+  // If you show 5 cards, grid-cols-4 will wrap nicely into next row.
+  // If you want all 5 in one row on large screens, change lg:grid-cols-4 -> lg:grid-cols-5
   return (
     <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
       {cards.map((c, idx) => (
