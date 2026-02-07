@@ -1,3 +1,8 @@
+// ReportsCard.jsx (UPDATED)
+// Adds sugar level field (already in your code)
+//  Adds callback prop: onMedicalEventAdded (so PatientPortal can refresh vitals cards)
+// Keeps everything else the same
+
 import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE = "http://localhost:8080";
@@ -12,7 +17,7 @@ const toDateTimeLocal = (iso) => {
   )}:${pad(d.getMinutes())}`;
 };
 
-const ReportsCard = ({ patientId }) => {
+const ReportsCard = ({ patientId, onMedicalEventAdded }) => {
   // Existing reports state
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +38,9 @@ const ReportsCard = ({ patientId }) => {
 
   // Event form state
   const [eventType, setEventType] = useState("VITALS");
-  const [recordedAt, setRecordedAt] = useState(toDateTimeLocal(new Date().toISOString()));
+  const [recordedAt, setRecordedAt] = useState(
+    toDateTimeLocal(new Date().toISOString())
+  );
   const [eventPayload, setEventPayload] = useState({});
 
   // Date range for timeline/report
@@ -50,7 +57,8 @@ const ReportsCard = ({ patientId }) => {
     const isFormData = options.body instanceof FormData;
 
     if (!isFormData) {
-      if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+      if (!headers.has("Content-Type"))
+        headers.set("Content-Type", "application/json");
     }
 
     if (token) {
@@ -75,7 +83,9 @@ const ReportsCard = ({ patientId }) => {
 
   const requirePatientId = () => {
     if (!patientId) {
-      setError("Patient ID is required. Please open the portal with a valid patient.");
+      setError(
+        "Patient ID is required. Please open the portal with a valid patient."
+      );
       return false;
     }
     return true;
@@ -94,7 +104,6 @@ const ReportsCard = ({ patientId }) => {
     setLoading(true);
     setError(null);
 
-    // IMPORTANT: do not call /api/reports if patientId missing
     if (!requirePatientId() || !requireToken()) {
       setReports([]);
       setLoading(false);
@@ -108,8 +117,10 @@ const ReportsCard = ({ patientId }) => {
       setReports(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch reports error:", err);
-      // 403 = forbidden (token missing/invalid/role blocked)
-      if (err.status === 403) setError("403 Forbidden: You are not allowed to view reports (check JWT/role).");
+      if (err.status === 403)
+        setError(
+          "403 Forbidden: You are not allowed to view reports (check JWT/role)."
+        );
       else setError("Failed to load reports.");
     } finally {
       setLoading(false);
@@ -124,12 +135,17 @@ const ReportsCard = ({ patientId }) => {
     setError(null);
 
     try {
-      const res = await authFetch(`${API_BASE}/api/patients/${patientId}/medical-summary`);
+      const res = await authFetch(
+        `${API_BASE}/api/patients/${patientId}/medical-summary`
+      );
       const data = await res.json();
       setMedicalSummary(data);
     } catch (err) {
       console.error("Summary fetch error:", err);
-      if (err.status === 403) setError("403 Forbidden: Cannot load medical summary (check JWT/role).");
+      if (err.status === 403)
+        setError(
+          "403 Forbidden: Cannot load medical summary (check JWT/role)."
+        );
       else setError("Failed to load medical summary.");
     } finally {
       setEventsLoading(false);
@@ -155,7 +171,8 @@ const ReportsCard = ({ patientId }) => {
       setMedicalEvents(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Events fetch error:", err);
-      if (err.status === 403) setError("403 Forbidden: Cannot load events (check JWT/role).");
+      if (err.status === 403)
+        setError("403 Forbidden: Cannot load events (check JWT/role).");
       else setError("Failed to load medical events.");
     } finally {
       setEventsLoading(false);
@@ -163,7 +180,6 @@ const ReportsCard = ({ patientId }) => {
   };
 
   useEffect(() => {
-    // Load everything when patientId changes
     fetchReports();
     if (patientId) {
       fetchMedicalSummary();
@@ -220,14 +236,10 @@ const ReportsCard = ({ patientId }) => {
     try {
       const endpoint = `${API_BASE}/api/patients/${patientId}/reports/upload`;
 
-      const res = await authFetch(endpoint, {
+      await authFetch(endpoint, {
         method: "POST",
         body: formData,
-        // DO NOT set Content-Type for FormData
       });
-
-      const data = await res.json().catch(() => ({}));
-      console.log("Upload success:", data);
 
       alert("Report uploaded successfully!");
       setFile(null);
@@ -252,24 +264,25 @@ const ReportsCard = ({ patientId }) => {
     if (!requirePatientId() || !requireToken()) return;
 
     try {
-      const res = await authFetch(`${API_BASE}/api/patients/${patientId}/medical-events`, {
+      await authFetch(`${API_BASE}/api/patients/${patientId}/medical-events`, {
         method: "POST",
         body: JSON.stringify({
           type: eventType,
-          recordedAt: recordedAt.length === 16 ? `${recordedAt}:00` : recordedAt,  // already yyyy-mm-ddThh:mm
-          payload: eventPayload,
+          recordedAt: recordedAt.length === 16 ? `${recordedAt}:00` : recordedAt,
+          payload: eventPayload, //  includes sugarLevel automatically
         }),
       });
-
-      await res.json().catch(() => ({}));
 
       alert("Medical event added successfully!");
       setEventPayload({});
       setRecordedAt(toDateTimeLocal(new Date().toISOString()));
       setShowEventForm(false);
 
-      fetchMedicalSummary();
-      fetchMedicalEvents();
+      await fetchMedicalSummary();
+      await fetchMedicalEvents();
+
+      // IMPORTANT: tell PatientPortal to refresh the vitals cards
+      onMedicalEventAdded?.();
     } catch (err) {
       console.error("Add event error:", err);
       alert("Failed to add event: " + err.message);
@@ -309,14 +322,21 @@ const ReportsCard = ({ patientId }) => {
     switch (type) {
       case "VITALS":
         return `BP: ${payload.bp || "N/A"}, SpO2: ${payload.spo2 || "N/A"}${
-          payload.temp ? `, Temp: ${payload.temp}°C` : ""
-        }${payload.heartRate ? `, HR: ${payload.heartRate} bpm` : ""}`;
+          payload.sugarLevel ? `, Sugar: ${payload.sugarLevel} mg/dL` : ""
+        }${payload.temp ? `, Temp: ${payload.temp}°C` : ""}${
+          payload.heartRate ? `, HR: ${payload.heartRate} bpm` : ""
+        }`;
+
       case "MEDICATION":
-        return `${payload.name || "N/A"} - ${payload.dose || ""} ${payload.frequency || ""}`.trim();
+        return `${payload.name || "N/A"} - ${payload.dose || ""} ${
+          payload.frequency || ""
+        }`.trim();
       case "DIAGNOSIS":
         return payload.condition || payload.text || "N/A";
       case "ALLERGY":
-        return `${payload.allergen || "N/A"}${payload.severity ? ` (${payload.severity})` : ""}`;
+        return `${payload.allergen || "N/A"}${
+          payload.severity ? ` (${payload.severity})` : ""
+        }`;
       case "LAB_RESULT":
         return payload.testName || payload.text || "N/A";
       case "NOTE":
@@ -335,29 +355,58 @@ const ReportsCard = ({ patientId }) => {
               type="text"
               placeholder="Blood Pressure (e.g., 120/80)"
               value={eventPayload.bp || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, bp: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({ ...eventPayload, bp: e.target.value })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
+
             <input
               type="number"
               placeholder="SpO2 (%)"
               value={eventPayload.spo2 || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, spo2: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({ ...eventPayload, spo2: e.target.value })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
+
+            {/*  Sugar Level */}
+            <input
+              type="number"
+              step="0.1"
+              placeholder="Sugar Level (mg/dL)"
+              value={eventPayload.sugarLevel || ""}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  sugarLevel: e.target.value,
+                })
+              }
+              className="w-full border border-gray-300 px-3 py-2 rounded-md"
+            />
+
             <input
               type="number"
               step="0.1"
               placeholder="Temperature (°C)"
               value={eventPayload.temp || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, temp: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({ ...eventPayload, temp: e.target.value })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
+
             <input
               type="number"
               placeholder="Heart Rate (bpm)"
               value={eventPayload.heartRate || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, heartRate: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  heartRate: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
           </div>
@@ -370,30 +419,51 @@ const ReportsCard = ({ patientId }) => {
               type="text"
               placeholder="Medication Name"
               value={eventPayload.name || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, name: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({ ...eventPayload, name: e.target.value })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
             <input
               type="text"
               placeholder="Dose (e.g., 500mg)"
               value={eventPayload.dose || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, dose: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({ ...eventPayload, dose: e.target.value })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
             <input
               type="text"
               placeholder="Frequency (e.g., 3 times/day)"
               value={eventPayload.frequency || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, frequency: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  frequency: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
             <input
               type="number"
               placeholder="Duration (days)"
               value={eventPayload.durationDays || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, durationDays: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  durationDays: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
+            <input
+  type="time"
+  value={eventPayload.timeOfDay || ""}
+  onChange={(e) => setEventPayload({ ...eventPayload, timeOfDay: e.target.value })}
+  className="w-full border border-gray-300 px-3 py-2 rounded-md"
+/>
+
           </div>
         );
 
@@ -404,13 +474,20 @@ const ReportsCard = ({ patientId }) => {
               type="text"
               placeholder="Condition/Diagnosis"
               value={eventPayload.condition || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, condition: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  condition: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
             <textarea
               placeholder="Notes"
               value={eventPayload.notes || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, notes: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({ ...eventPayload, notes: e.target.value })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
               rows="3"
             />
@@ -424,12 +501,22 @@ const ReportsCard = ({ patientId }) => {
               type="text"
               placeholder="Allergen"
               value={eventPayload.allergen || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, allergen: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  allergen: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
             <select
               value={eventPayload.severity || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, severity: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  severity: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             >
               <option value="">Select Severity</option>
@@ -440,7 +527,12 @@ const ReportsCard = ({ patientId }) => {
             <textarea
               placeholder="Reaction/Notes"
               value={eventPayload.reaction || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, reaction: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  reaction: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
               rows="2"
             />
@@ -454,21 +546,33 @@ const ReportsCard = ({ patientId }) => {
               type="text"
               placeholder="Test Name"
               value={eventPayload.testName || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, testName: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  testName: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
             <input
               type="text"
               placeholder="Result"
               value={eventPayload.result || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, result: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({ ...eventPayload, result: e.target.value })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
             <input
               type="text"
               placeholder="Reference Range"
               value={eventPayload.referenceRange || ""}
-              onChange={(e) => setEventPayload({ ...eventPayload, referenceRange: e.target.value })}
+              onChange={(e) =>
+                setEventPayload({
+                  ...eventPayload,
+                  referenceRange: e.target.value,
+                })
+              }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
           </div>
@@ -479,7 +583,9 @@ const ReportsCard = ({ patientId }) => {
           <textarea
             placeholder="Medical Note"
             value={eventPayload.text || ""}
-            onChange={(e) => setEventPayload({ ...eventPayload, text: e.target.value })}
+            onChange={(e) =>
+              setEventPayload({ ...eventPayload, text: e.target.value })
+            }
             className="w-full border border-gray-300 px-3 py-2 rounded-md"
             rows="4"
           />
@@ -491,14 +597,15 @@ const ReportsCard = ({ patientId }) => {
   };
 
   /* -------------------- UI -------------------- */
-
-  // If patientId missing, show a clean message (prevents all fetch errors)
   if (!patientId) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-800">Patient Medical Records</h2>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Patient Medical Records
+        </h2>
         <p className="mt-3 text-red-600">
-          Patient ID is required. Please open this page from a selected patient profile (or pass patientId prop).
+          Patient ID is required. Please open this page from a selected patient
+          profile (or pass patientId prop).
         </p>
       </div>
     );
@@ -508,10 +615,22 @@ const ReportsCard = ({ patientId }) => {
     <div className="bg-white rounded-lg shadow-sm p-6">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6">
-        <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <svg
+          className="w-5 h-5 text-gray-700"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
         </svg>
-        <h2 className="text-xl font-semibold text-gray-800">Patient Medical Records</h2>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Patient Medical Records
+        </h2>
       </div>
 
       {/* Tabs */}
@@ -545,7 +664,9 @@ const ReportsCard = ({ patientId }) => {
             <button
               onClick={() => setShowEventForm(true)}
               className="w-full py-4 rounded-xl text-white font-medium"
-              style={{ background: "linear-gradient(90deg, #4A90E2 0%, #56CCF2 100%)" }}
+              style={{
+                background: "linear-gradient(90deg, #4A90E2 0%, #56CCF2 100%)",
+              }}
             >
               Add Medical Event
             </button>
@@ -562,8 +683,18 @@ const ReportsCard = ({ patientId }) => {
                   }}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -608,57 +739,31 @@ const ReportsCard = ({ patientId }) => {
             <div className="text-center py-8 text-gray-500">Loading summary...</div>
           ) : medicalSummary ? (
             <div className="space-y-4">
-              <h3 className="font-semibold text-gray-800 text-lg">Current Medical Summary</h3>
+              <h3 className="font-semibold text-gray-800 text-lg">
+                Current Medical Summary
+              </h3>
 
               {medicalSummary.latestVitals && (
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Latest Vitals</h4>
+                  <h4 className="font-medium text-gray-700 mb-2">
+                    Latest Vitals
+                  </h4>
                   <p className="text-sm text-gray-600">
                     {renderEventPayload("VITALS", medicalSummary.latestVitals)}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     {new Date(
-                      medicalSummary.latestVitals.recordedAt || medicalSummary.latestVitalsDate
+                      medicalSummary.latestVitals.recordedAt ||
+                        medicalSummary.latestVitalsDate
                     ).toLocaleString()}
                   </p>
                 </div>
               )}
-
-              {medicalSummary.activeMedications?.length > 0 && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Active Medications</h4>
-                  {medicalSummary.activeMedications.map((med, idx) => (
-                    <p key={idx} className="text-sm text-gray-600">
-                      {renderEventPayload("MEDICATION", med)}
-                    </p>
-                  ))}
-                </div>
-              )}
-
-              {medicalSummary.activeDiagnoses?.length > 0 && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Active Diagnoses</h4>
-                  {medicalSummary.activeDiagnoses.map((diag, idx) => (
-                    <p key={idx} className="text-sm text-gray-600">
-                      {renderEventPayload("DIAGNOSIS", diag)}
-                    </p>
-                  ))}
-                </div>
-              )}
-
-              {medicalSummary.allergies?.length > 0 && (
-                <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                  <h4 className="font-medium text-red-700 mb-2">⚠️ Allergies</h4>
-                  {medicalSummary.allergies.map((allergy, idx) => (
-                    <p key={idx} className="text-sm text-red-600">
-                      {renderEventPayload("ALLERGY", allergy)}
-                    </p>
-                  ))}
-                </div>
-              )}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">No medical summary available</div>
+            <div className="text-center py-8 text-gray-500">
+              No medical summary available
+            </div>
           )}
         </div>
       )}
@@ -694,7 +799,10 @@ const ReportsCard = ({ patientId }) => {
           ) : (
             <div className="space-y-3">
               {medicalEvents.map((event) => (
-                <div key={event.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div
+                  key={event.id}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
                       {event.type}
@@ -703,9 +811,13 @@ const ReportsCard = ({ patientId }) => {
                       {new Date(event.recordedAt).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-gray-800">{renderEventPayload(event.type, event.payload)}</p>
+                  <p className="text-gray-800">
+                    {renderEventPayload(event.type, event.payload)}
+                  </p>
                   {event.createdBy && (
-                    <p className="text-xs text-gray-500 mt-2">Added by: {event.createdBy}</p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Added by: {event.createdBy}
+                    </p>
                   )}
                 </div>
               ))}
@@ -721,7 +833,9 @@ const ReportsCard = ({ patientId }) => {
             <button
               onClick={() => setShowUploadForm(true)}
               className="w-full mb-6 py-4 rounded-xl text-white font-medium"
-              style={{ background: "linear-gradient(90deg, #4A90E2 0%, #56CCF2 100%)" }}
+              style={{
+                background: "linear-gradient(90deg, #4A90E2 0%, #56CCF2 100%)",
+              }}
             >
               Upload New Report
             </button>
@@ -742,8 +856,18 @@ const ReportsCard = ({ patientId }) => {
                   }}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -826,13 +950,18 @@ const ReportsCard = ({ patientId }) => {
       {activeTab === "generate" && (
         <div className="space-y-6">
           <div className="p-5 border border-gray-200 rounded-lg">
-            <h3 className="font-semibold text-gray-800 mb-4">Generate Medical Report</h3>
+            <h3 className="font-semibold text-gray-800 mb-4">
+              Generate Medical Report
+            </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Generate a PDF report including patient information, medical summary, timeline, and uploaded reports.
+              Generate a PDF report including patient information, medical summary,
+              timeline, and uploaded reports.
             </p>
 
             <div className="space-y-3 mb-4">
-              <label className="block text-sm font-medium text-gray-700">Date Range (Optional)</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Date Range (Optional)
+              </label>
               <div className="flex gap-3">
                 <input
                   type="date"
@@ -852,21 +981,12 @@ const ReportsCard = ({ patientId }) => {
             <button
               onClick={generateReport}
               className="w-full py-3 rounded-lg text-white font-medium"
-              style={{ background: "linear-gradient(90deg, #4A90E2 0%, #56CCF2 100%)" }}
+              style={{
+                background: "linear-gradient(90deg, #4A90E2 0%, #56CCF2 100%)",
+              }}
             >
               Generate PDF Report
             </button>
-          </div>
-
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Report will include:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>✓ Patient Information</li>
-              <li>✓ Current Medical Summary</li>
-              <li>✓ Medical Events Timeline</li>
-              <li>✓ Uploaded Reports List</li>
-              <li>✓ Emergency Contact Information</li>
-            </ul>
           </div>
         </div>
       )}

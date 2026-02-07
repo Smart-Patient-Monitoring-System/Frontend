@@ -6,7 +6,11 @@ import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
 import ReportsCard from "../../components/PatientPortal/ReportsCard";
 import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
 import EmergencyCard from "../../components/PatientPortal/EmergencyCard";
-import VitalCard from "../../components/PatientPortal/VitalCard";
+import VitalsTrends3Charts from "../../components/PatientPortal/VitalsTrends3Charts";
+
+// UPDATED: Use VitalsDashboard (not single VitalCard)
+import VitalsDashboard from "../../components/PatientPortal/VitalsDashboard";
+
 import GraphCard from "../../components/PatientPortal/GraphCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
@@ -20,66 +24,23 @@ import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
 import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
 import HealthDataTab from "../../components/PatientPortal/HealthDataTab";
+import DoctorNotesCard from "../DoctorViewPatient/DoctorViewComponents/DoctorNotesCard";
 
 const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
   const [showManualEntry, setShowManualEntry] = useState(false);
 
-  const patientId = localStorage.getItem("patientId");
+  // NEW: used to trigger vitals refresh after adding a new medical event
+  const [vitalsRefreshKey, setVitalsRefreshKey] = useState(0);
 
-  const vitals = [
-    {
-      title: "Heart Rate",
-      value: "72",
-      unit: "bpm",
-      status: "Stable",
-      trend: "−",
-      iconName: "heart",
-      bgColor: "bg-blue-100",
-      iconColor: "bg-blue-500",
-      barColor: "bg-blue-500",
-    },
-    {
-      title: "Temperature",
-      value: "98.2",
-      unit: "°F",
-      status: "Stable",
-      trend: "−",
-      iconName: "thermometer",
-      bgColor: "bg-orange-100",
-      iconColor: "bg-orange-600",
-      barColor: "bg-orange-500",
-    },
-    {
-      title: "SPO₂",
-      value: "98",
-      unit: "%",
-      status: "Up",
-      trend: "↗",
-      iconName: "droplets",
-      bgColor: "bg-teal-100",
-      iconColor: "bg-teal-600",
-      barColor: "bg-teal-500",
-    },
-    {
-      title: "Blood Pressure",
-      value: "120/80",
-      unit: "mmHg",
-      status: "Stable",
-      trend: "−",
-      iconName: "activity",
-      bgColor: "bg-purple-100",
-      iconColor: "bg-purple-600",
-      barColor: "bg-purple-500",
-    },
-  ];
+  const patientId = localStorage.getItem("patientId");
 
   return (
     <>
       {/* Header */}
       <Header patientName="Sarah" />
 
-      {/* Patient Info - Responsive padding */}
+      {/* Patient Info */}
       <div className="w-full bg-gray-100 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
         <PatientInfoCard
           name="Sarah Johnson"
@@ -91,7 +52,7 @@ const PatientPortal = () => {
         />
       </div>
 
-      {/* Dashboard (Tabs + Manual Entry Button) */}
+      {/* Dashboard */}
       <div className="min-h-screen bg-gray-100">
         <Dashboard
           onTabChange={(tab) => {
@@ -108,63 +69,48 @@ const PatientPortal = () => {
           <ManualEntryForm onClose={() => setShowManualEntry(false)} />
         )}
 
-        {/* Main Content - Responsive padding */}
+        {/* Main Content */}
         <div className="p-3 sm:p-4 md:p-5 lg:p-6">
           {/* Overview Tab */}
           {currentTab === "Overview" && (
             <div className="space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-10">
-              {/* Vitals - Responsive grid 
-                  Mobile: 1 column
-                  Small mobile (>480px): 2 columns
-                  Tablet: 2 columns
-                  Laptop+: 4 columns
-              */}
-              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-                {vitals.map((vital, index) => (
-                  <VitalCard key={index} {...vital} />
-                ))}
-              </div>
+              {/*  UPDATED: Dynamic vitals cards from backend (latestVitals) */}
+              <VitalsDashboard patientId={patientId} refreshKey={vitalsRefreshKey} />
 
-              {/* Graph + Health Risk 
-                  Mobile/Tablet: Stack vertically
-                  Laptop+: 2:1 ratio
-              */}
+              {/* Graph + Health Risk */}
+              <div className="lg:col-span-2">
+  <VitalsTrends3Charts patientId={patientId} />
+</div>
+
+
+              {/* ECG + Health Tips */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 <div className="lg:col-span-2">
-                  <GraphCard />
-                </div>
-                <div>
                   <HealthRiskCard />
-                </div>
-              </div>
-
-              {/* ECG + Health Tips 
-                  Mobile/Tablet: Stack vertically
-                  Laptop+: 2:1 ratio
-              */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-                <div className="lg:col-span-2">
-                  <ECGMonitor />
                 </div>
                 <div>
                   <HealthTipsCard />
                 </div>
               </div>
 
-              {/* Appointments + Emergency AND Medications + Reports 
-                  Mobile: All stack vertically
-                  Tablet+: 2 columns
-              */}
+              {/* Appointments + Reports  |  Medications + Emergency */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-                {/* Column 1 — Appointments + Reports */}
+                {/* Column 1 */}
                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
                   <AppointmentsCard />
-                  <ReportsCard  patientId={patientId}/>
+
+                  {/*  UPDATED: when an event is added, refresh vitals cards */}
+                  <ReportsCard
+                    patientId={patientId}
+                    onMedicalEventAdded={() =>
+                      setVitalsRefreshKey((k) => k + 1)
+                    }
+                  />
                 </div>
 
-                {/* Column 2 — Medications + Emergency */}
+                {/* Column 2 */}
                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                  <MedicationsCard />
+                  <MedicationsCard patientId={patientId} />
                   <EmergencyCard />
                 </div>
               </div>
@@ -192,14 +138,22 @@ const PatientPortal = () => {
           {/* Medical Records */}
           {currentTab === "Medical Records" && (
             <div className="space-y-4 sm:space-y-5 md:space-y-6">
-              <ReportsCard  patientId={patientId}/>
+              <ReportsCard
+                patientId={patientId}
+                onMedicalEventAdded={() =>
+                  setVitalsRefreshKey((k) => k + 1)
+                }
+              />
             </div>
           )}
 
           {/* Health Data */}
           {currentTab === "Health Data from smart watch" && <HealthDataTab />}
 
-          {/* AI Assistant - Responsive height */}
+          {/* Doctor Consultations */}
+          {currentTab === "Doctor Consultations" && <DoctorNotesCard />}
+
+          {/* AI Assistant */}
           {currentTab === "AI Health Assistant" && (
             <div className="w-full h-[calc(100vh-200px)] sm:h-[calc(100vh-240px)] md:h-[calc(100vh-260px)] lg:h-[calc(100vh-280px)] max-w-7xl mx-auto">
               <FloatingChatbot isFullScreen={true} />
