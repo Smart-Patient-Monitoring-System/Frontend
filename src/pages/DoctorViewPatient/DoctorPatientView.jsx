@@ -143,7 +143,7 @@ const DoctorPatientView = () => {
                 </div>
 
                 {/* Vital Trends Graph */}
-                <GraphCard />
+                <GraphCard patientId={patientId}/>
               </div>
 
               {/* Right Column - Doctor's Notes and Care Team */}

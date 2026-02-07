@@ -457,6 +457,13 @@ const ReportsCard = ({ patientId, onMedicalEventAdded }) => {
               }
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
+            <input
+  type="time"
+  value={eventPayload.timeOfDay || ""}
+  onChange={(e) => setEventPayload({ ...eventPayload, timeOfDay: e.target.value })}
+  className="w-full border border-gray-300 px-3 py-2 rounded-md"
+/>
+
           </div>
         );
 

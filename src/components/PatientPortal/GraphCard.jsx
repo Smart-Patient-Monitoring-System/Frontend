@@ -1,177 +1,178 @@
-import React, { useMemo, useRef, useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { TrendingUp } from "lucide-react";
 
 const API_BASE = "http://localhost:8080";
 
-const rangeToDays = (range) => {
-  if (range === "24H") return 1;
-  if (range === "7D") return 7;
-  return 30;
+const formatDate = (d) => {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 
-const formatTimeLabel = (date, range) => {
-  const d = new Date(date);
-  if (range === "24H") {
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }
-  // 7D/30D -> show date
-  return d.toLocaleDateString([], { month: "short", day: "numeric" });
-};
-
-export default function GraphCard({ patientId }) {
+const GraphCard = ({ patientId, refreshKey = 0 }) => {
   const [timeRange, setTimeRange] = useState("24H");
-  const svgRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [points, setPoints] = useState([]); // { label, hr, spo2, sugar }
+  const [loading, setLoading] = useState(false);
 
   const token = useMemo(() => localStorage.getItem("token"), []);
 
-  const [data, setData] = useState([]); // points for chart
-  const [loading, setLoading] = useState(false);
+  const svgRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Resize observer (better than window resize only)
   useEffect(() => {
-    if (!svgRef.current) return;
-
-    const el = svgRef.current;
-    const resizeObserver = new ResizeObserver(() => {
-      setDimensions({
-        width: el.clientWidth,
-        height: el.clientHeight,
-      });
-    });
-
-    resizeObserver.observe(el);
-    setDimensions({
-      width: el.clientWidth,
-      height: el.clientHeight,
-    });
-
-    return () => resizeObserver.disconnect();
+    const updateDimensions = () => {
+      if (svgRef.current) {
+        setDimensions({
+          width: svgRef.current.clientWidth,
+          height: svgRef.current.clientHeight,
+        });
+      }
+    };
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  const fetchVitals = async () => {
-    if (!patientId || !token) return;
+  const buildRange = () => {
+    const now = new Date();
+    const to = new Date(now);
+
+    let from = new Date(now);
+    if (timeRange === "24H") from.setDate(from.getDate() - 1);
+    if (timeRange === "7D") from.setDate(from.getDate() - 7);
+    if (timeRange === "30D") from.setDate(from.getDate() - 30);
+
+    // backend supports date-only (LocalDate.parse)
+    return { from: formatDate(from), to: formatDate(to) };
+  };
+
+  const safeNum = (v) => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const fetchVitalsSeries = async () => {
+    if (!patientId || !token) {
+      setPoints([]);
+      return;
+    }
+
+    const { from, to } = buildRange();
+    const url = `${API_BASE}/api/patients/${patientId}/medical-events?from=${from}&to=${to}`;
 
     setLoading(true);
     try {
-      const days = rangeToDays(timeRange);
-
-      const to = new Date();
-      const from = new Date();
-      from.setDate(to.getDate() - days);
-
-      // Query format: YYYY-MM-DD
-      const toStr = to.toISOString().slice(0, 10);
-      const fromStr = from.toISOString().slice(0, 10);
-
-      const res = await fetch(
-        `${API_BASE}/api/patients/${patientId}/medical-events?from=${fromStr}&to=${toStr}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!res.ok) {
-        setData([]);
+        setPoints([]);
         return;
       }
 
       const events = await res.json();
 
-      // Keep only VITALS events, sort by recordedAt
       const vitals = (Array.isArray(events) ? events : [])
-        .filter((e) => e.type === "VITALS")
-        .sort((a, b) => new Date(a.recordedAt) - new Date(b.recordedAt));
+        .filter((e) => (e?.type || "").toUpperCase() === "VITALS")
+        .map((e) => {
+          const dt = new Date(e.recordedAt);
+          const p = e.payload || {};
+          return {
+            dt,
+            hr: safeNum(p.heartRate),
+            spo2: safeNum(p.spo2),
+            sugar: safeNum(p.sugarLevel),
+          };
+        })
+        .filter((x) => x.dt instanceof Date && !isNaN(x.dt.getTime()))
+        .sort((a, b) => a.dt - b.dt);
 
-      // Convert to chart points
-      const points = vitals.map((e) => {
-        const payload = e.payload || e; // support both formats
-        return {
-          time: formatTimeLabel(e.recordedAt, timeRange),
-          recordedAt: e.recordedAt,
-          heartRate: payload.heartRate != null ? Number(payload.heartRate) : null,
-          spo2: payload.spo2 != null ? Number(payload.spo2) : null,
-          sugarLevel: payload.sugarLevel != null ? Number(payload.sugarLevel) : null,
-        };
+      // Build labels:
+      // 24H -> HH:00 labels
+      // 7D/30D -> YYYY-MM-DD labels
+      const mapped = vitals.map((v) => {
+        let label = "";
+        if (timeRange === "24H") {
+          label = `${String(v.dt.getHours()).padStart(2, "0")}:00`;
+        } else {
+          label = formatDate(v.dt);
+        }
+        return { label, hr: v.hr, spo2: v.spo2, sugar: v.sugar };
       });
 
-      setData(points);
+      setPoints(mapped);
+    } catch (e) {
+      setPoints([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchVitals();
+    fetchVitalsSeries();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientId, timeRange]);
+  }, [patientId, timeRange, refreshKey]);
 
-  /* ---------------- CHART SCALES ---------------- */
+  // ---------------- CHART MATH ----------------
   const padding = { top: 20, right: 20, bottom: 40, left: 50 };
-  const width = dimensions.width || 0;
-  const height = dimensions.height || 0;
+  const innerWidth = Math.max(0, dimensions.width - padding.left - padding.right);
+  const innerHeight = Math.max(0, dimensions.height - padding.top - padding.bottom);
 
-  const innerWidth = Math.max(0, width - padding.left - padding.right);
-  const innerHeight = Math.max(0, height - padding.top - padding.bottom);
+  const xScale = (i) => padding.left + (i / Math.max(1, points.length - 1)) * innerWidth;
 
-  const xScale = (index) => {
-    if (data.length <= 1) return padding.left;
-    return padding.left + (index / (data.length - 1)) * innerWidth;
+  const getMinMax = (arr) => {
+    const vals = arr.filter((v) => v !== null && v !== undefined);
+    if (vals.length === 0) return { min: 0, max: 1 };
+    let min = vals[0], max = vals[0];
+    for (const v of vals) {
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    // add small padding
+    const pad = (max - min) * 0.15 || 5;
+    return { min: min - pad, max: max + pad };
   };
 
-  // Dynamic min/max for HR
-  const hrValues = data.map((d) => d.heartRate).filter((v) => v != null);
-  const hrMin = hrValues.length ? Math.min(...hrValues) : 60;
-  const hrMax = hrValues.length ? Math.max(...hrValues) : 100;
-  const hrPad = 5;
-  const hrDomainMin = Math.floor((hrMin - hrPad) / 5) * 5;
-  const hrDomainMax = Math.ceil((hrMax + hrPad) / 5) * 5;
+  const hrRange = getMinMax(points.map((p) => p.hr));
+  const spo2Range = getMinMax(points.map((p) => p.spo2));
+  const sugarRange = getMinMax(points.map((p) => p.sugar));
 
-  const yScaleHR = (value) => {
-    if (value == null) return null;
-    const t = (value - hrDomainMin) / (hrDomainMax - hrDomainMin || 1);
+  const yScale = (value, range) => {
+    if (value === null || value === undefined) return null;
+    const { min, max } = range;
+    const t = (value - min) / (max - min || 1);
     return padding.top + innerHeight - t * innerHeight;
   };
 
-  // SpO2 usually 90-100
-  const yScaleSpo2 = (value) => {
-    if (value == null) return null;
-    const spo2Min = 90;
-    const spo2Max = 100;
-    const t = (value - spo2Min) / (spo2Max - spo2Min || 1);
-    return padding.top + innerHeight - t * innerHeight;
-  };
-
-  // Path builder (skips null points)
-  const makePath = (key, yScaleFn) => {
-    let started = false;
-    let path = "";
-
-    data.forEach((d, i) => {
-      const y = yScaleFn(d[key]);
-      if (y == null) {
-        started = false;
-        return;
-      }
+  const buildPath = (key, range) => {
+    let d = "";
+    points.forEach((p, i) => {
+      const y = yScale(p[key], range);
+      if (y === null) return;
       const x = xScale(i);
-      path += `${started ? "L" : "M"} ${x} ${y} `;
-      started = true;
+      d += `${d ? " L" : "M"} ${x} ${y}`;
     });
-
-    return path.trim();
+    return d;
   };
 
-  const heartRatePath = makePath("heartRate", yScaleHR);
-  const spo2Path = makePath("spo2", yScaleSpo2);
-  // const sugarPath = makePath("sugarLevel", yScaleSugar); // if you add sugar chart scale
+  const hrPath = buildPath("hr", hrRange);
+  const spo2Path = buildPath("spo2", spo2Range);
+  const sugarPath = buildPath("sugar", sugarRange);
 
-  // Y axis ticks for HR (like screenshot)
-  const hrTicks = [];
-  for (let v = hrDomainMin; v <= hrDomainMax; v += 10) hrTicks.push(v);
+  const hasAnyData =
+    points.some((p) => p.hr !== null) ||
+    points.some((p) => p.spo2 !== null) ||
+    points.some((p) => p.sugar !== null);
 
-  const xLabelStep = timeRange === "24H" ? 4 : timeRange === "7D" ? 1 : 2;
+  // basic ticks for HR axis display (just for grid)
+  const hrTicks = [0, 1, 2, 3, 4].map((i) => {
+    const t = i / 4;
+    return hrRange.min + t * (hrRange.max - hrRange.min);
+  });
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 w-full max-w-full">
-      {/* HEADER */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -179,7 +180,9 @@ export default function GraphCard({ patientId }) {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Vitals Trends</h2>
-            <p className="text-sm text-gray-500">Historical monitoring data</p>
+            <p className="text-sm text-gray-500">
+              {loading ? "Loading..." : "Historical monitoring data"}
+            </p>
           </div>
         </div>
 
@@ -200,106 +203,105 @@ export default function GraphCard({ patientId }) {
         </div>
       </div>
 
-      {/* CHART */}
       <div className="relative w-full overflow-hidden h-64 sm:h-72 md:h-80 lg:h-96">
         <svg
           ref={svgRef}
-          viewBox={`0 0 ${width} ${height}`}
+          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
           className="w-full h-full"
-          preserveAspectRatio="none"
+          preserveAspectRatio="xMidYMid meet"
         >
-          {/* If no size yet, skip drawing */}
-          {width > 0 && height > 0 && (
-            <>
-              {/* Loading / empty */}
-              {loading && (
+          {/* Grid + HR tick labels */}
+          {hrTicks.map((val, idx) => {
+            const y = yScale(val, hrRange);
+            return (
+              <React.Fragment key={idx}>
+                <line
+                  x1={padding.left}
+                  y1={y}
+                  x2={dimensions.width - padding.right}
+                  y2={y}
+                  stroke="#e5e7eb"
+                />
                 <text
-                  x={width / 2}
-                  y={height / 2}
-                  textAnchor="middle"
+                  x={padding.left - 10}
+                  y={y}
+                  textAnchor="end"
+                  alignmentBaseline="middle"
                   fill="#9ca3af"
-                  fontSize="14"
+                  fontSize="11"
                 >
-                  Loading...
+                  {Math.round(val)}
                 </text>
-              )}
+              </React.Fragment>
+            );
+          })}
 
-              {!loading && data.length === 0 && (
-                <text
-                  x={width / 2}
-                  y={height / 2}
-                  textAnchor="middle"
-                  fill="#9ca3af"
-                  fontSize="14"
-                >
-                  No vitals data
-                </text>
-              )}
+          {/* X labels */}
+          {points.map((p, i) =>
+            points.length <= 1 ? null : i % Math.ceil(points.length / 6) === 0 ? (
+              <text
+                key={i}
+                x={xScale(i)}
+                y={dimensions.height - padding.bottom + 20}
+                textAnchor="middle"
+                fill="#9ca3af"
+                fontSize="11"
+              >
+                {p.label}
+              </text>
+            ) : null
+          )}
 
-              {/* Y GRID + HR labels */}
-              {hrTicks.map((val) => (
-                <React.Fragment key={val}>
-                  <line
-                    x1={padding.left}
-                    y1={yScaleHR(val)}
-                    x2={width - padding.right}
-                    y2={yScaleHR(val)}
-                    stroke="#e5e7eb"
-                  />
-                  <text
-                    x={padding.left - 10}
-                    y={yScaleHR(val)}
-                    textAnchor="end"
-                    alignmentBaseline="middle"
-                    fill="#9ca3af"
-                    fontSize="11"
-                  >
-                    {val}
-                  </text>
-                </React.Fragment>
-              ))}
+          {/* Lines */}
+          {spo2Path && (
+            <path
+              d={spo2Path}
+              fill="none"
+              stroke="#14b8a6"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
 
-              {/* X labels */}
-              {data.map((d, i) =>
-                i % xLabelStep === 0 ? (
-                  <text
-                    key={i}
-                    x={xScale(i)}
-                    y={height - padding.bottom + 20}
-                    textAnchor="middle"
-                    fill="#9ca3af"
-                    fontSize="11"
-                  >
-                    {d.time}
-                  </text>
-                ) : null
-              )}
+          {hrPath && (
+            <path
+              d={hrPath}
+              fill="none"
+              stroke="#3b82f6"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
 
-              {/* LINES */}
-              {/* SpO2 (green like your screenshot) */}
-              <path
-                d={spo2Path}
-                fill="none"
-                stroke="#14b8a6"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+          {/* Sugar (optional line) */}
+          {sugarPath && (
+            <path
+              d={sugarPath}
+              fill="none"
+              stroke="#eab308"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
 
-              {/* Heart Rate (blue like your screenshot) */}
-              <path
-                d={heartRatePath}
-                fill="none"
-                stroke="#3b82f6"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </>
+          {/* Empty label */}
+          {!loading && !hasAnyData && (
+            <text
+              x={dimensions.width / 2}
+              y={dimensions.height / 2}
+              textAnchor="middle"
+              fill="#9ca3af"
+              fontSize="14"
+            >
+              No vitals data
+            </text>
           )}
         </svg>
 
-        {/* LEGEND */}
+        {/* Legend */}
         <div className="flex items-center justify-center gap-6 mt-4 flex-wrap">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full" />
@@ -309,14 +311,14 @@ export default function GraphCard({ patientId }) {
             <div className="w-3 h-3 bg-teal-500 rounded-full" />
             <span className="text-sm text-gray-600">SpO₂ (%)</span>
           </div>
-
-          {/* enable if you add sugar line */}
-          {/* <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-yellow-500 rounded-full" />
             <span className="text-sm text-gray-600">Sugar (mg/dL)</span>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default GraphCard;

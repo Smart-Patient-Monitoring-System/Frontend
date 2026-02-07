@@ -6,6 +6,7 @@ import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
 import ReportsCard from "../../components/PatientPortal/ReportsCard";
 import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
 import EmergencyCard from "../../components/PatientPortal/EmergencyCard";
+import VitalsTrends3Charts from "../../components/PatientPortal/VitalsTrends3Charts";
 
 // UPDATED: Use VitalsDashboard (not single VitalCard)
 import VitalsDashboard from "../../components/PatientPortal/VitalsDashboard";
@@ -77,19 +78,15 @@ const PatientPortal = () => {
               <VitalsDashboard patientId={patientId} refreshKey={vitalsRefreshKey} />
 
               {/* Graph + Health Risk */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-                <div className="lg:col-span-2">
-                  <GraphCard />
-                </div>
-                <div>
-                  <HealthRiskCard />
-                </div>
-              </div>
+              <div className="lg:col-span-2">
+  <VitalsTrends3Charts patientId={patientId} />
+</div>
+
 
               {/* ECG + Health Tips */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 <div className="lg:col-span-2">
-                  <ECGMonitor />
+                  <HealthRiskCard />
                 </div>
                 <div>
                   <HealthTipsCard />
@@ -113,7 +110,7 @@ const PatientPortal = () => {
 
                 {/* Column 2 */}
                 <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                  <MedicationsCard />
+                  <MedicationsCard patientId={patientId} />
                   <EmergencyCard />
                 </div>
               </div>
