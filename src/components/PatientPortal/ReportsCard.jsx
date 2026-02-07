@@ -308,9 +308,12 @@ const ReportsCard = ({ patientId }) => {
   const renderEventPayload = (type, payload = {}) => {
     switch (type) {
       case "VITALS":
-        return `BP: ${payload.bp || "N/A"}, SpO2: ${payload.spo2 || "N/A"}${
-          payload.temp ? `, Temp: ${payload.temp}°C` : ""
-        }${payload.heartRate ? `, HR: ${payload.heartRate} bpm` : ""}`;
+  return `BP: ${payload.bp || "N/A"}, SpO2: ${payload.spo2 || "N/A"}${
+    payload.sugarLevel ? `, Sugar: ${payload.sugarLevel} mg/dL` : ""
+  }${payload.temp ? `, Temp: ${payload.temp}°C` : ""}${
+    payload.heartRate ? `, HR: ${payload.heartRate} bpm` : ""
+  }`;
+
       case "MEDICATION":
         return `${payload.name || "N/A"} - ${payload.dose || ""} ${payload.frequency || ""}`.trim();
       case "DIAGNOSIS":
@@ -360,6 +363,17 @@ const ReportsCard = ({ patientId }) => {
               onChange={(e) => setEventPayload({ ...eventPayload, heartRate: e.target.value })}
               className="w-full border border-gray-300 px-3 py-2 rounded-md"
             />
+            <input
+  type="number"
+  step="0.1"
+  placeholder="Sugar Level (mg/dL)"
+  value={eventPayload.sugarLevel || ""}
+  onChange={(e) =>
+    setEventPayload({ ...eventPayload, sugarLevel: e.target.value })
+  }
+  className="w-full border border-gray-300 px-3 py-2 rounded-md"
+/>
+
           </div>
         );
 
