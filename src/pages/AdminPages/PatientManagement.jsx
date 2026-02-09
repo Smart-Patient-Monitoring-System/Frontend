@@ -281,6 +281,12 @@ function PatientManagement() {
     {/* RIGHT SIDE – ACTION BUTTONS */}
     <div className="flex flex-col gap-2">
               <button
+                onClick={() => handleView(patient)}
+                className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+              >
+                View
+              </button>
+              <button
                 onClick={() => handleEdit(patient)}
                 className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
               >
@@ -295,9 +301,69 @@ function PatientManagement() {
               </button>
             </div>
           </div>
-))}
-
+        ))}
       </div>
+
+      {/* View Patient Modal */}
+        {showViewModal && selectedPatient && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden">
+              
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex justify-between items-center">
+                <h2 className="text-white text-xl font-semibold">
+                  Patient Profile
+                </h2>
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="text-white text-2xl hover:opacity-80"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  <InfoItem label="Full Name" value={selectedPatient.name} />
+                  <InfoItem label="Email" value={selectedPatient.email} />
+                  <InfoItem label="Contact Number" value={selectedPatient.contactNo} />
+                  <InfoItem label="NIC Number" value={selectedPatient.nicNo} />
+                  <InfoItem label="Gender" value={selectedPatient.gender} />
+
+                  {/* Right column */}
+                  <InfoItem label="Date of Birth" value={selectedPatient.dateOfBirth} />
+                  <InfoItem label="Blood Type" value={selectedPatient.bloodType} />
+                  <InfoItem label="Address" value={selectedPatient.address} />
+                  <InfoItem label="City" value={selectedPatient.city} />
+                  <InfoItem label="District" value={selectedPatient.district} />
+                  <InfoItem label="Postal Code" value={selectedPatient.dispostalCodet} />
+
+                  {/* Guardian Details */}
+                  <InfoItem label="Guardian Name" value={selectedPatient.guardiansName} />
+                  <InfoItem label="Guardian Contact Number" value={selectedPatient.guardiansContactNo} />
+                  <InfoItem label="Guardian Relationship" value={selectedPatient.guardianRelationship} />
+                  <InfoItem label="Guardian Email" value={selectedPatient.guardianEmail} />
+                  {/* Full width */}
+                  <div className="md:col-span-2">
+                    <InfoItem label="Address" value={selectedDoctor.address} />
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 flex justify-end">
+                  <button
+                    onClick={() => setShowViewModal(false)}
+                    className="px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* Create Patient Modal */}
       {showModal && (
