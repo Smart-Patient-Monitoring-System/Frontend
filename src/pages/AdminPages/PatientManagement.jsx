@@ -279,7 +279,7 @@ function PatientManagement() {
     </div>
 
     {/* RIGHT SIDE – ACTION BUTTONS */}
-    <div className="flex flex-col gap-2">
+    <div className="flex gap-2">
               <button
                 onClick={() => handleView(patient)}
                 className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
@@ -346,9 +346,6 @@ function PatientManagement() {
                   <InfoItem label="Guardian Relationship" value={selectedPatient.guardianRelationship} />
                   <InfoItem label="Guardian Email" value={selectedPatient.guardianEmail} />
                   {/* Full width */}
-                  <div className="md:col-span-2">
-                    <InfoItem label="Address" value={selectedDoctor.address} />
-                  </div>
                 </div>
 
                 {/* Footer */}
@@ -995,5 +992,16 @@ function PatientManagement() {
     </div>
   );
 }
+
+const InfoItem = ({ label, value }) => (
+  <div className="bg-gray-50 rounded-xl p-4">
+    <p className="text-xs text-gray-500 font-semibold mb-1">
+      {label}
+    </p>
+    <p className="text-gray-800 font-medium">
+      {value || "-"}
+    </p>
+  </div>
+);
 
 export default PatientManagement;
