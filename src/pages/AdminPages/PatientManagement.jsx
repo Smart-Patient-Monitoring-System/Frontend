@@ -60,6 +60,9 @@ function PatientManagement() {
       pastSurgeries: "",
       emergencyNotes: "",
       });
+//new
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [selectedPatient, setSelectedPatient] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -116,7 +119,11 @@ function PatientManagement() {
 
     setShowEditModal(true);
   };   
-  
+  //new
+  const handleView = (patient) => {
+    setSelectedPatient(patient);
+    setShowViewModal(true);
+  };
 
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
