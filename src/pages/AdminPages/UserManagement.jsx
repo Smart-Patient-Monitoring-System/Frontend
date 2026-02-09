@@ -96,7 +96,7 @@ function UserManagement() {
     setShowEditModal(true);
   }; 
 
-  // New handler for View button
+  // View button
   const handleView = (doctor) => {
     setSelectedDoctor(doctor);
     setShowViewModal(true);
@@ -222,7 +222,7 @@ function UserManagement() {
             key={doctor.id}
             className="flex justify-between items-center bg-gray-50 p-4 rounded-xl"
           >
-            {/* LEFT SIDE – Doctor Info (simplified) */}
+            {/* LEFT SIDE – Doctor Info */}
             <div className="space-y-1">
               <p className="font-medium text-gray-800">
                 {doctor.name}

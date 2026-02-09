@@ -270,35 +270,11 @@ function PatientManagement() {
     key={patient.id}
     className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
   >
-    {/* Patient Info */}
+    {/* Leftside-Patient Info */}
     <div className="space-y-1">
       <p className="font-medium text-gray-800">
         {patient.name}
       </p>
-
-      <p className="text-sm text-gray-500">
-        {patient.dateOfBirth} 
-      </p>
-
-      <p className="text-sm text-gray-500">
-        {patient.address}
-      </p>
-
-      <p className="text-sm text-gray-500">
-        📧 {patient.email}
-      </p>
-
-      <p className="font-medium text-gray-800">
-        {patient.nicNo}
-      </p>
-    
-      <p className="text-sm text-gray-500">
-        📞 {patient.contactNo}
-      </p>
-
-      <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-        {patient.gender}
-      </span>
 
     </div>
 
