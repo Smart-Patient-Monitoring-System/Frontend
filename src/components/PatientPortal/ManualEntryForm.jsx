@@ -61,7 +61,7 @@ const ManualEntryForm = ({ onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setSubmitting(true);
@@ -84,10 +84,14 @@ const ManualEntryForm = ({ onClose, onSuccess }) => {
 
       console.log("Submitting vital signs:", apiData);
 
+      // Get the JWT token from localStorage
+      const token = localStorage.getItem("token");
+
       const response = await fetch("http://localhost:8080/api/vital-signs/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify(apiData),
       });
@@ -101,14 +105,14 @@ const ManualEntryForm = ({ onClose, onSuccess }) => {
       console.log("Submission successful:", result);
 
       alert("Health data submitted successfully!");
-      
+
       // Call success callback if provided
       if (onSuccess) {
         onSuccess(result);
       }
-      
+
       onClose();
-      
+
     } catch (error) {
       console.error("Submission error:", error);
       setErrors({ general: error.message || "Failed to submit data. Please try again." });

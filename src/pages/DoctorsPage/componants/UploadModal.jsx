@@ -17,23 +17,75 @@ function UploadModal({ open, onClose, onAnalyze }) {
     }
 
     const formData = new FormData();
-    formData.append("patientId", patientId);
     formData.append("dat_file", datFile);
     formData.append("hea_file", heaFile);
 
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        "http://localhost:8080/api/ecg/analyze", // ✅ FIXED
+      // Step 1: Send files directly to VitalReports for ECG analysis
+      const ecgRes = await axios.post(
+        "http://localhost:8083/api/ecg/analyze",
         formData
       );
 
-      onAnalyze(res.data);   // send data to parent
+      // Step 2: Fetch patient data from MainService
+      let patientData = null;
+      try {
+        const token = localStorage.getItem("token");
+        const patientRes = await axios.get(
+          `http://localhost:8080/api/patient/get/${patientId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        patientData = patientRes.data;
+      } catch (patientErr) {
+        console.warn("Could not fetch patient data:", patientErr.message);
+      }
+
+      // Combine ECG results + patient info
+      const combined = {
+        ...ecgRes.data,
+        ...(patientData ? { patient: patientData } : {}),
+      };
+
+      onAnalyze(combined);
+
+      // Step 3: If ECG is abnormal, create a critical alert
+      if (ecgRes.data.status === "Abnormal") {
+        try {
+          const token = localStorage.getItem("token");
+          await axios.post(
+            "http://localhost:8080/api/doctor/critical-alerts",
+            {
+              patientId: parseInt(patientId),
+              patientName: patientData?.name || `Patient #${patientId}`,
+              alertType: "ECG Abnormal",
+              heartRate: ecgRes.data.meanHR || 0,
+              triageLevel: "HIGH",
+              severity: "RED",
+              description: ecgRes.data.rationale || "Abnormal ECG detected by CNN model",
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } catch (alertErr) {
+          console.warn("Could not create critical alert:", alertErr.message);
+        }
+      }
+
       onClose();
     } catch (err) {
-      console.error(err);
-      alert("ECG analysis failed");
+      console.error("Full error:", err);
+      console.error("Response data:", err.response?.data);
+      const msg = err.response?.data?.error
+        || err.response?.data?.message
+        || (typeof err.response?.data === 'string' ? err.response.data : null)
+        || err.message
+        || "Unknown error";
+      alert("ECG analysis failed: " + msg);
     } finally {
       setLoading(false);
     }
