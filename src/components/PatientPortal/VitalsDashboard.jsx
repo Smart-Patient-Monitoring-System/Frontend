@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import VitalCard from "./VitalCard";
 
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL; 
 
 export default function VitalsDashboard({ patientId, refreshKey = 0 }) {
   const token = useMemo(() => localStorage.getItem("token"), []);

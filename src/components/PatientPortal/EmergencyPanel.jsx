@@ -17,7 +17,7 @@ import {
  * - Or use ngrok public URL.
  */
 const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL || "http://10.170.27.47:8080";
+  import.meta?.env?.VITE_API_URL || "http://10.170.27.47:8080";
 
 export default function EmergencyPanel() {
   const [panelData, setPanelData] = useState(null);

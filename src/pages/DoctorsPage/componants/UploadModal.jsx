@@ -25,7 +25,7 @@ function UploadModal({ open, onClose, onAnalyze }) {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:8080/api/ecg/analyze", // ✅ FIXED
+        `${import.meta.env.VITE_API_URL}/api/ecg/analyze`,
         formData
       );
 
