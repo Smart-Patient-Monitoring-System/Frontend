@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/pendingdoctor";
+const BASE_URL = import.meta.env.VITE_API_URL + "/api/pendingdoctor";
 
 async function handleResponse(res) {
   if (!res.ok) {

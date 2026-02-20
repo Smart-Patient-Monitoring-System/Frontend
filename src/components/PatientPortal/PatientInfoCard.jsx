@@ -19,7 +19,7 @@ const PatientInfoCard = () => {
         }
 
         // Fetch patient data from your backend
-        const response = await fetch(`http://localhost:8080/api/patient/get/${patientId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/patient/get/${patientId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

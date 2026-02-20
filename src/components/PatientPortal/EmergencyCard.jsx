@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Phone, MapPin, Clock, AlertTriangle } from "lucide-react";
 
 const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL || "http://10.170.27.47:8080";
+  import.meta?.env?.VITE_API_URL || "http://10.170.27.47:8080";
 
 export default function EmergencyCard() {
   const [panelData, setPanelData] = useState(null);

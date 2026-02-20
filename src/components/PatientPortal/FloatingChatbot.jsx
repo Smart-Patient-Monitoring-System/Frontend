@@ -36,7 +36,7 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8081/api/chat", {
+      const res = await fetch(`${import.meta.env.VITE_CHATBOT_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: inputMessage }),

@@ -63,7 +63,7 @@ class ErrorBoundary extends React.Component {
 }
 
 /* ===================== Helpers ===================== */
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 function safeNumber(v) {
   const n = Number(v);
