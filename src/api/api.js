@@ -47,6 +47,14 @@ export const getAvailableSlots = async (doctorId, date) => {
   return res.data;
 };
 
+export const getAllSlots = async (doctorId, date) => {
+  const res = await API.get(`/availability/doctor/${doctorId}/all`, {
+    params: { date },
+  });
+  return res.data;
+};
+
+
 export const saveAvailability = async ({ doctorId, date, times }) => {
   const res = await API.post("/availability", {
     doctorId,
@@ -70,49 +78,42 @@ export const deleteAvailabilitySlot = async (id) => {
    APPOINTMENTS
 ========================= */
 export const bookAppointment = async (data) => {
-  // POST /api/appointments/book
   const res = await API.post("/appointments/book", data);
   return res.data;
 };
 
 export const getAppointmentTypes = async () => {
-  // GET /api/appointment-types
   const res = await API.get("/appointment-types");
   return res.data;
 };
 
-// This matches your current backend controller:
-// GET /api/appointments/user/success
+// GET appointments for logged-in patient
 export const getUserAppointments = async () => {
   try {
-    const res = await API.get("/appointments/user/success");
-    return res.data;
+    const response = await API.get("/appointments/user/success");
+    return response.data;
   } catch (err) {
-    console.error("Error fetching appointments:", err);
-    return [];
+    console.error("Failed to fetch user appointments:", err);
+    throw err;
   }
 };
 
 /* =========================
    ADMIN – APPOINTMENTS
 ========================= */
-
-// This matches AdminAppointmentController:
-// GET /api/admin/appointments
 export const getAllAppointments = async () => {
   const res = await API.get("/admin/appointments");
   return res.data;
 };
 
-// This matches AdminAppointmentController:
-// POST /api/admin/appointments/confirm/{id}?physicalLocation=... OR ?zoomLink=...
 export const confirmAppointment = async (appointmentId, params) => {
   const res = await API.post(
     `/admin/appointments/confirm/${appointmentId}`,
     null,
-    { params } // axios will convert this to query string
+    { params }
   );
   return res.data;
 };
+
 
 export default API;

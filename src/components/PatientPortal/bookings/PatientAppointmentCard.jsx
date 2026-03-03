@@ -1,23 +1,40 @@
 import { useState } from "react";
+import RescheduleCart from "./RescheduleCart"; // Import the reschedule cart we created
 
-export default function AppointmentCard({ appointment, onRemove }) {
+export default function AppointmentCard({
+  appointment,
+  availableSlots,
+  onRemove,
+  onReschedule,
+}) {
   const [error, setError] = useState("");
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [rescheduleMode, setRescheduleMode] = useState(false);
 
+  // Open Zoom link
   const handleZoomClick = () => {
-    if (
-      appointment.locationOrLink &&
-      appointment.locationOrLink.startsWith("https://")
-    ) {
-      // Open the link in a new tab
+    if (appointment.locationOrLink?.startsWith("https://")) {
       window.open(appointment.locationOrLink, "_blank");
-      setError(""); // Clear any previous error
+      setError("");
     } else {
-      setError("Zoom link is invalid or not available.Please contact us ");
+      setError("Zoom link is invalid or not available. Please contact us.");
     }
   };
 
+  // Cancel appointment confirmation
+  const handleCancelClick = () => {
+    setCancelConfirm(true);
+  };
+
+  const confirmCancel = () => {
+    if (onRemove) {
+      onRemove(appointment.appointmentId);
+    }
+    setCancelConfirm(false);
+  };
+
   return (
-    <div className="border rounded p-4 shadow-md bg-white flex flex-col gap-1">
+    <div className="border rounded p-4 shadow-md bg-white flex flex-col gap-2">
       <h3 className="text-lg font-bold">{appointment.doctorName}</h3>
       <p>
         <strong>Specialty:</strong> {appointment.specialty}
@@ -44,7 +61,7 @@ export default function AppointmentCard({ appointment, onRemove }) {
         <strong>Appointment Status:</strong> {appointment.appointmentStatus}
       </p>
 
-      {/* Zoom Link / Location */}
+      {/* Zoom Button */}
       {appointment.locationOrLink ? (
         <button
           onClick={handleZoomClick}
@@ -60,13 +77,58 @@ export default function AppointmentCard({ appointment, onRemove }) {
 
       {error && <p className="text-red-500 mt-1">{error}</p>}
 
-      {onRemove && (
+      {/* Cancel & Reschedule Buttons */}
+      <div className="flex gap-2 mt-2">
         <button
-          className="mt-2 bg-red-500 text-white px-2 py-1 rounded w-fit"
-          onClick={() => onRemove(appointment.appointmentId)}
+          className="bg-yellow-500 text-white px-2 py-1 rounded"
+          onClick={handleCancelClick}
         >
-          Remove
+          Cancel Appointment
         </button>
+        <button
+          className="bg-green-500 text-white px-2 py-1 rounded"
+          onClick={() => setRescheduleMode(true)}
+        >
+          Reschedule Appointment
+        </button>
+      </div>
+
+      {/* Cancel Confirmation */}
+      {cancelConfirm && (
+        <div className="mt-2 p-2 border rounded bg-red-50">
+          <p className="text-red-600 font-semibold">
+            We understand plans can change. You can reschedule your appointment
+            at no additional cost. Cancelling the appointment will not refund
+            your payment.
+          </p>
+          <div className="flex gap-2 mt-2">
+            <button
+              className="bg-red-600 text-white px-3 py-1 rounded"
+              onClick={confirmCancel}
+            >
+              Yes, Cancel
+            </button>
+            <button
+              className="bg-gray-400 text-white px-3 py-1 rounded"
+              onClick={() => {
+                setCancelConfirm(false);
+                setRescheduleMode(true);
+              }}
+            >
+              Reschedule Appointment
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Cart */}
+      {rescheduleMode && (
+        <RescheduleCart
+          appointment={appointment}
+          availableSlots={availableSlots}
+          onSubmit={onReschedule}
+          onCancel={() => setRescheduleMode(false)}
+        />
       )}
     </div>
   );
