@@ -306,25 +306,26 @@ function PatientManagement() {
 
       {/* View Patient Modal */}
         {showViewModal && selectedPatient && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            
+            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-200">
               
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-white text-xl font-semibold">
+              <div className="flex justify-between items-center px-6 py-4 border-b bg-gray-50 rounded-t-2xl">
+                <h2 className="text-xl font-bold text-gray-800">
                   Patient Profile
                 </h2>
                 <button
                   onClick={() => setShowViewModal(false)}
-                  className="text-white text-2xl hover:opacity-80"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 hover:bg-red-500 hover:text-white transition"
                 >
                   ×
                 </button>
               </div>
 
-              {/* Body */}
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Scrollable Body */}
+              <div className="p-6 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
 
                   <InfoItem label="Full Name" value={selectedPatient.name} />
                   <InfoItem label="Email" value={selectedPatient.email} />
@@ -345,19 +346,20 @@ function PatientManagement() {
                   <InfoItem label="Guardian Contact Number" value={selectedPatient.guardiansContactNo} />
                   <InfoItem label="Guardian Relationship" value={selectedPatient.guardianRelationship} />
                   <InfoItem label="Guardian Email" value={selectedPatient.guardianEmail} />
-                  {/* Full width */}
-                </div>
 
-                {/* Footer */}
-                <div className="mt-8 flex justify-end">
-                  <button
-                    onClick={() => setShowViewModal(false)}
-                    className="px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
-                  >
-                    Close
-                  </button>
                 </div>
               </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t flex justify-end bg-gray-50 rounded-b-2xl">
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+                >
+                  Close
+                </button>
+              </div>
+
             </div>
           </div>
         )}
