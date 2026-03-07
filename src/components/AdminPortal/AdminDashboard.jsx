@@ -101,57 +101,50 @@ function AdminDashboard() {
       </header>
 
       {/* ================= STATS CARDS ================= */}
-      <div className="px-6 mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Total Users */}
-          <div className="bg-[#EEF4FF] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-              <Users className="text-white w-5 h-5" />
-            </div>
-            <p className="text-sm text-gray-600">Total Users</p>
-            <h2 className="text-2xl font-bold text-gray-800">72</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              +12
-            </span>
-          </div>
+        <div className="px-6 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* Active Doctors */}
+            <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
+              
+              <div>
+                <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
+                  <UserCircle className="text-white w-5 h-5" />
+                </div>
+                <p className="text-sm text-gray-600">Active Doctors</p>
+              </div>
 
-          {/* Active Doctors */}
-          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-4">
-              <UserCircle className="text-white w-5 h-5" />
+              <h2 className="text-3xl font-bold text-gray-800">24</h2>
             </div>
-            <p className="text-sm text-gray-600">Active Doctors</p>
-            <h2 className="text-2xl font-bold text-gray-800">24</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              +12
-            </span>
-          </div>
 
-          {/* Active Patients */}
-          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
-              <Activity className="text-white w-5 h-5" />
-            </div>
-            <p className="text-sm text-gray-600">Active Patients</p>
-            <h2 className="text-2xl font-bold text-gray-800">48</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              +12
-            </span>
-          </div>
+            {/* Active Patients */}
+            <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
+              
+              <div>
+                <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
+                  <Activity className="text-white w-5 h-5" />
+                </div>
+                <p className="text-sm text-gray-600">Active Patients</p>
+              </div>
 
-          {/* System Uptime */}
-          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
-              <TrendingUp className="text-white w-5 h-5" />
+              <h2 className="text-3xl font-bold text-gray-800">48</h2>
             </div>
-            <p className="text-sm text-gray-600">System Uptime</p>
-            <h2 className="text-2xl font-bold text-gray-800">99.9%</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              Stable
-            </span>
+
+            {/* IoT Devices */}
+            <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
+              
+              <div>
+                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-3">
+                  <TrendingUp className="text-white w-5 h-5" />
+                </div>
+                <p className="text-sm text-gray-600">IOT Devices</p>
+              </div>
+
+              <h2 className="text-3xl font-bold text-gray-800">99.9%</h2>
+            </div>
+
           </div>
         </div>
-      </div>
 
       {/* ================= BOTTOM NAVIGATION ================= */}
       <div className="px-6 mt-8">
