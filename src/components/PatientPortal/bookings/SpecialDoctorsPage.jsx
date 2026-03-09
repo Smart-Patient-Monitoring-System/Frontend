@@ -8,7 +8,7 @@ export default function DoctorsPage() {
 
   // Fetch doctors (example)
   useEffect(() => {
-    // fetch("http://localhost:8080/api/doctors")
+    // fetch("http://localhost:8084/api/doctors")
     //   .then(res => res.json())
     //   .then(data => setDoctors(data));
 
@@ -36,7 +36,7 @@ export default function DoctorsPage() {
     console.log("Slots:", slots);
 
     // BACKEND CALL (later)
-    // fetch("http://localhost:8080/api/availability", {
+    // fetch("http://localhost:8084/api/availability", {
     //   method: "POST",
     //   headers: { "Content-Type": "application/json" },
     //   body: JSON.stringify({ doctorId, availability: slots }),

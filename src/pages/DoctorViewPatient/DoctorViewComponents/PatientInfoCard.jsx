@@ -28,7 +28,7 @@ const PatientInfoCard = ({
         }
 
         const response = await fetch(
-          `http://localhost:8080/api/patient/get/${patientId}`,
+          `http://localhost:8084/api/patient/get/${patientId}`,
           {
             method: "GET",
             headers: {
@@ -202,35 +202,32 @@ const PatientInfoCard = ({
             <p className="text-sm text-gray-500 mb-1">Health Status</p>
             <div className="flex items-center gap-2">
               <div
-                className={`w-2 h-2 rounded-full ${
-                  healthStatus === "Excellent"
+                className={`w-2 h-2 rounded-full ${healthStatus === "Excellent"
                     ? "bg-green-500"
                     : healthStatus === "Good"
-                    ? "bg-blue-500"
-                    : "bg-yellow-500"
-                }`}
+                      ? "bg-blue-500"
+                      : "bg-yellow-500"
+                  }`}
               ></div>
               <span
-                className={`font-semibold ${
-                  healthStatus === "Excellent"
+                className={`font-semibold ${healthStatus === "Excellent"
                     ? "text-green-600"
                     : healthStatus === "Good"
-                    ? "text-blue-600"
-                    : "text-yellow-600"
-                }`}
+                      ? "text-blue-600"
+                      : "text-yellow-600"
+                  }`}
               >
                 {healthStatus}
               </span>
             </div>
           </div>
           <div
-            className={`p-4 rounded-2xl shadow-md ${
-              healthStatus === "Excellent"
+            className={`p-4 rounded-2xl shadow-md ${healthStatus === "Excellent"
                 ? "bg-green-500"
                 : healthStatus === "Good"
-                ? "bg-blue-500"
-                : "bg-yellow-500"
-            }`}
+                  ? "bg-blue-500"
+                  : "bg-yellow-500"
+              }`}
           >
             <HeartPulse className="w-7 h-7 text-white" strokeWidth={2.5} />
           </div>
