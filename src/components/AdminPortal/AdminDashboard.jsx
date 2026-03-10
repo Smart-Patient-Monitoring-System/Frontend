@@ -31,10 +31,20 @@ function AdminDashboard() {
     // Navigate to homepage
     navigate("/");
   };
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("users"); 
   const [doctorCount, setDoctorCount] = useState(0);
   const [patientCount, setPatientCount] = useState(0);
 
+  useEffect(() => {
+  fetch("http://localhost:8080/api/dashboard/counts")
+    .then((res) => res.json())
+    .then((data) => {
+      setDoctorCount(data.doctorCount);
+      setPatientCount(data.patientCount);
+    })
+    .catch((error) => console.error("Error fetching dashboard counts:", error));
+  }, []);
+ 
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
@@ -102,7 +112,7 @@ function AdminDashboard() {
               <p className="text-sm text-gray-600">Active Doctors</p>
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-800">24</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{doctorCount === 0 ? "..." : doctorCount}</h2>
           </div>
 
           {/* Active Patients */}
@@ -115,7 +125,7 @@ function AdminDashboard() {
               <p className="text-sm text-gray-600">Active Patients</p>
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-800">48</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{patientCount === 0 ? "..." : patientCount}</h2>
           </div>
 
           {/* IoT Devices */}
@@ -134,7 +144,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* ================= BOTTOM NAVIGATION ================= */}
+      {/* === BOTTOM NAVIGATION === */}
       <div className="px-6 mt-8">
         <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
 
