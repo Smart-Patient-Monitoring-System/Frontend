@@ -32,6 +32,9 @@ function AdminDashboard() {
     navigate("/");
   };
   const [activeTab, setActiveTab] = useState("users");
+  const [doctorCount, setDoctorCount] = useState(0);
+  const [patientCount, setPatientCount] = useState(0);
+
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
