@@ -1,36 +1,27 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import Header from "../../pages/DoctorViewPatient/DoctorViewComponents/Header";
-import PatientInfoCard from "../../pages/DoctorViewPatient/DoctorViewComponents/PatientInfoCard";
+
+import Header from "../../components/PatientPortal/Header";
+import PatientInfoCard from "../../components/PatientPortal/PatientInfoCard";
 import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
 import ReportsCard from "../../components/PatientPortal/ReportsCard";
 import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
+import EmergencyCard from "../../components/PatientPortal/EmergencyCard";
 import VitalCard from "../../components/PatientPortal/VitalCard";
 import GraphCard from "../../components/PatientPortal/GraphCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
-import Dashboard from "../../pages/DoctorViewPatient/DoctorViewComponents/Dashboard";
+import Dashboard from "../../components/PatientPortal/Dashboard";
 import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
 import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
+import MessagingDashboard from "../../components/PatientPortal/MessagingDashboard";
 import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
 import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
-import DoctorNotesCard from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorNotesCard";
-import AssignedCareTeamCard from "../../pages/DoctorViewPatient/DoctorViewComponents/AssignedCareTeamCard";
 
 const DoctorPatientView = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
   const [showManualEntry, setShowManualEntry] = useState(false);
-
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const patientId =
-    location.state?.patientId || localStorage.getItem("profilePatientId");
-
-  const patientName =
-    location.state?.patientName || localStorage.getItem("profilePatientName");
 
   const vitals = [
     {
@@ -79,35 +70,21 @@ const DoctorPatientView = () => {
     },
   ];
 
-  if (!patientId) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
-          No patient selected. Please go back and click “View”.
-          <button
-            className="ml-3 px-4 py-2 bg-red-600 text-white rounded-lg"
-            onClick={() => navigate("/DocDashboard")}
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-
   return (
     <>
       {/* Header */}
-      <Header
-        isDoctorView={true}
-        profileName={patientName}
-        backPath="/DocDashboard"
-      />
+      <Header patientName="Sarah" />
 
       {/* Patient Info - Responsive padding */}
       <div className="w-full bg-gray-100 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
-        <PatientInfoCard isDoctorView={true} patientId={patientId} />
+        <PatientInfoCard
+          name="Sarah Johnson"
+          patientId="P-2024-001"
+          room="Room 204-B"
+          age={34}
+          bloodType="A+"
+          imageUrl="https://i.pravatar.cc/300?img=12"
+        />
       </div>
 
       {/* Dashboard (Tabs + Manual Entry Button) */}
@@ -129,80 +106,95 @@ const DoctorPatientView = () => {
 
         {/* Main Content - Responsive padding */}
         <div className="p-3 sm:p-4 md:p-5 lg:p-6">
-          {/* Overview Tab - Simplified to match screenshot */}
+          {/* Overview Tab */}
           {currentTab === "Overview" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-              
-              {/* Left Column - Vitals and Graph */}
-              <div className="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
-                {/* Vitals Grid */}
-                <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
-                  {vitals.map((vital, index) => (
-                    <VitalCard key={index} {...vital} />
-                  ))}
-                </div>
-
-                {/* Vital Trends Graph */}
-                <GraphCard patientId={patientId}/>
+            <div className="space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-10">
+              {/* Vitals - Responsive grid 
+                  Mobile: 1 column
+                  Small mobile (>480px): 2 columns
+                  Tablet: 2 columns
+                  Laptop+: 4 columns
+              */}
+              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+                {vitals.map((vital, index) => (
+                  <VitalCard key={index} {...vital} />
+                ))}
               </div>
 
-              {/* Right Column - Doctor's Notes and Care Team */}
-              <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                <DoctorNotesCard />
-                <AssignedCareTeamCard />
+              {/* Graph + Health Risk 
+                  Mobile/Tablet: Stack vertically
+                  Laptop+: 2:1 ratio
+              */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+                <div className="lg:col-span-2">
+                  <GraphCard />
+                </div>
+                <div>
+                  <HealthRiskCard />
+                </div>
+              </div>
+
+              {/* ECG + Health Tips 
+                  Mobile/Tablet: Stack vertically
+                  Laptop+: 2:1 ratio
+              */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+                <div className="lg:col-span-2">
+                  <ECGMonitor />
+                </div>
+                <div>
+                  <HealthTipsCard />
+                </div>
+              </div>
+
+              {/* Appointments + Emergency AND Medications + Reports 
+                  Mobile: All stack vertically
+                  Tablet+: 2 columns
+              */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+                
+                {/* Column 1 — Appointments + Reports */}
+                <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                  <AppointmentsCard />
+                  <ReportsCard />
+                </div>
+
+                {/* Column 2 — Medications + Emergency */}
+                <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                  <MedicationsCard />
+                  <EmergencyCard />
+                </div>
+
               </div>
             </div>
           )}
 
-          {/* Real-Time Vitals Tab */}
+          {/* Vitals History */}
           {currentTab === "Real-Time Vitals" && (
             <RealtimeGraphs />
           )}
 
-          {/* ECG Readings Tab */}
-          {currentTab === "ECG Readings" && (
-            <div className="space-y-4 sm:space-y-5 md:space-y-6">
-              <ECGMonitor isFullPage={true} />
-            </div>
-          )}
+          {/* Full-page ECG */}
+          {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} />}
 
-          {/* Medical Records Tab */}
-          {currentTab === "Medical Records" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-              <ReportsCard />
-              <MedicationsCard />
-            </div>
-          )}
-
-          {/* Health Insights Tab */}
-          {currentTab === "Health Insights" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-              <div className="lg:col-span-2">
-                <HealthRiskCard />
-              </div>
-              <div>
-                <HealthTipsCard />
-              </div>
-            </div>
-          )}
-
-          {/* Appointments Tab */}
-          {currentTab === "Appointments" && (
-            <div className="max-w-4xl">
-              <AppointmentsCard />
-            </div>
-          )}
-
-          {/* Emergency Panel Tab */}
-          {currentTab === "Emergency Panel" && <EmergencyPanel />}
-
-          {/* Messaging Tab */}
-          {currentTab === "Doctor Notes" && <DoctorNotesCard />}
-
-          {/* Profile Tab */}
+          {/* Profile */}
           {currentTab === "Profile" && <ProfileTab />}
 
-          {/* AI Health Assistant - Responsive height */}
+
+          {/* Emergency Panel */}
+          {currentTab === "Emergency Panel" && <EmergencyPanel />}
+
+          {/* Messaging */}
+          {currentTab === "Messaging" && <MessagingDashboard />}
+
+          {/* Medical Records */}
+          {currentTab === "Medical Records" && (
+            <div className="space-y-4 sm:space-y-5 md:space-y-6">
+              <ReportsCard />
+            </div>
+          )}
+
+          {/* AI Assistant - Responsive height */}
           {currentTab === "AI Health Assistant" && (
             <div className="w-full h-[calc(100vh-200px)] sm:h-[calc(100vh-240px)] md:h-[calc(100vh-260px)] lg:h-[calc(100vh-280px)] max-w-7xl mx-auto">
               <FloatingChatbot isFullScreen={true} />

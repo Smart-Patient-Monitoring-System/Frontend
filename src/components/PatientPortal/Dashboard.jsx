@@ -10,11 +10,10 @@ const Dashboard = ({ onTabChange }) => {
     "Real-Time Vitals",
     "ECG Readings",
     "Profile",
-    "Medical Records",
-    "Health Data from smart watch",
-    "Doctor Consultations",
-    "Emergency Panel",
     "Bookings",
+    "Emergency Panel",
+    "Medical Records",
+    "Health Data",
     "Messaging",
     "AI Health Assistant"
   ];
@@ -88,16 +87,16 @@ const Dashboard = ({ onTabChange }) => {
         </div>
 
         {/* Manual Entry Button */}
-        {/* <button
+        <button
           onClick={() => onTabChange("manual-entry")}
           className="ml-4 px-4 xl:px-6 py-2 rounded-full bg-green-500 text-white font-medium text-xs xl:text-sm shadow-md hover:bg-green-600 transition-all duration-200 whitespace-nowrap"
         >
           Manual Entry +
-        </button> */}
+        </button>
       </div>
 
       {/* Tablet Horizontal Scroll */}
-      {/* <div className="hidden md:flex lg:hidden items-center gap-2 px-4 py-3 overflow-x-auto">
+      <div className="hidden md:flex lg:hidden items-center gap-2 px-4 py-3 overflow-x-auto">
         <div className="flex gap-2 min-w-max">
           {tabs.map((tab) => (
             <button
@@ -118,7 +117,7 @@ const Dashboard = ({ onTabChange }) => {
         >
           + Entry
         </button>
-      </div> */}
+      </div>
     </div>
   );
 };
