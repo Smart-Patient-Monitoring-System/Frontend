@@ -103,7 +103,7 @@ function App() {
         <Route path="/patient-portal" element={<PatientPortal />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/DocDashboard" element={<DocDashboard />} />
-        <Route path="/DocViewPatient" element={<DocViewPatient />} />
+        <Route path="/DocViewPatient/:patientId" element={<DocViewPatient />} />
 
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/AdminDashboard/confirm-appointments" element={<AdminConfirmAppointments />} />

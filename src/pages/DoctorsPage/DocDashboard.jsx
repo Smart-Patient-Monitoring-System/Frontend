@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useMemo } from "react";
 import CriticalAlertPage from "./CriticalAlertPage";
 import ECGReaderPage from "./ECGReaderPage";
@@ -5,6 +6,11 @@ import ECGReaderPage from "./ECGReaderPage";
 import DoctorMessagesPanel from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorMessagingDashboard"; 
 
 
+=======
+import React, { useState, useEffect } from 'react';
+import CriticalAlertPage from './CriticalAlertPage';
+import ECGReaderPage from './ECGReaderPage';
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
 import { useNavigate } from "react-router-dom";
 import {
   Heart,
@@ -22,6 +28,7 @@ import {
   MessageSquare, // NEW ICON for Messaging
 } from "lucide-react";
 
+<<<<<<< HEAD
 /* ===================== Config ===================== */
 const API_BASE = "http://localhost:8080";
 
@@ -109,9 +116,13 @@ const fetchMyPatients = async () => {
   if (!res.ok) throw new Error("Failed to load patients");
   return res.json(); // List<Patient>
 };
+=======
+const API_BASE_URL = 'http://localhost:8080';
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
 
 function DocDashboard() {
   const [hasNotification, setHasNotification] = useState(true);
+<<<<<<< HEAD
   const [activeTab, setActiveTab] = useState("patient-overview");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -219,22 +230,130 @@ function DocDashboard() {
       icon: <AlertCircle className="w-6 h-6" />,
       color: "#ffffffff",
       bgColor: "#F41D2A",
+=======
+  const [activeTab, setActiveTab] = useState('patient-overview');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  // Fetch assigned patients from backend API
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          setError('Not authenticated. Please login again.');
+          navigate('/doctorLogin');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/doctor/my-patients`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            setError('Session expired. Please login again.');
+            navigate('/doctorLogin');
+            return;
+          }
+          throw new Error(`Failed to fetch patients: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Transform API data to match component format
+        const transformedPatients = data.map(patient => ({
+          name: patient.patientName,
+          id: `P-${patient.patientId}`,
+          rawId: patient.patientId, // Store raw numeric ID for API calls
+          age: '—',
+          room: patient.room || 'N/A',
+          heartRate: patient.heartRate ? `${patient.heartRate} bpm` : 'N/A',
+          temp: patient.temperature ? `${patient.temperature}°F` : 'N/A',
+          spO2: patient.spo2 ? `${patient.spo2}%` : 'N/A',
+          bloodPressure: patient.bloodPressureSystolic && patient.bloodPressureDiastolic
+            ? `${patient.bloodPressureSystolic}/${patient.bloodPressureDiastolic}`
+            : 'N/A',
+          riskLevel: patient.riskLevel || 'UNKNOWN',
+          status: patient.status || 'NO_DATA'
+        }));
+
+        setPatients(transformedPatients);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching patients:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, [navigate]);
+
+  // Event handler for logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    console.log('Logging out...');
+    navigate('/');
+  };
+
+  // Statistics data for the 4 boxes
+  const statsData = [
+    {
+      title: 'Total Patients',
+      value: loading ? '...' : String(patients.length),
+      icon: <Users className="w-6 h-6" />,
+      color: '#ffffffff',
+      bgColor: '#1A65FE',
+
+    },
+    {
+      title: 'Critical Alerts',
+      value: loading ? '...' : String(patients.filter(p => p.riskLevel === 'CRITICAL').length),
+      icon: <AlertCircle className="w-6 h-6" />,
+      color: '#ffffffff',
+      bgColor: '#F41D2A',
+
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
     },
     {
       title: "IoT Devices",
       value: "48",
       icon: <Wifi className="w-6 h-6" />,
+<<<<<<< HEAD
       color: "#ffffffff",
       bgColor: "#00AD42",
+=======
+      color: '#ffffffff',
+      bgColor: '#00AD42',
+
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
     },
     {
       title: "Avg Health Score",
       value: "87",
       suffix: "%",
       icon: <TrendingUp className="w-6 h-6" />,
+<<<<<<< HEAD
       color: "#ffffffff",
       bgColor: "#00AC9B",
     },
+=======
+      color: '#ffffffff',
+      bgColor: '#00AC9B',
+
+    }
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
   ];
 
   return (
@@ -272,6 +391,10 @@ function DocDashboard() {
 
             {/* Right */}
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+<<<<<<< HEAD
+=======
+              {/* Notification Bell */}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
               <button
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
                 aria-label="Notifications"
@@ -283,6 +406,10 @@ function DocDashboard() {
                 )}
               </button>
 
+<<<<<<< HEAD
+=======
+              {/* Settings */}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
               <button
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Settings"
@@ -311,51 +438,87 @@ function DocDashboard() {
           <div className="p-4">
             <div className="space-y-2">
               <button
+<<<<<<< HEAD
                 onClick={() => setActiveTab("patient-overview")}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
                   activeTab === "patient-overview"
                     ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
                     : "hover:bg-gray-50 text-gray-700"
                 }`}
+=======
+                onClick={() => setActiveTab('patient-overview')}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === 'patient-overview'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                  : 'hover:bg-gray-50 text-gray-700'
+                  }`}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
               >
                 <Users className="w-5 h-5" />
                 <span className="font-medium">Patient Overview</span>
               </button>
 
               <button
+<<<<<<< HEAD
                 onClick={() => setActiveTab("ecg-reader")}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
                   activeTab === "ecg-reader"
                     ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
                     : "hover:bg-gray-50 text-gray-700"
                 }`}
+=======
+                onClick={() => setActiveTab('ecg-reader')}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === 'ecg-reader'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                  : 'hover:bg-gray-50 text-gray-700'
+                  }`}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
               >
                 <Activity className="w-5 h-5" />
                 <span className="font-medium">ECG Reader</span>
               </button>
 
               <button
+<<<<<<< HEAD
                 onClick={() => setActiveTab("critical-alerts")}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
                   activeTab === "critical-alerts"
                     ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
                     : "hover:bg-gray-50 text-gray-700"
                 }`}
+=======
+                onClick={() => setActiveTab('critical-alerts')}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === 'critical-alerts'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                  : 'hover:bg-gray-50 text-gray-700'
+                  }`}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
               >
                 <AlertTriangle className="w-5 h-5" />
                 <span className="font-medium">Critical Alerts</span>
                 <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+<<<<<<< HEAD
                   2
+=======
+                  {loading ? '...' : patients.filter(p => p.riskLevel === 'CRITICAL').length}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
                 </span>
               </button>
 
               <button
+<<<<<<< HEAD
                 onClick={() => setActiveTab("reports")}
                 className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
                   activeTab === "reports"
                     ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
                     : "hover:bg-gray-50 text-gray-700"
                 }`}
+=======
+                onClick={() => setActiveTab('reports')}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === 'reports'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                  : 'hover:bg-gray-50 text-gray-700'
+                  }`}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
               >
                 <FileText className="w-5 h-5" />
                 <span className="font-medium">Reports</span>
@@ -384,26 +547,48 @@ function DocDashboard() {
             <div className="space-y-3">
               <div className="bg-blue-50 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
+<<<<<<< HEAD
                   <span className="text-sm text-gray-600">Assigned</span>
                   <span className="text-lg font-bold text-gray-800">
                     {patients.length}
                   </span>
+=======
+                  <span className="text-sm text-gray-600">Active Patients</span>
+                  <span className="text-lg font-bold text-gray-800">{loading ? '...' : patients.length}</span>
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
                 </div>
               </div>
               <div className="bg-red-50 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Critical</span>
+<<<<<<< HEAD
                   <span className="text-lg font-bold text-red-600">—</span>
+=======
+                  <span className="text-lg font-bold text-red-600">
+                    {loading ? '...' : patients.filter(p => p.riskLevel === 'CRITICAL').length}
+                  </span>
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
                 </div>
               </div>
               <div className="bg-green-50 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Stable</span>
+<<<<<<< HEAD
                   <span className="text-lg font-bold text-green-600">—</span>
+=======
+                  <span className="text-lg font-bold text-green-600">
+                    {loading ? '...' : patients.filter(p => p.status === 'STABLE').length}
+                  </span>
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
                 </div>
               </div>
             </div>
           </div>
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
         </aside>
 
         {/* Main */}
@@ -423,7 +608,14 @@ function DocDashboard() {
             </div>
           )}
 
+<<<<<<< HEAD
           {activeTab === "patient-overview" && (
+=======
+          {/* Content based on active tab */}
+
+          {/* Patient Overview Tab Content */}
+          {activeTab === 'patient-overview' && (
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
             <>
               {/* Stats */}
               <div className="mb-6">
@@ -448,6 +640,17 @@ function DocDashboard() {
                               </span>
                             )}
                           </div>
+<<<<<<< HEAD
+=======
+                          {stat.change && (
+                            <div className={`inline-flex items-center mt-2 text-xs font-medium px-2 py-1 rounded-full ${stat.title === 'Critical Alerts'
+                              ? 'bg-red-50 text-red-700'
+                              : 'bg-green-50 text-green-700'
+                              }`}>
+
+                            </div>
+                          )}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
                         </div>
                         <div
                           className="p-3 rounded-lg"
@@ -470,6 +673,7 @@ function DocDashboard() {
                   </p>
                 </div>
 
+<<<<<<< HEAD
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
@@ -564,15 +768,146 @@ function DocDashboard() {
                     </tbody>
                   </table>
                 </div>
+=======
+                {/* Error Message */}
+                {error && (
+                  <div className="p-4 bg-red-50 border-l-4 border-red-500">
+                    <p className="text-red-700">{error}</p>
+                  </div>
+                )}
+
+                {/* Loading State */}
+                {loading && (
+                  <div className="p-8 text-center">
+                    <p className="text-gray-600">Loading patients...</p>
+                  </div>
+                )}
+
+                {/* No Patients */}
+                {!loading && !error && patients.length === 0 && (
+                  <div className="p-8 text-center">
+                    <p className="text-gray-600">No patients assigned to you yet.</p>
+                  </div>
+                )}
+
+                {/* Table */}
+                {!loading && !error && patients.length > 0 && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Room</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Heart Rate</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Temp</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SpO₂</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Risk Level</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {patients.map((patient, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="py-4 px-4">
+                              <div>
+                                <div className="font-medium text-gray-900">{patient.name}</div>
+                                <div className="text-sm text-gray-500">{patient.id} - {patient.age}</div>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-gray-400" />
+                                <span className="text-gray-700">{patient.room}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-blue-500" />
+                                <span className={`font-medium ${patient.heartRate.includes('145') ? 'text-red-600' : 'text-gray-700'
+                                  }`}>
+                                  {patient.heartRate}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-2">
+                                <Thermometer className="w-4 h-4 text-orange-500" />
+                                <span className="text-gray-700">{patient.temp}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-2">
+                                <Droplets className="w-4 h-4 text-cyan-500" />
+                                <span className="text-gray-700">{patient.spO2}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${patient.riskLevel === 'CRITICAL' || patient.riskLevel === 'HIGH'
+                                ? 'bg-red-100 text-red-800'
+                                : patient.riskLevel === 'MEDIUM'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-green-100 text-green-800'
+                                }`}>
+                                {patient.riskLevel}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${patient.status === 'CRITICAL'
+                                ? 'bg-red-100 text-red-800'
+                                : patient.status === 'MONITORING'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : patient.status === 'STABLE'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                {patient.status}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4">
+                              <button className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium"
+                                onClick={() => navigate(`/DocViewPatient/${patient.rawId}`)}>
+                                <Eye className="w-4 h-4" />
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Table Footer */}
+                {!loading && !error && patients.length > 0 && (
+                  <div className="p-4 border-t border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600">
+                        Showing {patients.length} patient{patients.length !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </div>
+                )}
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
               </div>
             </>
           )}
 
+<<<<<<< HEAD
           {activeTab === "ecg-reader" && <ECGReaderPage />}
           {activeTab === "critical-alerts" && <CriticalAlertPage />}
 
           {/* NEW: Messaging tab renders here */}
           {activeTab === "messaging" && <DoctorMessagesPanel />}
+=======
+          {/* ECG Reader Tab Content */}
+          {activeTab === 'ecg-reader' && <ECGReaderPage />}
+
+          {/* Critical Alerts Tab Content */}
+          {activeTab === 'critical-alerts' && <CriticalAlertPage />}
+
+
+>>>>>>> 5a0ce8388755d01961ab86a61f93eba670076ee9
         </main>
       </div>
     </div>
