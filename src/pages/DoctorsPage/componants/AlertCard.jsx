@@ -1,14 +1,14 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
 
-export default function AlertCard({ title, patient, hr, normalRange, time, level = "medium", description }) {
+export default function AlertCard({title,patient,hr,normalRange,time,level = "medium"}) {
   const colors = {
     high: "bg-red-100 border-red-300 text-red-700",
     medium: "bg-yellow-100 border-yellow-300 text-yellow-700",
     low: "bg-blue-100 border-blue-300 text-blue-700",
   };
 
-
+  
   return (
     <div
       className={`${colors[level]} 
@@ -61,10 +61,6 @@ export default function AlertCard({ title, patient, hr, normalRange, time, level
             </span>{" "}
             <span className="text-gray-500"> (Normal: {normalRange})</span>
           </p>
-
-          {description && (
-            <p className="text-gray-500 text-xs mt-1 italic">{description}</p>
-          )}
         </div>
       </div>
 
