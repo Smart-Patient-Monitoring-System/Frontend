@@ -35,6 +35,16 @@ function AdminDashboard() {
   const [doctorCount, setDoctorCount] = useState(0);
   const [patientCount, setPatientCount] = useState(0);
 
+  const loadDashboardCounts = () => {
+  fetch("http://localhost:8080/api/dashboard/counts")
+    .then((res) => res.json())
+    .then((data) => {
+      setDoctorCount(data.doctorCount);
+      setPatientCount(data.patientCount);
+    })
+    .catch((error) => console.error("Error fetching dashboard counts:", error));
+};
+
   useEffect(() => {
   fetch("http://localhost:8080/api/dashboard/counts")
     .then((res) => res.json())
@@ -44,6 +54,10 @@ function AdminDashboard() {
     })
     .catch((error) => console.error("Error fetching dashboard counts:", error));
   }, []);
+
+  useEffect(() => {
+  loadDashboardCounts();
+}, []);
  
 
   return (
@@ -73,7 +87,7 @@ function AdminDashboard() {
                   Admin Portal
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Welcome, <span className="font-semibold">Section 7</span>{" "}
+                  Welcome 
                   Janith
                 </p>
               </div>
@@ -98,7 +112,7 @@ function AdminDashboard() {
         </div>
       </header>
 
-      {/* ================= STATS CARDS ================= */}
+      {/* === STATS CARDS === */}
         <div className="px-6 mt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           
@@ -308,7 +322,7 @@ function AdminDashboard() {
         </div>
       </div>
       <div className="px-6 mt-6">
-        {activeTab === "users" && <UserManagement />}
+        {activeTab === "users" && <UserManagement refreshCounts={loadDashboardCounts} />}
         {activeTab === "accept" && <PendingDoctors />}
         {activeTab === "patients" && <PatientManagement />}
         {activeTab === "admins" && <AdminManagement />}
