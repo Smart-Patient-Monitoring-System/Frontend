@@ -51,7 +51,7 @@ const formatAddress = (address, city, district, postalCode) => {
   return parts.length ? parts.join(", ") : "—";
 };
 
-const ProfileTab = ({ patientId: propPatientId }) => {
+const ProfileTab = () => {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,14 +59,14 @@ const ProfileTab = ({ patientId: propPatientId }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const patientIdToFetch = propPatientId || localStorage.getItem("patientId");
+        const patientId = localStorage.getItem("patientId");
         const token = localStorage.getItem("token");
-        if (!patientIdToFetch) {
+        if (!patientId) {
           setError("Please log in again.");
           setLoading(false);
           return;
         }
-        const response = await fetch(`${API_BASE_URL}/api/patient/get/${patientIdToFetch}`, {
+        const response = await fetch(`${API_BASE_URL}/api/patient/get/${patientId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -85,7 +85,7 @@ const ProfileTab = ({ patientId: propPatientId }) => {
       }
     };
     fetchProfile();
-  }, [propPatientId]);
+  }, []);
 
   if (loading) {
     return (
@@ -126,7 +126,7 @@ const ProfileTab = ({ patientId: propPatientId }) => {
   if (!patient) return null;
 
   const age = calculateAge(patient.dateOfBirth);
-  const patientIdFormatted = formatPatientId(patient.id || patient.Id);
+  const patientIdFormatted = formatPatientId(patient.id);
   const addressFull = formatAddress(patient.address, patient.city, patient.district, patient.postalCode);
   const allergiesList = parseList(patient.allergies);
   const medicationsList = parseMedications(patient.currentMedications);
