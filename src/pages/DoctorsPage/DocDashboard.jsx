@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import CriticalAlertPage from "./CriticalAlertPage";
 import ECGReaderPage from "./ECGReaderPage";
+import ReportsPage from "./ReportsPage";
 
 import DoctorMessagesPanel from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorMessagingDashboard";
 
@@ -74,8 +75,8 @@ const getUserFromToken = () => {
   }
 };
 
-/* ===================== API: Doctor name from backend ===================== */
-const fetchDoctorNameByEmail = async (doctorEmail) => {
+/* ===================== API: Doctor data from backend ===================== */
+const fetchDoctorByEmail = async (doctorEmail) => {
   const token = localStorage.getItem("token");
   if (!token || !doctorEmail) return null;
 
@@ -97,7 +98,7 @@ const fetchDoctorNameByEmail = async (doctorEmail) => {
     (d) => (d?.email || "").toLowerCase() === doctorEmail.toLowerCase()
   );
 
-  return me?.name || null;
+  return me || null;
 };
 
 /* ===================== API: My patients ===================== */
@@ -120,7 +121,10 @@ function DocDashboard() {
   const [doctorInfo, setDoctorInfo] = useState({
     name: "Doctor",
     role: "",
+    id: null,
   });
+
+  const [criticalAlertsCount, setCriticalAlertsCount] = useState(0);
 
   // Patients (from backend)
   const [patients, setPatients] = useState([]);
@@ -132,16 +136,45 @@ function DocDashboard() {
       const user = getUserFromToken();
       if (!user) return;
 
-      const dbName = await fetchDoctorNameByEmail(user.email);
+      const dbDoctor = await fetchDoctorByEmail(user.email);
 
       setDoctorInfo({
-        name: dbName ? toTitle(dbName) : guessFirstNameFromEmail(user.email),
+        name: dbDoctor?.name ? toTitle(dbDoctor.name) : guessFirstNameFromEmail(user.email),
         role: user.role || "",
+        id: dbDoctor?.id || dbDoctor?.Id || null,
       });
     };
 
     loadDoctor();
   }, []);
+
+  // Poll critical alerts
+  useEffect(() => {
+    if (!doctorInfo.id) return;
+
+    const fetchAlertsCount = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API_BASE}/api/doctor/critical-alerts/${doctorInfo.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setCriticalAlertsCount(Array.isArray(data) ? data.length : 0);
+        }
+      } catch (e) {
+        console.error("Failed to fetch alerts count", e);
+      }
+    };
+
+    fetchAlertsCount();
+    const interval = setInterval(fetchAlertsCount, 30000); // 30s polling
+    return () => clearInterval(interval);
+  }, [doctorInfo.id]);
 
   useEffect(() => {
     const loadPatients = async () => {
@@ -217,7 +250,7 @@ function DocDashboard() {
     },
     {
       title: "Critical Alerts",
-      value: "2",
+      value: String(criticalAlertsCount),
       icon: <AlertCircle className="w-6 h-6" />,
       color: "#ffffffff",
       bgColor: "#F41D2A",
@@ -343,9 +376,11 @@ function DocDashboard() {
               >
                 <AlertTriangle className="w-5 h-5" />
                 <span className="font-medium">Critical Alerts</span>
-                <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  2
-                </span>
+                {criticalAlertsCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {criticalAlertsCount}
+                  </span>
+                )}
               </button>
 
               <button
@@ -405,7 +440,7 @@ function DocDashboard() {
 
         {/* Main */}
         <main className="flex-1 p-6 overflow-y-auto h-[calc(100vh-80px)] bg-[#F0F6FF]">
-          {(activeTab === "patient-overview" || activeTab === "reports") && (
+          {activeTab === "patient-overview" && (
             <div className="mb-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -565,8 +600,9 @@ function DocDashboard() {
             </>
           )}
 
-          {activeTab === "ecg-reader" && <ECGReaderPage />}
+          {activeTab === "ecg-reader" && <ECGReaderPage doctorId={doctorInfo.id} />}
           {activeTab === "critical-alerts" && <CriticalAlertPage />}
+          {activeTab === "reports" && <ReportsPage doctorId={doctorInfo.id} />}
 
           {/* NEW: Messaging tab renders here */}
           {activeTab === "messaging" && <DoctorMessagesPanel />}

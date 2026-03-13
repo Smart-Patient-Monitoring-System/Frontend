@@ -63,6 +63,7 @@ export default function LoginPageDoctor() {
       }
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", "DOCTOR");
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -115,6 +116,7 @@ export default function LoginPageDoctor() {
       const data = await response.json();
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", "DOCTOR");
       localStorage.setItem(
         "user",
         JSON.stringify({

@@ -8,6 +8,7 @@ function UploadModal({ open, onClose, onAnalyze }) {
   const [heaFile, setHeaFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [saveStatus, setSaveStatus] = useState(""); // "", "success", "error"
 
   if (!open) return null;
 
@@ -25,13 +26,20 @@ function UploadModal({ open, onClose, onAnalyze }) {
 
     try {
       setLoading(true);
+      setSaveStatus("");
       const res = await axios.post(
         "http://localhost:8084/api/vital/ecg/analyze",
         formData
       );
 
-      // Extract numeric ID only (handles "P-12" or "12")
-      const numericId = parseInt(patientId.replace(/\D/g, ""), 10);
+      // Extract numeric ID only (handles "P-12", "Patient-12", or "12")
+      const rawId = patientId.trim();
+      const numericIdMatch = rawId.match(/\d+/);
+      const numericId = numericIdMatch ? parseInt(numericIdMatch[0], 10) : null;
+
+      if (!numericId) {
+        throw new Error("Could not extract a valid numeric patient ID. Please use a format like 'P-12' or just '12'.");
+      }
 
       // Save result to MainService for persistent history
       try {
@@ -53,11 +61,17 @@ function UploadModal({ open, onClose, onAnalyze }) {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           }
         );
+        setSaveStatus("success");
       } catch (saveErr) {
         console.error("Failed to save ECG reading to history:", saveErr);
+        setSaveStatus("error");
+        // We don't throw here because analysis itself succeeded
       }
 
-      onAnalyze(res.data);
+      // Short delay to show success state before closing
+      setTimeout(() => {
+        onAnalyze(res.data);
+      }, 1500);
     } catch (err) {
       console.error(err);
       const msg =
@@ -189,11 +203,27 @@ function UploadModal({ open, onClose, onAnalyze }) {
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Analyzing ECG…
+                {saveStatus === "" && (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Analyzing ECG…
+                  </>
+                )}
+                {saveStatus === "success" && (
+                  <>
+                    <CheckCircle size={18} className="text-emerald-300" />
+                    Saved Successfully!
+                  </>
+                )}
+                {saveStatus === "error" && (
+                  <>
+                    <AlertCircle size={18} className="text-orange-300" />
+                    Analysis OK, Save Failed
+                  </>
+                )}
               </span>
             ) : (
               "Upload & Analyze"

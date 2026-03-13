@@ -100,7 +100,7 @@ const DoctorPatientView = () => {
 
               {/* Right Column - Doctor's Notes and Care Team */}
               <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                <DoctorNotesCard />
+                <DoctorNotesCard patientId={patientId} />
                 <AssignedCareTeamCard />
               </div>
             </div>
@@ -154,7 +154,7 @@ const DoctorPatientView = () => {
           )}
 
           {/* Messaging Tab */}
-          {currentTab === "Doctor Notes" && <DoctorNotesCard />}
+          {currentTab === "Doctor Notes" && <DoctorNotesCard patientId={patientId} />}
 
           {/* Profile Tab */}
           {currentTab === "Profile" && <ProfileTab />}
