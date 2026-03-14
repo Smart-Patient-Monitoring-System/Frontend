@@ -1,4 +1,7 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+import Loader from "./components/Loader";
 
 import Header from "./pages/HomePage/components/Header";
 import Hero from "./pages/HomePage/components/Hero";
@@ -24,7 +27,6 @@ import DocDashboard from "./pages/DoctorsPage/DocDashboard";
 import DocViewPatient from "./pages/DoctorViewPatient/DoctorPatientView";
 
 import AdminConfirmAppointments from "./components/PatientPortal/bookings/AdminConfirmAppointments";
-
 
 function HomePage() {
   const stats = [
@@ -84,6 +86,21 @@ function HomePage() {
 }
 
 function App() {
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1800); // loader time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <Router>
       <Routes>
@@ -105,9 +122,7 @@ function App() {
         <Route path="/DocDashboard" element={<DocDashboard />} />
         <Route path="/DocViewPatient" element={<DocViewPatient />} />
 
-        <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/AdminDashboard/confirm-appointments" element={<AdminConfirmAppointments />} />
-
       </Routes>
     </Router>
   );
