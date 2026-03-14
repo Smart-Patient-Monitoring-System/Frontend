@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import Loader from "./components/Loader";
@@ -15,7 +15,6 @@ import LoginPatient from "./pages/Login_Signup/loginPagePatient";
 import LoginAdmin from "./pages/Login_Signup/loginPageAdmin";
 import AdminAccessPage from "./pages/Login_Signup/AdminAccessPage";
 import SignupAdmin from "./pages/Login_Signup/signupPageAdmin";
-
 import SignupPatient from "./pages/Login_Signup/signupPagePatient";
 
 import ForgotPasswordPage from "./pages/Login_Signup/ForgotPasswordPage";
@@ -27,6 +26,7 @@ import DocDashboard from "./pages/DoctorsPage/DocDashboard";
 import DocViewPatient from "./pages/DoctorViewPatient/DoctorPatientView";
 
 import AdminConfirmAppointments from "./components/PatientPortal/bookings/AdminConfirmAppointments";
+
 
 function HomePage() {
   const stats = [
@@ -40,8 +40,7 @@ function HomePage() {
       id: 1,
       icon: "activity",
       title: "Real-Time Vitals",
-      description:
-        "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
+      description: "Continuous monitoring with ESP32, DS18B20, MAX30102 sensors",
     },
     {
       id: 2,
@@ -85,24 +84,26 @@ function HomePage() {
   );
 }
 
-function App() {
 
-  const [loading, setLoading] = useState(true);
+/* Route wrapper to detect page change */
+function AppContent() {
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
+
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1800); // loader time
+    }, 1000); // loader time when switching pages
 
     return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return <Loader />;
-  }
+  }, [location]);
 
   return (
-    <Router>
+    <>
+      {loading && <Loader />}
+
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/role-selection" element={<RoleSelectionPage />} />
@@ -113,7 +114,6 @@ function App() {
         <Route path="/adminSignup" element={<SignupAdmin />} />
         <Route path="/patientSignup" element={<SignupPatient />} />
 
-        {/* Password reset routes */}
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
@@ -122,8 +122,20 @@ function App() {
         <Route path="/DocDashboard" element={<DocDashboard />} />
         <Route path="/DocViewPatient" element={<DocViewPatient />} />
 
-        <Route path="/AdminDashboard/confirm-appointments" element={<AdminConfirmAppointments />} />
+        <Route
+          path="/AdminDashboard/confirm-appointments"
+          element={<AdminConfirmAppointments />}
+        />
       </Routes>
+    </>
+  );
+}
+
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
