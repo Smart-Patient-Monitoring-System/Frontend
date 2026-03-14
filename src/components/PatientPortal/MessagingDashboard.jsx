@@ -448,15 +448,19 @@ const MessagingDashboard = () => {
   const rejectCall  = () => { sendCallSignal("ANSWER", callState.callType, { accepted: false }); setCallState({ open: false, mode: null, callType: null, fromName: "", fromUserId: null, toUserId: null }); };
   const hangupCall  = () => { sendCallSignal("HANGUP", callState.callType, { ended: true }); setCallState({ open: false, mode: null, callType: null, fromName: "", fromUserId: null, toUserId: null }); };
 
-  const formatMessage = (msg) => ({
-    id: msg.id,
-    sender: msg.senderId === userId ? "self" : "other",
-    text: msg.content,
-    time: formatMessageTime(msg.timestamp),
-    read: msg.read,
-    attachments: msg.attachments || [],
-    type: msg.type || "TEXT",
-  });
+  const formatMessage = (msg) => {
+    const isSelf = Number(msg.senderId) === Number(userId);
+    console.log("[MSG]", "senderId:", msg.senderId, "userId:", userId, "isSelf:", isSelf);
+    return {
+      id: msg.id,
+      sender: isSelf ? "self" : "other",
+      text: msg.content,
+      time: formatMessageTime(msg.timestamp),
+      read: msg.read,
+      attachments: msg.attachments || [],
+      type: msg.type || "TEXT",
+    };
+  };
 
   const loadConversations = async () => {
     try {

@@ -13,6 +13,9 @@ import {
   X,
   UserPlus,
   PhoneOff,
+  Trash2,
+  Eraser,
+  Info,
 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import { Client } from "@stomp/stompjs";
@@ -231,6 +234,8 @@ const DoctorMessagingDashboard = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   // ── Call state (same as patient side) ──
   const [callState, setCallState] = useState({
@@ -275,6 +280,31 @@ const DoctorMessagingDashboard = () => {
   // Keep ref in sync with state for WS callbacks
   useEffect(() => { selectedChatRef.current = selectedChat; }, [selectedChat]);
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const onDocClick = () => setShowMenu(false);
+    if (showMenu) document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [showMenu]);
+
+  // Clear chat and remove conversation helpers
+  const clearChatLocal = () => {
+    if (!selectedChat) return;
+    if (!window.confirm("Clear messages in this chat (UI only)?")) return;
+    setMessages([]);
+    setShowMenu(false);
+  };
+
+  const deleteConversationLocal = () => {
+    if (!selectedChat) return;
+    if (!window.confirm("Remove this conversation from UI?")) return;
+    setChats((prev) => prev.filter((c) => c.id !== selectedChat.id));
+    setSelectedChat(null);
+    selectedChatRef.current = null;
+    setMessages([]);
+    setShowMenu(false);
+  };
 
   /* ── WebSocket ── */
   const connectWebSocket = () => {
@@ -404,14 +434,18 @@ const DoctorMessagingDashboard = () => {
   };
 
   /* ── Chat ── */
-  const formatMsg = (msg) => ({
-    id: msg.id,
-    sender: msg.senderId === userId ? "self" : "other",
-    text: msg.content,
-    time: formatMessageTime(msg.timestamp),
-    read: msg.read,
-    attachments: msg.attachments || [],
-  });
+  const formatMsg = (msg) => {
+    const isSelf = Number(msg.senderId) === Number(userId);
+    console.log("[MSG]", "senderId:", msg.senderId, "userId:", userId, "isSelf:", isSelf);
+    return {
+      id: msg.id,
+      sender: isSelf ? "self" : "other",
+      text: msg.content,
+      time: formatMessageTime(msg.timestamp),
+      read: msg.read,
+      attachments: msg.attachments || [],
+    };
+  };
 
   const loadConversations = async () => {
     try {
@@ -616,6 +650,33 @@ const DoctorMessagingDashboard = () => {
         </div>
       )}
 
+      {/* PROFILE MODAL */}
+      {showProfile && selectedChat && (
+        <div className="fixed inset-0 bg-black/40 z-[999] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-xl p-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">Profile</h3>
+              <button onClick={() => setShowProfile(false)} className="p-2 rounded-full hover:bg-gray-100"><X /></button>
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(selectedChat.name || "Patient")}`}
+                alt={selectedChat.name}
+                className="w-14 h-14 rounded-full object-cover"
+              />
+              <div>
+                <p className="font-semibold text-gray-900">{selectedChat.name}</p>
+                <p className="text-sm text-gray-600">Patient</p>
+                <p className="text-xs text-gray-500">User ID: {selectedChat.participantId ?? "N/A"}</p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button onClick={() => setShowProfile(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row h-[calc(100vh-200px)] bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
         <DoctorSelectPatientModal
           isOpen={showSelectPatientModal}
@@ -683,7 +744,7 @@ const DoctorMessagingDashboard = () => {
                     <p className="text-sm text-gray-500">{selectedChat.online ? "Online" : "Offline"} • Patient</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative">
                   <button
                     className="p-2 hover:bg-gray-100 rounded-full"
                     title="Audio call"
@@ -700,9 +761,41 @@ const DoctorMessagingDashboard = () => {
                   >
                     <Video size={20} className="text-gray-600" />
                   </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full" type="button">
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    title="More"
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setShowMenu((s) => !s); }}
+                  >
                     <MoreVertical size={20} className="text-gray-600" />
                   </button>
+
+                  {/* DROPDOWN MENU */}
+                  {showMenu && (
+                    <div
+                      className="absolute right-0 top-12 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                        onClick={() => { setShowProfile(true); setShowMenu(false); }}
+                      >
+                        <Info size={16} /> View profile
+                      </button>
+                      <button
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                        onClick={clearChatLocal}
+                      >
+                        <Eraser size={16} /> Clear chat (UI)
+                      </button>
+                      <button
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-2 text-sm text-red-600"
+                        onClick={deleteConversationLocal}
+                      >
+                        <Trash2 size={16} /> Remove conversation (UI)
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
