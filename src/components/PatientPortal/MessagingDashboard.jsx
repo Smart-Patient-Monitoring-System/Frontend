@@ -64,6 +64,7 @@ class ErrorBoundary extends React.Component {
 
 /* ===================== Helpers ===================== */
 const API_BASE = import.meta.env.VITE_API_URL;
+const WS_BASE  = import.meta.env.VITE_WS_URL || import.meta.env.VITE_API_URL;
 
 function safeNumber(v) {
   const n = Number(v);
@@ -384,7 +385,7 @@ const MessagingDashboard = () => {
     try {
       if (stompRef.current?.active) return;
 
-      const wsUrl = `${API_BASE}/ws`;
+      const wsUrl = `${WS_BASE}/ws`;
       const sock = new SockJS(wsUrl);
 
       const stomp = new Client({
