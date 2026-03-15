@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 /* ===================== Config ===================== */
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8088";
 
 /* ===================== Helpers ===================== */
 const toTitle = (s = "") =>
@@ -425,13 +425,17 @@ function DocDashboard() {
               <div className="bg-red-50 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Critical</span>
-                  <span className="text-lg font-bold text-red-600">—</span>
+                  <span className="text-lg font-bold text-red-600">
+                    {patients.filter(p => ["CRITICAL","HIGH","EMERGENCY"].includes((p.riskLevel || "").toUpperCase()) || (p.status || "").toUpperCase() === "CRITICAL").length}
+                  </span>
                 </div>
               </div>
               <div className="bg-green-50 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Stable</span>
-                  <span className="text-lg font-bold text-green-600">—</span>
+                  <span className="text-lg font-bold text-green-600">
+                    {patients.filter(p => !["critical","high"].includes((p.riskLevel || p.status || "").toLowerCase())).length}
+                  </span>
                 </div>
               </div>
             </div>
@@ -522,6 +526,9 @@ function DocDashboard() {
                           Blood Type
                         </th>
                         <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -567,6 +574,43 @@ function DocDashboard() {
                           <td className="py-4 px-4 text-gray-700">{patient.city}</td>
                           <td className="py-4 px-4 text-gray-700">{patient.district}</td>
                           <td className="py-4 px-4 text-gray-700">{patient.bloodType || "-"}</td>
+
+                          <td className="py-4 px-4">
+                            {(() => {
+                              const risk = (patient.riskLevel || "").toUpperCase();
+                              const stat = (patient.status || "").toUpperCase();
+
+                              // CRITICAL: riskLevel=CRITICAL/HIGH/EMERGENCY or status=CRITICAL
+                              const isCritical =
+                                risk === "CRITICAL" || risk === "HIGH" || risk === "EMERGENCY" ||
+                                stat === "CRITICAL";
+
+                              // MODERATE: riskLevel=MEDIUM or status=MONITORING
+                              const isModerate =
+                                risk === "MEDIUM" || stat === "MONITORING";
+
+                              if (isCritical) return (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                  Critical
+                                </span>
+                              );
+                              if (isModerate) return (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 border border-yellow-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                                  Moderate
+                                </span>
+                              );
+                              // LOW riskLevel or STABLE status → Good
+                              return (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                  Good
+                                </span>
+                              );
+                            })()}
+                          </td>
+
 
                           <td className="py-4 px-4">
                             <button

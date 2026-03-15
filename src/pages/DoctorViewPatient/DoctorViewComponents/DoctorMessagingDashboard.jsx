@@ -18,7 +18,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
 /* ===================== Helpers ===================== */
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8088";
 
 function safeNumber(v) {
   const n = Number(v);

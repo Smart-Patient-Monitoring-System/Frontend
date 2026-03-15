@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { TrendingUp } from "lucide-react";
 
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8088";
 
 const pad2 = (n) => String(n).padStart(2, "0");
 const formatDate = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;

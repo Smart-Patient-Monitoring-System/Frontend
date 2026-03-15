@@ -63,7 +63,7 @@ class ErrorBoundary extends React.Component {
 }
 
 /* ===================== Helpers ===================== */
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8088";
 
 function safeNumber(v) {
   const n = Number(v);

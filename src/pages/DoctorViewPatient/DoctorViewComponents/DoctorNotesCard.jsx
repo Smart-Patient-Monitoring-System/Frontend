@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { MessageSquare, Clock, User, Loader2, Plus } from "lucide-react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8088";
 
 const DoctorNotesCard = ({ patientId }) => {
   const [notes, setNotes] = useState([]);

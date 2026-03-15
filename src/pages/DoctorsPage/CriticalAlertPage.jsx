@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AlertCard from "./componants/AlertCard";
 import { AlertTriangle, RefreshCw, Shield } from "lucide-react";
 
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8088";
 
 /* ── JWT helpers ── */
 const getToken = () => localStorage.getItem("token");

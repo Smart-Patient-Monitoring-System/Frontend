@@ -29,7 +29,7 @@ const ECGMonitor = ({ isFullPage = false, patientId }) => {
             }
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`http://localhost:8084/api/patient/ecg/history/${patientId}`, {
+                const res = await fetch(`http://localhost:8088/api/patient/ecg/history/${patientId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {

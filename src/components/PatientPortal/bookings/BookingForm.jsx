@@ -74,7 +74,7 @@ if (types?.length) setSelectedTypeId(types[0].id);
   const handlePayNow = () => {
     if (!appointmentId) return alert("Please book first!");
     const fee = Number(selectedDoctor.consultationFee || 0).toFixed(2);
-    window.location.href = `http://localhost:8084/api/payments/pay/${appointmentId}?amount=${fee}`;
+    window.location.href = `http://localhost:8088/api/payments/pay/${appointmentId}?amount=${fee}`;
   };
 
   return (
