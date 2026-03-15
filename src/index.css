@@ -8,6 +8,8 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none; /* Chrome, Safari and Opera */
   }
+}
+
 @keyframes pulseLogo {
   0% {
     transform: scale(0.9);
