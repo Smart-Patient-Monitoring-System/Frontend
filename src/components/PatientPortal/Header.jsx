@@ -55,7 +55,7 @@ const Header = () => {
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-end">
           {/* DARK MODE */}
-          <button
+          {/* <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className={`relative w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors ${
               isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
@@ -66,10 +66,10 @@ const Header = () => {
                 isDarkMode ? 'translate-x-6 sm:translate-x-8' : 'translate-x-1'
               }`}
             />
-          </button>
+          </button> */}
 
           {/* BELL ICON */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
               onClick={() => setShowAlerts(!showAlerts)}
@@ -82,12 +82,12 @@ const Header = () => {
                 <AlertsCard />
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* SETTINGS */}
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          {/* <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <Settings className="w-5 h-5 text-gray-700" />
-          </button>
+          </button> */}
 
           {/* LOGOUT BUTTON */}
           <button
