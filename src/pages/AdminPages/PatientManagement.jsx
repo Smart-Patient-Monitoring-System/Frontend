@@ -60,6 +60,9 @@ function PatientManagement() {
       pastSurgeries: "",
       emergencyNotes: "",
       });
+//new
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [selectedPatient, setSelectedPatient] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -116,7 +119,11 @@ function PatientManagement() {
 
     setShowEditModal(true);
   };   
-  
+  //new
+  const handleView = (patient) => {
+    setSelectedPatient(patient);
+    setShowViewModal(true);
+  };
 
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
@@ -263,40 +270,22 @@ function PatientManagement() {
     key={patient.id}
     className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
   >
-    {/* Patient Info */}
+    {/* Leftside-Patient Info */}
     <div className="space-y-1">
       <p className="font-medium text-gray-800">
         {patient.name}
       </p>
 
-      <p className="text-sm text-gray-500">
-        {patient.dateOfBirth} 
-      </p>
-
-      <p className="text-sm text-gray-500">
-        {patient.address}
-      </p>
-
-      <p className="text-sm text-gray-500">
-        📧 {patient.email}
-      </p>
-
-      <p className="font-medium text-gray-800">
-        {patient.nicNo}
-      </p>
-    
-      <p className="text-sm text-gray-500">
-        📞 {patient.contactNo}
-      </p>
-
-      <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-        {patient.gender}
-      </span>
-
     </div>
 
     {/* RIGHT SIDE – ACTION BUTTONS */}
-    <div className="flex flex-col gap-2">
+    <div className="flex gap-2">
+              <button
+                onClick={() => handleView(patient)}
+                className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+              >
+                View
+              </button>
               <button
                 onClick={() => handleEdit(patient)}
                 className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
@@ -312,9 +301,68 @@ function PatientManagement() {
               </button>
             </div>
           </div>
-))}
-
+        ))}
       </div>
+
+      {/* View Patient Modal */}
+        {showViewModal && selectedPatient && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            
+            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-200">
+              
+              {/* Header */}
+              <div className="flex justify-between items-center px-6 py-4 border-b bg-gray-50 rounded-t-2xl">
+                <h2 className="text-xl font-bold text-gray-800">
+                  Patient Profile
+                </h2>
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 hover:bg-red-500 hover:text-white transition"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Scrollable Body */}
+              <div className="p-6 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+
+                  <InfoItem label="Full Name" value={selectedPatient.name} />
+                  <InfoItem label="Email" value={selectedPatient.email} />
+                  <InfoItem label="Contact Number" value={selectedPatient.contactNo} />
+                  <InfoItem label="NIC Number" value={selectedPatient.nicNo} />
+                  <InfoItem label="Gender" value={selectedPatient.gender} />
+
+                  {/* Right column */}
+                  <InfoItem label="Date of Birth" value={selectedPatient.dateOfBirth} />
+                  <InfoItem label="Blood Type" value={selectedPatient.bloodType} />
+                  <InfoItem label="Address" value={selectedPatient.address} />
+                  <InfoItem label="City" value={selectedPatient.city} />
+                  <InfoItem label="District" value={selectedPatient.district} />
+                  <InfoItem label="Postal Code" value={selectedPatient.dispostalCodet} />
+
+                  {/* Guardian Details */}
+                  <InfoItem label="Guardian Name" value={selectedPatient.guardiansName} />
+                  <InfoItem label="Guardian Contact Number" value={selectedPatient.guardiansContactNo} />
+                  <InfoItem label="Guardian Relationship" value={selectedPatient.guardianRelationship} />
+                  <InfoItem label="Guardian Email" value={selectedPatient.guardianEmail} />
+
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t flex justify-end bg-gray-50 rounded-b-2xl">
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+                >
+                  Close
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
 
       {/* Create Patient Modal */}
       {showModal && (
@@ -946,5 +994,16 @@ function PatientManagement() {
     </div>
   );
 }
+
+const InfoItem = ({ label, value }) => (
+  <div className="bg-gray-50 rounded-xl p-4">
+    <p className="text-xs text-gray-500 font-semibold mb-1">
+      {label}
+    </p>
+    <p className="text-gray-800 font-medium">
+      {value || "-"}
+    </p>
+  </div>
+);
 
 export default PatientManagement;
