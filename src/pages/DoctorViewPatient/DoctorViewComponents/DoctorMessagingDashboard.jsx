@@ -567,14 +567,7 @@ const DoctorMessagingDashboard = () => {
   }
 
   const ChatListItem = ({ chat }) => (
-    <div
-      onClick={() => selectChat(chat)}
-      className={`flex items-start gap-3 p-4 cursor-pointer transition-all border-l-4 ${
-        selectedChat?.id === chat.id
-          ? "bg-blue-50 border-l-blue-600"
-          : "hover:bg-gray-50 border-l-transparent"
-      }`}
-    >
+    <div onClick={() => selectChat(chat)} className={`flex items-start gap-3 p-4 cursor-pointer transition-all border-l-4 ${selectedChat?.id === chat.id ? "bg-blue-50 border-l-blue-600" : "hover:bg-gray-50 border-l-transparent"}`}>
       <div className="relative flex-shrink-0">
         <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(chat.name || "Patient")}`} alt={chat.name} className="w-12 h-12 rounded-full object-cover" />
         {chat.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />}
@@ -600,26 +593,8 @@ const DoctorMessagingDashboard = () => {
     return (
       <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}>
         <div className={`max-w-[70%] ${isOwn ? "order-2" : "order-1"}`}>
-          <div
-            className={`rounded-2xl px-4 py-3 ${
-              isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"
-            }`}
-          >
+          <div className={`rounded-2xl px-4 py-3 ${isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}>
             <p className="text-sm leading-relaxed">{message.text}</p>
-            {message.attachments?.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {message.attachments.map((file, i) => (
-                  <div
-                    key={i}
-                    className={`px-2 py-1 rounded-lg text-xs truncate max-w-[100px] ${
-                      isOwn ? "bg-blue-500" : "bg-gray-200"
-                    }`}
-                  >
-                    {file}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           <div className={`flex items-center gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
             <span className="text-xs text-gray-500">{message.time}</span>
@@ -769,19 +744,17 @@ const DoctorMessagingDashboard = () => {
                     <p className="text-sm text-gray-500">{selectedChat.online ? "Online" : "Offline"} • Patient</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={handleVoiceCall}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors" 
-                    type="button"
-                    title="Voice call"
+                <div className="flex items-center gap-2 relative">
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    title="Audio call"
+                    onClick={() => startOutgoingCall("AUDIO")}
+                    disabled={!isConnected}
                   >
                     <Phone size={20} className="text-gray-600" />
                   </button>
-                  <button 
-                    onClick={handleVideoCall}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors" 
-                    type="button"
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-full"
                     title="Video call"
                     onClick={() => startOutgoingCall("VIDEO")}
                     disabled={!isConnected}
@@ -858,12 +831,8 @@ const DoctorMessagingDashboard = () => {
                   </div>
                   <button
                     onClick={handleSendMessage}
-                    disabled={!messageText.trim() && attachments.length === 0}
-                    className={`p-3 rounded-full transition-colors flex-shrink-0 ${
-                      messageText.trim() || attachments.length
-                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    }`}
+                    disabled={!messageText.trim()}
+                    className={`p-3 rounded-full transition-colors flex-shrink-0 ${messageText.trim() ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
                     type="button"
                   >
                     <Send size={20} />
