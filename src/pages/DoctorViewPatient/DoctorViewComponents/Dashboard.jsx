@@ -1,18 +1,23 @@
 import React, { useState } from "react";
 
-const Dashboard = ({ onTabChange }) => {
+const Dashboard = ({ onTabChange, isDoctorView = false }) => {
   const [activeTab, setActiveTab] = useState("Overview");
 
-  const tabs = [
+  let tabs = [
     "Overview",
     "Real-Time Vitals",
     "ECG Readings",
     "Profile",
+    "Health Data from smart watch",
     "Emergency Panel",
     "Medical Records",
     "Doctor Notes",
-    "AI Health Assistant",
   ];
+
+  // Only allow AI Assistant if it's the Patient viewing
+  if (!isDoctorView) {
+    tabs.push("AI Health Assistant");
+  }
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -47,14 +52,16 @@ const Dashboard = ({ onTabChange }) => {
           </div>
         </div>
 
-        {/* Manual Entry button (separated like the image) */}
-        <button
-          onClick={() => onTabChange && onTabChange("manual-entry")}
-          className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-green-500 px-5 py-2.5 text-white text-xs xl:text-sm font-semibold shadow-sm hover:bg-green-600 transition"
-        >
-          <span className="text-base leading-none">+</span>
-          Manual Entry
-        </button>
+        {/* Manual Entry button - hide for Doctors */}
+        {!isDoctorView && (
+          <button
+            onClick={() => onTabChange && onTabChange("manual-entry")}
+            className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-green-500 px-5 py-2.5 text-white text-xs xl:text-sm font-semibold shadow-sm hover:bg-green-600 transition"
+          >
+            <span className="text-base leading-none">+</span>
+            Manual Entry
+          </button>
+        )}
       </div>
 
       {/* Subtle divider like dashboards */}

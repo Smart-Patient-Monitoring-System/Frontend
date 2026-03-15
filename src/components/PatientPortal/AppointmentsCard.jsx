@@ -3,7 +3,7 @@ import { Activity, Video, User } from "lucide-react";
 import BookingModal from "../../components/PatientPortal/bookings/BookingPage";
 import { getUserAppointments } from "../../api/api.js";
 
-const AppointmentsCard = () => {
+const AppointmentsCard = ({ isDoctorView = false }) => {
   const [appointments, setAppointments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,17 +68,19 @@ const AppointmentsCard = () => {
           </h2>
         </div>
 
-        {/* + button */}
-        <button
-          onClick={() => setShowModal(true)}
-          className="text-blue-500 hover:text-blue-600 p-1 sm:p-0"
-          aria-label="Book Appointment"
-          type="button"
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
+        {/* + button (hidden for doctors) */}
+        {!isDoctorView && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="text-blue-500 hover:text-blue-600 p-1 sm:p-0"
+            aria-label="Book Appointment"
+            type="button"
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Modal */}

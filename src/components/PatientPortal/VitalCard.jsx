@@ -8,11 +8,11 @@ const VitalCard = ({ title, value, unit, status, trend, iconName, bgColor, iconC
     droplets: Droplets,
     activity: Activity,
   };
-  
+
   const Icon = iconMap[iconName];
-  
+
   return (
-    <div className={`${bgColor} rounded-3xl p-4 sm:p-6 shadow-lg backdrop-blur-sm w-full sm:w-[320px]`}>
+    <div className={`${bgColor} rounded-3xl p-4 sm:p-6 shadow-lg backdrop-blur-sm w-full`}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2 sm:gap-0">
         <div className={`${iconColor} p-3 sm:p-4 rounded-2xl shadow-md`}>
           <Icon className="w-6 sm:w-7 h-6 sm:h-7 text-white" strokeWidth={2.5} />
@@ -22,7 +22,7 @@ const VitalCard = ({ title, value, unit, status, trend, iconName, bgColor, iconC
           <span className="text-xs sm:text-sm font-medium text-gray-700">NORMAL</span>
         </div>
       </div>
-      
+
       <div className="mb-4">
         <h3 className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 tracking-wide uppercase">{title}</h3>
         <div className="flex items-baseline gap-1 sm:gap-2">
@@ -30,7 +30,7 @@ const VitalCard = ({ title, value, unit, status, trend, iconName, bgColor, iconC
           <span className="text-sm sm:text-xl text-gray-500 font-light">{unit}</span>
         </div>
       </div>
-      
+
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2 sm:gap-0">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200/50 rounded-full flex items-center justify-center">
@@ -43,7 +43,7 @@ const VitalCard = ({ title, value, unit, status, trend, iconName, bgColor, iconC
           <span className="text-xs sm:text-xs text-gray-600 font-medium">LIVE</span>
         </div>
       </div>
-      
+
       <div className="w-full bg-gray-200/40 rounded-full h-1.5 sm:h-2 overflow-hidden">
         <div className={`${barColor} h-full rounded-full`} style={{ width: '75%' }}></div>
       </div>
