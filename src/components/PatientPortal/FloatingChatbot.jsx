@@ -1,6 +1,98 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 
+const API_CHAT_URL = "http://localhost:8088/api/chat/chat";
+
+/* ── Simple markdown-like formatter ── */
+const formatBotText = (text) => {
+  if (!text) return text;
+
+  // Split by double newline for paragraphs
+  const paragraphs = text.split(/\n{2,}/);
+
+  return paragraphs.map((para, pi) => {
+    // Handle bullet points  (lines starting with * or -)
+    const lines = para.split("\n");
+    const isBulletList = lines.every(
+      (l) => l.trim().startsWith("* ") || l.trim().startsWith("- ") || l.trim() === ""
+    );
+
+    if (isBulletList && lines.some((l) => l.trim().startsWith("* ") || l.trim().startsWith("- "))) {
+      return (
+        <ul key={pi} className="list-disc list-inside space-y-1 my-1">
+          {lines
+            .filter((l) => l.trim())
+            .map((l, li) => (
+              <li key={li} className="text-sm leading-relaxed">
+                {formatInline(l.replace(/^[\s]*[-*]\s*/, ""))}
+              </li>
+            ))}
+        </ul>
+      );
+    }
+
+    // Regular paragraph
+    return (
+      <p key={pi} className="text-sm leading-relaxed mb-1.5 last:mb-0">
+        {formatInline(para.replace(/\n/g, " "))}
+      </p>
+    );
+  });
+};
+
+/* Bold (**text**) and inline code (`code`) */
+const formatInline = (text) => {
+  const parts = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    // Bold **text**
+    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+    // Inline code `code`
+    const codeMatch = remaining.match(/`(.+?)`/);
+
+    let firstMatch = null;
+    let type = null;
+
+    if (boldMatch && (!codeMatch || boldMatch.index <= codeMatch.index)) {
+      firstMatch = boldMatch;
+      type = "bold";
+    } else if (codeMatch) {
+      firstMatch = codeMatch;
+      type = "code";
+    }
+
+    if (!firstMatch) {
+      parts.push(remaining);
+      break;
+    }
+
+    // Text before match
+    if (firstMatch.index > 0) {
+      parts.push(remaining.substring(0, firstMatch.index));
+    }
+
+    if (type === "bold") {
+      parts.push(
+        <strong key={key++} className="font-semibold">
+          {firstMatch[1]}
+        </strong>
+      );
+    } else if (type === "code") {
+      parts.push(
+        <code key={key++} className="bg-blue-50 text-blue-700 px-1 py-0.5 rounded text-xs font-mono">
+          {firstMatch[1]}
+        </code>
+      );
+    }
+
+    remaining = remaining.substring(firstMatch.index + firstMatch[0].length);
+  }
+
+  return parts;
+};
+
 const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -25,37 +117,43 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
     if (inputMessage.trim() === "") return;
 
     const userMessage = {
-      id: messages.length + 1,
+      id: Date.now(),
       text: inputMessage,
       sender: "user",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setMessages([...messages, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
+    const sentText = inputMessage;
     setInputMessage("");
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8081/api/chat", {
+      const res = await fetch(API_CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: inputMessage }),
+        body: JSON.stringify({ message: sentText }),
       });
 
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}`);
+      }
+
       const data = await res.json();
-      
+
       const botMessage = {
-        id: messages.length + 2,
+        id: Date.now() + 1,
         text: data.reply || "I received your message. How else can I assist you?",
         sender: "bot",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
-      
+
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
+      console.error("Chatbot error:", error);
       const errorMessage = {
-        id: messages.length + 2,
-        text: "⚠️ Something went wrong. Please try again.",
+        id: Date.now() + 1,
+        text: "⚠️ Could not reach the AI service. Make sure the chatbot backend is running on port 8083.",
         sender: "bot",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
@@ -65,7 +163,12 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
     }
   };
 
-  const handleKeyPress = (e) => e.key === "Enter" && handleSendMessage();
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   const shouldShowChat = isFullScreen || isOpen;
 
@@ -118,16 +221,21 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
                 }`}
               >
                 <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-2 ${
+                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                     message.sender === "user"
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-white text-gray-800 rounded-bl-none shadow-sm"
+                      ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-sm"
+                      : "bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100"
                   }`}
                 >
-                  <p className="text-sm">{message.text}</p>
+                  {/* Render formatted text for bot, plain text for user */}
+                  <div className="text-sm">
+                    {message.sender === "bot"
+                      ? formatBotText(message.text)
+                      : message.text}
+                  </div>
                   <p
-                    className={`text-xs mt-1 ${
-                      message.sender === "user" ? "text-blue-100" : "text-gray-400"
+                    className={`text-[10px] mt-1.5 ${
+                      message.sender === "user" ? "text-blue-200" : "text-gray-400"
                     }`}
                   >
                     {message.timestamp}
@@ -138,8 +246,12 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white text-gray-800 rounded-2xl rounded-bl-none shadow-sm px-4 py-2 animate-pulse">
-                  <p className="text-sm">Thinking...</p>
+                <div className="bg-white text-gray-800 rounded-2xl rounded-bl-sm shadow-sm border border-gray-100 px-4 py-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                  </div>
                 </div>
               </div>
             )}
@@ -158,15 +270,15 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder="Type your message..."
                 disabled={loading}
                 className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
               />
               <button
                 onClick={handleSendMessage}
-                disabled={loading}
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 sm:p-3 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || !inputMessage.trim()}
+                className="bg-gradient-to-br from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full p-2 sm:p-3 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
