@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../../api";
+import API from "../../api/api";
 
 import gtMark from "../../assets/images/gtMark.png";
 import heart from "../../assets/images/heart.png";
@@ -18,134 +18,83 @@ export default function LoginPagePatient() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    if (!email.trim() || !password.trim()) {
-      setError("Please enter both email and password");
-      setLoading(false);
+  if (!email.trim() || !password.trim()) {
+    setError("Please enter both email and password");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const { data } = await API.post("/auth/login", {
+      email,
+      password,
+      role: "PATIENT",
+    });
+
+    if (data.otpRequired) {
+      setLoginSessionId(data.loginSessionId);
+      setStep("OTP");
       return;
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password, role: "PATIENT" }),
-      });
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("userId", data.patientId);
+    localStorage.setItem("userRole", "PATIENT");
+    localStorage.setItem("user", JSON.stringify({
+      username: data.username,
+      role: data.role?.toLowerCase() || "patient",
+    }));
+    localStorage.setItem("patientId", data.patientId);
+    localStorage.setItem("patientName", data.name || data.username);
 
-      if (!response.ok) {
-        // Try to get error message from response
-        let errorMessage = "Invalid email or password";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          }
-        } catch (e) {
-          // If response is not JSON, use default message
-        }
-        setError(errorMessage);
-        setLoading(false);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.otpRequired) {
-        setLoginSessionId(data.loginSessionId);
-        setStep("OTP");
-        setLoading(false);
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userId", data.patientId);
-      localStorage.setItem("userRole", "PATIENT");
-
-
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          username: data.username,
-          role: data.role?.toLowerCase() || "patient",
-        })
-      );
-
-      localStorage.setItem("patientId", data.patientId);
-      localStorage.setItem("patientName", data.name || data.username);
-
-
-      navigate("/patient-portal");
-    } catch (err) {
-      setError("Unable to connect to server. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    navigate("/patient-portal");
+  } catch (err) {
+    const msg = err.response?.data?.message || "Invalid email or password";
+    setError(msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    if (!otp.trim()) {
-      setError("Please enter the OTP sent to your email");
-      setLoading(false);
-      return;
-    }
+  if (!otp.trim()) {
+    setError("Please enter the OTP sent to your email");
+    setLoading(false);
+    return;
+  }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login/verify-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ loginSessionId, otp }),
-      });
+  try {
+    const { data } = await API.post("/auth/login/verify-otp", {
+      loginSessionId,
+      otp,
+    });
 
-      if (!response.ok) {
-        let errorMessage = "Invalid or expired OTP";
-        try {
-          const errorData = await response.json();
-          if (errorData.message) {
-            errorMessage = errorData.message;
-          }
-        } catch (e) {}
-        setError(errorMessage);
-        setLoading(false);
-        return;
-      }
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("userId", data.patientId);
+    localStorage.setItem("userRole", "PATIENT");
+    localStorage.setItem("user", JSON.stringify({
+      username: data.username,
+      role: data.role?.toLowerCase() || "patient",
+    }));
+    localStorage.setItem("patientId", data.patientId);
+    localStorage.setItem("patientName", data.name || data.username);
 
-      const data = await response.json();
-
-      localStorage.setItem("token", data.token);
-
-      localStorage.setItem("userId", data.patientId);
-      localStorage.setItem("userRole", "PATIENT");
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          username: data.username,
-          role: data.role?.toLowerCase() || "patient",
-        })
-      );
-
-      localStorage.setItem("patientId", data.patientId);
-      localStorage.setItem("patientName", data.name || data.username);
-
-      navigate("/patient-portal");
-    } catch (err) {
-      setError("Unable to connect to server. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    navigate("/patient-portal");
+  } catch (err) {
+    const msg = err.response?.data?.message || "Invalid or expired OTP";
+    setError(msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-[#F8FBFF] to-[#EEF6FF] flex items-center justify-center px-4">

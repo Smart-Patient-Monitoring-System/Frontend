@@ -8,9 +8,11 @@ export default function DoctorsPage() {
 
   // Fetch doctors (example)
   useEffect(() => {
-    // fetch("http://localhost:8084/api/doctors")
-    //   .then(res => res.json())
-    //   .then(data => setDoctors(data));
+//     const API_BASE = import.meta.env.VITE_API_URL;
+
+// fetch(`${API_BASE}/api/doctors`)
+//   .then(res => res.json())
+//   .then(data => setDoctors(data));
 
     // TEMP DATA
     setDoctors([

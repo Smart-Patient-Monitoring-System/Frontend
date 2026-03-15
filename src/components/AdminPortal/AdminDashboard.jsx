@@ -31,11 +31,24 @@ function AdminDashboard() {
     // Navigate to homepage
     navigate("/");
   };
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("users"); 
+  const [doctorCount, setDoctorCount] = useState(0);
+  const [patientCount, setPatientCount] = useState(0);
+
+  useEffect(() => {
+  fetch("http://localhost:8080/api/dashboard/counts")
+    .then((res) => res.json())
+    .then((data) => {
+      setDoctorCount(data.doctorCount);
+      setPatientCount(data.patientCount);
+    })
+    .catch((error) => console.error("Error fetching dashboard counts:", error));
+  }, []);
+ 
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
-      {/* ================= HEADER ================= */}
+      {/* === HEADER === */}
       <header className="bg-white shadow-sm w-full">
         <div className="max-w-full px-4 sm:px-6 md:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
@@ -68,21 +81,6 @@ function AdminDashboard() {
 
             {/* Right */}
             <div className="flex items-center gap-3">
-              {/* Notification */}
-              <button
-                className="p-2 hover:bg-gray-100 rounded-lg relative"
-                onClick={() => setHasNotification(false)}
-              >
-                <Bell className="w-5 h-5 text-black" />
-                {hasNotification && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-                )}
-              </button>
-
-              {/* Settings */}
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <Settings className="w-5 h-5 text-black" />
-              </button>
 
               {/* Logout */}
               <button
@@ -101,59 +99,52 @@ function AdminDashboard() {
       </header>
 
       {/* ================= STATS CARDS ================= */}
-      <div className="px-6 mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Total Users */}
-          <div className="bg-[#EEF4FF] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-              <Users className="text-white w-5 h-5" />
-            </div>
-            <p className="text-sm text-gray-600">Total Users</p>
-            <h2 className="text-2xl font-bold text-gray-800">72</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              +12
-            </span>
-          </div>
-
+        <div className="px-6 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          
           {/* Active Doctors */}
-          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-4">
-              <UserCircle className="text-white w-5 h-5" />
+          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
+            
+            <div>
+              <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
+                <UserCircle className="text-white w-5 h-5" />
+              </div>
+              <p className="text-sm text-gray-600">Active Doctors</p>
             </div>
-            <p className="text-sm text-gray-600">Active Doctors</p>
-            <h2 className="text-2xl font-bold text-gray-800">24</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              +12
-            </span>
+
+            <h2 className="text-3xl font-bold text-gray-800">{doctorCount === 0 ? "..." : doctorCount}</h2>
           </div>
 
           {/* Active Patients */}
-          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
-              <Activity className="text-white w-5 h-5" />
+          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
+            
+            <div>
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
+                <Activity className="text-white w-5 h-5" />
+              </div>
+              <p className="text-sm text-gray-600">Active Patients</p>
             </div>
-            <p className="text-sm text-gray-600">Active Patients</p>
-            <h2 className="text-2xl font-bold text-gray-800">48</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              +12
-            </span>
+
+            <h2 className="text-3xl font-bold text-gray-800">{patientCount === 0 ? "..." : patientCount}</h2>
           </div>
 
-          {/* System Uptime */}
-          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md relative">
-            <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
-              <TrendingUp className="text-white w-5 h-5" />
+          {/* IoT Devices */}
+          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
+            
+            <div>
+              <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-3">
+                <TrendingUp className="text-white w-5 h-5" />
+              </div>
+              <p className="text-sm text-gray-600">IOT Devices</p>
             </div>
-            <p className="text-sm text-gray-600">System Uptime</p>
-            <h2 className="text-2xl font-bold text-gray-800">99.9%</h2>
-            <span className="absolute top-3 right-3 text-xs bg-green-200 text-green-700 px-2 py-0.5 rounded-full">
-              Stable
-            </span>
+
+            <h2 className="text-3xl font-bold text-gray-800">23</h2>
           </div>
+
         </div>
       </div>
 
-      {/* ================= BOTTOM NAVIGATION ================= */}
+      {/* === BOTTOM NAVIGATION === */}
       <div className="px-6 mt-8">
         <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
 

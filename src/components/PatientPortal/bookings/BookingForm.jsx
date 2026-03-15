@@ -72,10 +72,13 @@ if (types?.length) setSelectedTypeId(types[0].id);
   };
 
   const handlePayNow = () => {
-    if (!appointmentId) return alert("Please book first!");
-    const fee = Number(selectedDoctor.consultationFee || 0).toFixed(2);
-    window.location.href = `http://localhost:8084/api/payments/pay/${appointmentId}?amount=${fee}`;
-  };
+  if (!appointmentId) return alert("Please book first!");
+
+  const fee = Number(selectedDoctor.consultationFee || 0).toFixed(2);
+
+  window.location.href =
+    `${API_BASE}/api/payments/pay/${appointmentId}?amount=${fee}`;
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

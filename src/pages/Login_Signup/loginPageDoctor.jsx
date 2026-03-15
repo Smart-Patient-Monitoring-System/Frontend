@@ -63,16 +63,18 @@ export default function LoginPageDoctor() {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("userRole", "DOCTOR");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          username: data.username,
-          role: data.role?.toLowerCase() || "doctor",
-        })
-      );
+localStorage.setItem("userId", data.patientId);
+localStorage.setItem("userName", data.name || data.username || "");
+localStorage.setItem("userRole", "DOCTOR");
+localStorage.setItem(
+  "user",
+  JSON.stringify({
+    username: data.username,
+    role: data.role?.toLowerCase() || "doctor",
+  })
+);
 
-      navigate("/DocDashboard");
+navigate("/DocDashboard");
     } catch (err) {
       setError("Unable to connect to server. Please try again.");
     } finally {
@@ -116,16 +118,18 @@ export default function LoginPageDoctor() {
       const data = await response.json();
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("userRole", "DOCTOR");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          username: data.username,
-          role: data.role?.toLowerCase() || "doctor",
-        })
-      );
+localStorage.setItem("userId", data.patientId);
+localStorage.setItem("userName", data.name || data.username || "");
+localStorage.setItem("userRole", "DOCTOR");
+localStorage.setItem(
+  "user",
+  JSON.stringify({
+    username: data.username,
+    role: data.role?.toLowerCase() || "doctor",
+  })
+);
 
-      navigate("/DocDashboard");
+navigate("/DocDashboard");
     } catch (err) {
       setError("Unable to connect to server. Please try again.");
     } finally {
