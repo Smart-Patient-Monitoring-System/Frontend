@@ -6,6 +6,7 @@ import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
 import ReportsCard from "../../components/PatientPortal/ReportsCard";
 import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
 import VitalCard from "../../components/PatientPortal/VitalCard";
+import VitalsDashboard from "../../components/PatientPortal/VitalsDashboard";
 import GraphCard from "../../components/PatientPortal/GraphCard";
 import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
 import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
@@ -16,6 +17,7 @@ import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
 import ProfileTab from "../../components/PatientPortal/ProfileTab";
 import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
 import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
+import HealthDataTab from "../../components/PatientPortal/HealthDataTab";
 import DoctorNotesCard from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorNotesCard";
 import AssignedCareTeamCard from "../../pages/DoctorViewPatient/DoctorViewComponents/AssignedCareTeamCard";
 
@@ -31,53 +33,6 @@ const DoctorPatientView = () => {
 
   const patientName =
     location.state?.patientName || localStorage.getItem("profilePatientName");
-
-  const vitals = [
-    {
-      title: "Heart Rate",
-      value: "72",
-      unit: "bpm",
-      status: "Stable",
-      trend: "−",
-      iconName: "heart",
-      bgColor: "bg-blue-100",
-      iconColor: "bg-blue-500",
-      barColor: "bg-blue-500",
-    },
-    {
-      title: "Temperature",
-      value: "98.2",
-      unit: "°F",
-      status: "Stable",
-      trend: "−",
-      iconName: "thermometer",
-      bgColor: "bg-orange-100",
-      iconColor: "bg-orange-600",
-      barColor: "bg-orange-500",
-    },
-    {
-      title: "SPO₂",
-      value: "98",
-      unit: "%",
-      status: "Up",
-      trend: "↗",
-      iconName: "droplets",
-      bgColor: "bg-teal-100",
-      iconColor: "bg-teal-600",
-      barColor: "bg-teal-500",
-    },
-    {
-      title: "Blood Pressure",
-      value: "120/80",
-      unit: "mmHg",
-      status: "Stable",
-      trend: "−",
-      iconName: "activity",
-      bgColor: "bg-purple-100",
-      iconColor: "bg-purple-600",
-      barColor: "bg-purple-500",
-    },
-  ];
 
   if (!patientId) {
     return (
@@ -113,6 +68,7 @@ const DoctorPatientView = () => {
       {/* Dashboard (Tabs + Manual Entry Button) */}
       <div className="min-h-screen bg-gray-100">
         <Dashboard
+          isDoctorView={true}
           onTabChange={(tab) => {
             if (tab === "manual-entry") {
               setShowManualEntry(true);
@@ -132,23 +88,19 @@ const DoctorPatientView = () => {
           {/* Overview Tab - Simplified to match screenshot */}
           {currentTab === "Overview" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-              
+
               {/* Left Column - Vitals and Graph */}
               <div className="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
-                {/* Vitals Grid */}
-                <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
-                  {vitals.map((vital, index) => (
-                    <VitalCard key={index} {...vital} />
-                  ))}
-                </div>
+                {/* Vitals Dashboard */}
+                <VitalsDashboard patientId={patientId} />
 
                 {/* Vital Trends Graph */}
-                <GraphCard patientId={patientId}/>
+                <GraphCard patientId={patientId} />
               </div>
 
               {/* Right Column - Doctor's Notes and Care Team */}
               <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                <DoctorNotesCard />
+                <DoctorNotesCard patientId={patientId} />
                 <AssignedCareTeamCard />
               </div>
             </div>
@@ -156,21 +108,21 @@ const DoctorPatientView = () => {
 
           {/* Real-Time Vitals Tab */}
           {currentTab === "Real-Time Vitals" && (
-            <RealtimeGraphs />
+            <RealtimeGraphs patientId={patientId} />
           )}
 
           {/* ECG Readings Tab */}
           {currentTab === "ECG Readings" && (
             <div className="space-y-4 sm:space-y-5 md:space-y-6">
-              <ECGMonitor isFullPage={true} />
+              <ECGMonitor isFullPage={true} patientId={patientId} />
             </div>
           )}
 
           {/* Medical Records Tab */}
           {currentTab === "Medical Records" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-              <ReportsCard />
-              <MedicationsCard />
+              <ReportsCard patientId={patientId} />
+              <MedicationsCard patientId={patientId} />
             </div>
           )}
 
@@ -189,15 +141,20 @@ const DoctorPatientView = () => {
           {/* Appointments Tab */}
           {currentTab === "Appointments" && (
             <div className="max-w-4xl">
-              <AppointmentsCard />
+              <AppointmentsCard isDoctorView={true} />
             </div>
           )}
 
           {/* Emergency Panel Tab */}
           {currentTab === "Emergency Panel" && <EmergencyPanel />}
 
+          {/* Health Data from smart watch Tab */}
+          {currentTab === "Health Data from smart watch" && (
+            <HealthDataTab patientId={patientId} isDoctorView={true} />
+          )}
+
           {/* Messaging Tab */}
-          {currentTab === "Doctor Notes" && <DoctorNotesCard />}
+          {currentTab === "Doctor Notes" && <DoctorNotesCard patientId={patientId} />}
 
           {/* Profile Tab */}
           {currentTab === "Profile" && <ProfileTab />}
@@ -211,8 +168,8 @@ const DoctorPatientView = () => {
         </div>
       </div>
 
-      {/* Floating Chatbot */}
-      {currentTab !== "AI Health Assistant" && <FloatingChatbot />}
+      {/* Floating Chatbot - Disabled for Doctor View */}
+      {/* {currentTab !== "AI Health Assistant" && <FloatingChatbot />} */}
     </>
   );
 };
