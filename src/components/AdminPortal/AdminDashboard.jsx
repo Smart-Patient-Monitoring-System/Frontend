@@ -33,6 +33,7 @@ function AdminDashboard() {
   };
   const [activeTab, setActiveTab] = useState("users"); 
   const [doctorCount, setDoctorCount] = useState(0);
+  const [specialdoctorCount, setSpecialDoctorCount] = useState(0);
   const [patientCount, setPatientCount] = useState(0);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ function AdminDashboard() {
     .then((res) => res.json())
     .then((data) => {
       setDoctorCount(data.doctorCount);
+      setSpecialDoctorCount(data.specialdoctorCount)
       setPatientCount(data.patientCount);
     })
     .catch((error) => console.error("Error fetching dashboard counts:", error));
@@ -98,13 +100,12 @@ function AdminDashboard() {
         </div>
       </header>
 
-      {/* ================= STATS CARDS ================= */}
-        <div className="px-6 mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* === STATS CARDS === */}
+      <div className="px-6 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           
           {/* Active Doctors */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
-            
             <div>
               <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
                 <UserCircle className="text-white w-5 h-5" />
@@ -112,25 +113,55 @@ function AdminDashboard() {
               <p className="text-sm text-gray-600">Active Doctors</p>
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-800">{doctorCount === 0 ? "..." : doctorCount}</h2>
+            <h2 className="text-3xl font-bold text-gray-800">
+              {doctorCount === 0 ? "..." : doctorCount}
+            </h2>
+          </div>
+
+          {/* Special Doctors */}
+          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
+            <div>
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
+                <Users className="text-white w-5 h-5" />
+              </div>
+              <p className="text-sm text-gray-600">Special Doctors</p>
+            </div>
+
+            <h2 className="text-3xl font-bold text-gray-800">
+              {specialdoctorCount === 0 ? "..." : specialdoctorCount}
+            </h2>
           </div>
 
           {/* Active Patients */}
-          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
-            
+          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-3">
                 <Activity className="text-white w-5 h-5" />
               </div>
               <p className="text-sm text-gray-600">Active Patients</p>
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-800">{patientCount === 0 ? "..." : patientCount}</h2>
+            <h2 className="text-3xl font-bold text-gray-800">
+              {patientCount === 0 ? "..." : patientCount}
+            </h2>
+          </div>
+
+          {/* Pending Doctors */}
+          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
+            <div>
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
+                <Bell className="text-white w-5 h-5" />
+              </div>
+              <p className="text-sm text-gray-600">Pending Doctors</p>
+            </div>
+
+            <h2 className="text-3xl font-bold text-gray-800">
+              23
+            </h2>
           </div>
 
           {/* IoT Devices */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
-            
             <div>
               <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-3">
                 <TrendingUp className="text-white w-5 h-5" />
@@ -168,6 +199,26 @@ function AdminDashboard() {
             }
           >
             Doctor Management
+          </button>
+
+          <button
+            onClick={() => setActiveTab("logs")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
+              ${
+                activeTab === "logs"
+                  ? "text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            style={
+              activeTab === "logs"
+                ? {
+                    background:
+                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
+                  }
+                : {}
+            }
+          >
+            Special Doctors
           </button>
 
           <button
@@ -214,7 +265,7 @@ function AdminDashboard() {
             onClick={() => setActiveTab("accept")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
               ${
-                activeTab === "analytics"
+                activeTab === "accept"
                   ? "text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
@@ -231,15 +282,15 @@ function AdminDashboard() {
           </button>
 
           <button
-            onClick={() => setActiveTab("analytics")}
+            onClick={() => setActiveTab("booking")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
               ${
-                activeTab === "analytics"
+                activeTab === "booking"
                   ? "text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             style={
-              activeTab === "analytics"
+              activeTab === "booking"
                 ? {
                     background:
                       "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
@@ -247,7 +298,7 @@ function AdminDashboard() {
                 : {}
             }
           >
-            Analytics
+            Booking
           </button>
 
           <button
@@ -269,45 +320,7 @@ function AdminDashboard() {
             Admin Management
           </button>
 
-          <button
-            onClick={() => setActiveTab("logs")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "logs"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            style={
-              activeTab === "logs"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
-                : {}
-            }
-          >
-            Security Logs
-          </button>
-
-          <button
-            onClick={() => setActiveTab("booking")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-    ${
-      activeTab === "booking"
-        ? "text-white shadow-md"
-        : "text-gray-600 hover:bg-gray-100"
-    }`}
-            style={
-              activeTab === "booking"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
-                : {}
-            }
-          >
-            Booking
-          </button>
+          
         </div>
       </div>
       <div className="px-6 mt-6">
