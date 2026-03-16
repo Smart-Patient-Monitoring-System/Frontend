@@ -28,7 +28,7 @@ const PatientInfoCard = ({
         }
 
         const response = await fetch(
-          `http://localhost:8084/api/patient/get/${patientId}`,
+          `http://localhost:8088/api/patient/get/${patientId}`,
           {
             method: "GET",
             headers: {

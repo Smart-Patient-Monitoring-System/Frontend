@@ -44,7 +44,7 @@ function UploadModal({ open, onClose, onAnalyze }) {
       // Save result to MainService for persistent history
       try {
         await axios.post(
-          "http://localhost:8084/api/doctor/ecg/save",
+          "http://localhost:8088/api/doctor/ecg/save",
           {
             patientId: numericId,
             prediction: res.data.prediction || res.data.status || "Unknown",

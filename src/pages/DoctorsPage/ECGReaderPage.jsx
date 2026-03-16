@@ -4,7 +4,7 @@ import UploadModal from "./componants/UploadModal";
 import ECGGraph from "./componants/ECGGraph";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8088";
 
 function ECGReaderPage({ doctorId }) {
   const [analysis, setAnalysis] = useState(null);
@@ -81,13 +81,11 @@ function ECGReaderPage({ doctorId }) {
         onAnalyze={(data) => {
           setAnalysis(data);
           setOpenModal(false);
-          // Optional: We could unshift the new upload into the history state here
-          // if we had the full DTO available from upload response.
         }}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in-0 duration-500">
-        
+
         {/* ── Left Sidebar: History List ── */}
         <div className="lg:col-span-1 bg-white/70 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 p-5 h-[700px] overflow-y-auto">
           <div className="flex items-center gap-3 mb-5 pb-3 border-b border-gray-100">
@@ -124,7 +122,7 @@ function ECGReaderPage({ doctorId }) {
                       {reading.prediction || reading.status}
                     </span>
                   </div>
-                  
+
                   <div className="flex flex-col gap-1.5 mt-2">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 bg-indigo-100/50 px-2 py-1 rounded w-fit">
                       <User size={12} />
@@ -177,7 +175,7 @@ function ECGReaderPage({ doctorId }) {
                     </p>
                   </div>
                 </div>
-                
+
                 {analysis.patientName && (
                   <div className="hidden sm:flex flex-col items-end">
                     <span className="text-xs uppercase tracking-wider font-bold opacity-60">Patient</span>
@@ -187,14 +185,13 @@ function ECGReaderPage({ doctorId }) {
               </div>
 
               {/* ── ECG Waveform Graph ── */}
-              <ECGGraph 
-                waveform={analysis.waveform || (analysis.waveformJson ? JSON.parse(analysis.waveformJson) : [])} 
-                fs={analysis.fs || 500} 
+              <ECGGraph
+                waveform={analysis.waveform || (analysis.waveformJson ? JSON.parse(analysis.waveformJson) : [])}
+                fs={analysis.fs || 500}
               />
 
               {/* ── Metrics Grid ── */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {/* Mean HR */}
                 <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-100 shadow-sm transition-all hover:bg-white">
                   <div className="flex items-center gap-2 mb-2">
                     <Heart size={14} className="text-red-400" />
@@ -206,7 +203,6 @@ function ECGReaderPage({ doctorId }) {
                   </p>
                 </div>
 
-                {/* SDNN */}
                 <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-100 shadow-sm transition-all hover:bg-white">
                   <div className="flex items-center gap-2 mb-2">
                     <Zap size={14} className="text-yellow-500" />
@@ -218,7 +214,6 @@ function ECGReaderPage({ doctorId }) {
                   </p>
                 </div>
 
-                {/* RMSSD */}
                 <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-100 shadow-sm transition-all hover:bg-white">
                   <div className="flex items-center gap-2 mb-2">
                     <Activity size={14} className="text-blue-400" />
@@ -230,7 +225,6 @@ function ECGReaderPage({ doctorId }) {
                   </p>
                 </div>
 
-                {/* Beats */}
                 <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-gray-100 shadow-sm transition-all hover:bg-white">
                   <div className="flex items-center gap-2 mb-2">
                     <Heart size={14} className="text-purple-400" />
@@ -263,7 +257,7 @@ function ECGReaderPage({ doctorId }) {
                   </p>
                 </div>
               </div>
-              
+
             </div>
           )}
         </div>

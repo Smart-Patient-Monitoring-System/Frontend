@@ -12,7 +12,7 @@ import {
 
 /**
  * IMPORTANT FOR MOBILE:
- * - On phone, http://localhost:8084 won't work.
+ * - On phone, http://localhost:8088 won't work.
  * - Use your PC LAN IP like: http://192.168.1.25:8080
  * - Or use ngrok public URL.
  */
