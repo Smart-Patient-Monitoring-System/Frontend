@@ -301,7 +301,7 @@ function AdminDashboard() {
                 : {}
             }
           >
-            Admin Management
+            Admin 
           </button>
 
         </div>
