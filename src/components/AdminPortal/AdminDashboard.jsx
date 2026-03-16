@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
   Bell,
-  Settings,
   Activity,
   Users,
   UserCircle,
@@ -23,30 +22,44 @@ function AdminDashboard() {
   const [hasNotification, setHasNotification] = useState(true);
   const navigate = useNavigate();
 
+  const [adminData, setAdminData] = useState({ name: "", role: "" });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setAdminData({
+          name: parsed.name || parsed.username || parsed.fullName || "Admin",
+          role: parsed.role || "Administrator",
+        });
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+      }
+    }
+  }, []);
+
   const handleLogout = () => {
-    // Clear authentication data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    // Navigate to homepage
     navigate("/");
   };
-  const [activeTab, setActiveTab] = useState("users"); 
+
+  const [activeTab, setActiveTab] = useState("users");
   const [doctorCount, setDoctorCount] = useState(0);
   const [specialdoctorCount, setSpecialDoctorCount] = useState(0);
   const [patientCount, setPatientCount] = useState(0);
 
   useEffect(() => {
-  fetch("http://localhost:8080/api/dashboard/counts")
-    .then((res) => res.json())
-    .then((data) => {
-      setDoctorCount(data.doctorCount);
-      setSpecialDoctorCount(data.specialdoctorCount)
-      setPatientCount(data.patientCount);
-    })
-    .catch((error) => console.error("Error fetching dashboard counts:", error));
+    fetch("http://localhost:8080/api/dashboard/counts")
+      .then((res) => res.json())
+      .then((data) => {
+        setDoctorCount(data.doctorCount);
+        setSpecialDoctorCount(data.specialdoctorCount);
+        setPatientCount(data.patientCount);
+      })
+      .catch((error) => console.error("Error fetching dashboard counts:", error));
   }, []);
- 
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
@@ -75,16 +88,16 @@ function AdminDashboard() {
                   Admin Portal
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Welcome, <span className="font-semibold">Section 7</span>{" "}
-                  Janith
+                  Welcome,{" "}
+                  <span className="font-semibold">
+                    {adminData.name || "..."}
+                  </span>
                 </p>
               </div>
             </div>
 
             {/* Right */}
             <div className="flex items-center gap-3">
-
-              {/* Logout */}
               <button
                 onClick={handleLogout}
                 className="rounded-lg px-4 py-2 shadow-xl text-white font-medium"
@@ -103,7 +116,7 @@ function AdminDashboard() {
       {/* === STATS CARDS === */}
       <div className="px-6 mt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          
+
           {/* Active Doctors */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
@@ -112,7 +125,6 @@ function AdminDashboard() {
               </div>
               <p className="text-sm text-gray-600">Active Doctors</p>
             </div>
-
             <h2 className="text-3xl font-bold text-gray-800">
               {doctorCount === 0 ? "..." : doctorCount}
             </h2>
@@ -126,7 +138,6 @@ function AdminDashboard() {
               </div>
               <p className="text-sm text-gray-600">Special Doctors</p>
             </div>
-
             <h2 className="text-3xl font-bold text-gray-800">
               {specialdoctorCount === 0 ? "..." : specialdoctorCount}
             </h2>
@@ -140,7 +151,6 @@ function AdminDashboard() {
               </div>
               <p className="text-sm text-gray-600">Active Patients</p>
             </div>
-
             <h2 className="text-3xl font-bold text-gray-800">
               {patientCount === 0 ? "..." : patientCount}
             </h2>
@@ -154,10 +164,7 @@ function AdminDashboard() {
               </div>
               <p className="text-sm text-gray-600">Pending Doctors</p>
             </div>
-
-            <h2 className="text-3xl font-bold text-gray-800">
-              23
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-800">23</h2>
           </div>
 
           {/* IoT Devices */}
@@ -168,7 +175,6 @@ function AdminDashboard() {
               </div>
               <p className="text-sm text-gray-600">IOT Devices</p>
             </div>
-
             <h2 className="text-3xl font-bold text-gray-800">23</h2>
           </div>
 
@@ -179,22 +185,16 @@ function AdminDashboard() {
       <div className="px-6 mt-8">
         <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
 
-                  
-
           <button
             onClick={() => setActiveTab("users")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "users"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "users"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
             style={
               activeTab === "users"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
@@ -203,18 +203,14 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("logs")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "logs"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "logs"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
             style={
               activeTab === "logs"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
@@ -223,18 +219,14 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("patients")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "patients"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "patients"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
             style={
               activeTab === "patients"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
@@ -243,18 +235,14 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("iot")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "iot"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "iot"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
             style={
               activeTab === "iot"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
@@ -263,18 +251,14 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("accept")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "accept"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "accept"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
             style={
               activeTab === "accept"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
@@ -283,18 +267,14 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("booking")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "booking"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "booking"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
             style={
               activeTab === "booking"
-                ? {
-                    background:
-                      "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)",
-                  }
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
@@ -303,26 +283,24 @@ function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab("admins")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all
-              ${
-                activeTab === "admins"
-                  ? "text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "admins"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
             style={
               activeTab === "admins"
-                ? {
-                    background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)"
-                  }
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
             Admin Management
           </button>
 
-          
         </div>
       </div>
+
+      {/* === TAB CONTENT === */}
       <div className="px-6 mt-6">
         {activeTab === "users" && <UserManagement />}
         {activeTab === "accept" && <PendingDoctors />}
