@@ -12,12 +12,11 @@ import {
 
 /**
  * IMPORTANT FOR MOBILE:
- * - On phone, http://localhost:8080 won't work.
+ * - On phone, http://localhost:8084 won't work.
  * - Use your PC LAN IP like: http://192.168.1.25:8080
  * - Or use ngrok public URL.
  */
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL || "http://10.170.27.47:8080";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function EmergencyPanel() {
   const [panelData, setPanelData] = useState(null);

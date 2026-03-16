@@ -79,8 +79,8 @@ const PatientPortal = () => {
 
               {/* Graph + Health Risk */}
               <div className="lg:col-span-2">
-  <VitalsTrends3Charts patientId={patientId} />
-</div>
+                <VitalsTrends3Charts patientId={patientId} />
+              </div>
 
 
               {/* ECG + Health Tips */}
@@ -121,7 +121,7 @@ const PatientPortal = () => {
           {currentTab === "Real-Time Vitals" && <RealtimeGraphs />}
 
           {/* Full-page ECG */}
-          {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} />}
+          {currentTab === "ECG Readings" && <ECGMonitor isFullPage={true} patientId={patientId} />}
 
           {/* Profile */}
           {currentTab === "Profile" && <ProfileTab />}

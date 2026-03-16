@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import CriticalAlertPage from "./CriticalAlertPage";
 import ECGReaderPage from "./ECGReaderPage";
+import ReportsPage from "./ReportsPage";
 
-import DoctorMessagesPanel from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorMessagingDashboard"; 
+import DoctorMessagesPanel from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorMessagingDashboard";
 
 
 import { useNavigate } from "react-router-dom";
@@ -23,7 +24,7 @@ import {
 } from "lucide-react";
 
 /* ===================== Config ===================== */
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL; 
 
 /* ===================== Helpers ===================== */
 const toTitle = (s = "") =>
@@ -74,8 +75,8 @@ const getUserFromToken = () => {
   }
 };
 
-/* ===================== API: Doctor name from backend ===================== */
-const fetchDoctorNameByEmail = async (doctorEmail) => {
+/* ===================== API: Doctor data from backend ===================== */
+const fetchDoctorByEmail = async (doctorEmail) => {
   const token = localStorage.getItem("token");
   if (!token || !doctorEmail) return null;
 
@@ -97,13 +98,13 @@ const fetchDoctorNameByEmail = async (doctorEmail) => {
     (d) => (d?.email || "").toLowerCase() === doctorEmail.toLowerCase()
   );
 
-  return me?.name || null;
+  return me || null;
 };
 
 /* ===================== API: My patients ===================== */
 const fetchMyPatients = async () => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}/api/doctor/patients`, {
+  const res = await fetch(`${API_BASE}/api/doctor/my-patients`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Failed to load patients");
@@ -120,7 +121,10 @@ function DocDashboard() {
   const [doctorInfo, setDoctorInfo] = useState({
     name: "Doctor",
     role: "",
+    id: null,
   });
+
+  const [criticalAlertsCount, setCriticalAlertsCount] = useState(0);
 
   // Patients (from backend)
   const [patients, setPatients] = useState([]);
@@ -132,16 +136,45 @@ function DocDashboard() {
       const user = getUserFromToken();
       if (!user) return;
 
-      const dbName = await fetchDoctorNameByEmail(user.email);
+      const dbDoctor = await fetchDoctorByEmail(user.email);
 
       setDoctorInfo({
-        name: dbName ? toTitle(dbName) : guessFirstNameFromEmail(user.email),
+        name: dbDoctor?.name ? toTitle(dbDoctor.name) : guessFirstNameFromEmail(user.email),
         role: user.role || "",
+        id: dbDoctor?.id || dbDoctor?.Id || null,
       });
     };
 
     loadDoctor();
   }, []);
+
+  // Poll critical alerts
+  useEffect(() => {
+    if (!doctorInfo.id) return;
+
+    const fetchAlertsCount = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API_BASE}/api/doctor/critical-alerts/${doctorInfo.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setCriticalAlertsCount(Array.isArray(data) ? data.length : 0);
+        }
+      } catch (e) {
+        console.error("Failed to fetch alerts count", e);
+      }
+    };
+
+    fetchAlertsCount();
+    const interval = setInterval(fetchAlertsCount, 30000); // 30s polling
+    return () => clearInterval(interval);
+  }, [doctorInfo.id]);
 
   useEffect(() => {
     const loadPatients = async () => {
@@ -151,28 +184,30 @@ function DocDashboard() {
 
         const data = await fetchMyPatients();
 
-        // Map backend Patient -> UI row format
+        // Map backend DoctorPortalPatientDTO -> UI row format
         const mapped = (Array.isArray(data) ? data : []).map((p) => {
           const ageNum = p?.dateOfBirth ? calcAge(p.dateOfBirth) : "";
           return {
-            // backend
-            rawId: p?.id,
-            name: p?.name || "Unknown",
-            id: p?.id ? `P-${p.id}` : "-", // display id
+            // backend IDs
+            rawId: p?.patientId,
+            name: p?.patientName || "Unknown",
+            id: p?.patientId ? `P-${p.patientId}` : "-",
             age: ageNum ? `${ageNum}y` : "-",
 
-            // hospital/location you DO have
-            hospital: p?.hospital || "-",
+            // demographics from DTO
+            hospital: p?.address || "-",
             city: p?.city || "-",
             district: p?.district || "-",
+            bloodType: p?.bloodType || "-",
+            gender: p?.gender || "-",
 
-            // placeholders until vitals table exists
-            room: "-",
-            heartRate: "-",
-            temp: "-",
-            spO2: "-",
-            riskLevel: "Low",
-            status: "stable",
+            // vitals from DTO
+            room: p?.room || "-",
+            heartRate: p?.heartRate ?? "-",
+            temp: p?.temperature ?? "-",
+            spO2: p?.spo2 ?? "-",
+            riskLevel: p?.riskLevel || "Low",
+            status: p?.status || "stable",
           };
         });
 
@@ -215,7 +250,7 @@ function DocDashboard() {
     },
     {
       title: "Critical Alerts",
-      value: "2",
+      value: String(criticalAlertsCount),
       icon: <AlertCircle className="w-6 h-6" />,
       color: "#ffffffff",
       bgColor: "#F41D2A",
@@ -312,11 +347,10 @@ function DocDashboard() {
             <div className="space-y-2">
               <button
                 onClick={() => setActiveTab("patient-overview")}
-                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
-                  activeTab === "patient-overview"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                    : "hover:bg-gray-50 text-gray-700"
-                }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === "patient-overview"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "hover:bg-gray-50 text-gray-700"
+                  }`}
               >
                 <Users className="w-5 h-5" />
                 <span className="font-medium">Patient Overview</span>
@@ -324,11 +358,10 @@ function DocDashboard() {
 
               <button
                 onClick={() => setActiveTab("ecg-reader")}
-                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
-                  activeTab === "ecg-reader"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                    : "hover:bg-gray-50 text-gray-700"
-                }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === "ecg-reader"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "hover:bg-gray-50 text-gray-700"
+                  }`}
               >
                 <Activity className="w-5 h-5" />
                 <span className="font-medium">ECG Reader</span>
@@ -336,26 +369,26 @@ function DocDashboard() {
 
               <button
                 onClick={() => setActiveTab("critical-alerts")}
-                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
-                  activeTab === "critical-alerts"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                    : "hover:bg-gray-50 text-gray-700"
-                }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === "critical-alerts"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "hover:bg-gray-50 text-gray-700"
+                  }`}
               >
                 <AlertTriangle className="w-5 h-5" />
                 <span className="font-medium">Critical Alerts</span>
-                <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  2
-                </span>
+                {criticalAlertsCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {criticalAlertsCount}
+                  </span>
+                )}
               </button>
 
               <button
                 onClick={() => setActiveTab("reports")}
-                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
-                  activeTab === "reports"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                    : "hover:bg-gray-50 text-gray-700"
-                }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === "reports"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "hover:bg-gray-50 text-gray-700"
+                  }`}
               >
                 <FileText className="w-5 h-5" />
                 <span className="font-medium">Reports</span>
@@ -364,11 +397,10 @@ function DocDashboard() {
               {/*  UPDATED: Messaging button + icon */}
               <button
                 onClick={() => setActiveTab("messaging")}
-                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
-                  activeTab === "messaging"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                    : "hover:bg-gray-50 text-gray-700"
-                }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === "messaging"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "hover:bg-gray-50 text-gray-700"
+                  }`}
               >
                 <MessageSquare className="w-5 h-5" />
                 <span className="font-medium">Messaging</span>
@@ -408,7 +440,7 @@ function DocDashboard() {
 
         {/* Main */}
         <main className="flex-1 p-6 overflow-y-auto h-[calc(100vh-80px)] bg-[#F0F6FF]">
-          {(activeTab === "patient-overview" || activeTab === "reports") && (
+          {activeTab === "patient-overview" && (
             <div className="mb-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -538,25 +570,25 @@ function DocDashboard() {
 
                           <td className="py-4 px-4">
                             <button
-  className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium"
-  onClick={() => {
-    // save for refresh-safety
-    localStorage.setItem("profilePatientId", String(patient.rawId || ""));
-    localStorage.setItem("profilePatientName", patient.name || "");
+                              className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm font-medium"
+                              onClick={() => {
+                                // save for refresh-safety
+                                localStorage.setItem("profilePatientId", String(patient.rawId || ""));
+                                localStorage.setItem("profilePatientName", patient.name || "");
 
-    // navigate with state (best way)
-    navigate("/DocViewPatient", {
-      state: {
-        patientId: patient.rawId,
-        patientName: patient.name,
-        returnTo: "/DocDashboard",
-      },
-    });
-  }}
->
-  <Eye className="w-4 h-4" />
-  View
-</button>
+                                // navigate with state (best way)
+                                navigate("/DocViewPatient", {
+                                  state: {
+                                    patientId: patient.rawId,
+                                    patientName: patient.name,
+                                    returnTo: "/DocDashboard",
+                                  },
+                                });
+                              }}
+                            >
+                              <Eye className="w-4 h-4" />
+                              View
+                            </button>
 
                           </td>
                         </tr>
@@ -568,8 +600,9 @@ function DocDashboard() {
             </>
           )}
 
-          {activeTab === "ecg-reader" && <ECGReaderPage />}
+          {activeTab === "ecg-reader" && <ECGReaderPage doctorId={doctorInfo.id} />}
           {activeTab === "critical-alerts" && <CriticalAlertPage />}
+          {activeTab === "reports" && <ReportsPage doctorId={doctorInfo.id} />}
 
           {/* NEW: Messaging tab renders here */}
           {activeTab === "messaging" && <DoctorMessagesPanel />}

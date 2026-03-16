@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { TrendingUp } from "lucide-react";
 
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const formatDate = (d) => {
   const pad = (n) => String(n).padStart(2, "0");

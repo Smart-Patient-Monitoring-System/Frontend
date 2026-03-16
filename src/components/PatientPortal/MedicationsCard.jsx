@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle } from "lucide-react";
 
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const pad2 = (n) => String(n).padStart(2, "0");
 const todayKey = () => {

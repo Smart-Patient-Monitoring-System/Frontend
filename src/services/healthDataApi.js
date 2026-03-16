@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api/health-data';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/health-data`;
+
 
 // Helper to get auth headers
 const getAuthHeaders = () => {

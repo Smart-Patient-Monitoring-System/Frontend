@@ -84,7 +84,7 @@ const ManualEntryForm = ({ onClose, onSuccess }) => {
 
       console.log("Submitting vital signs:", apiData);
 
-      const response = await fetch("http://localhost:8080/api/vital-signs/submit", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vital-signs/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -35,7 +35,7 @@ const emptyHealthData = () => ({
     activityRings: { move: { current: 0, goal: 600 }, exercise: { current: 0, goal: 30 }, stand: { current: 0, goal: 12 } }
 });
 
-const HealthDataTab = () => {
+const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
     const [workoutSessions, setWorkoutSessions] = useState([]);
     const [selectedSessionId, setSelectedSessionId] = useState(null);
     const [aggregatedData, setAggregatedData] = useState(null);
@@ -46,9 +46,9 @@ const HealthDataTab = () => {
     useEffect(() => {
         let cancelled = false;
         const loadSessions = async () => {
-            const patientId = localStorage.getItem('patientId');
+            const patientIdToFetch = propPatientId || localStorage.getItem('patientId');
             const token = localStorage.getItem('token');
-            if (!patientId || !token) {
+            if (!patientIdToFetch || !token) {
                 setLoading(false);
                 setLoadError('Please log in to view your health data.');
                 setWorkoutSessions([]);
@@ -57,7 +57,7 @@ const HealthDataTab = () => {
             setLoadError(null);
             setLoading(true);
             try {
-                const sessions = await healthDataApi.getWorkoutSessions(patientId);
+                const sessions = await healthDataApi.getWorkoutSessions(patientIdToFetch);
                 if (cancelled) return;
                 const list = Array.isArray(sessions) ? sessions : [];
                 const formattedSessions = list.map(session => {
@@ -90,7 +90,7 @@ const HealthDataTab = () => {
         };
         loadSessions();
         return () => { cancelled = true; };
-    }, []);
+    }, [propPatientId]); // Added propPatientId to dependencies
 
     // Get the selected session or most recent session for display
     const currentSession = selectedSessionId
@@ -290,15 +290,15 @@ const HealthDataTab = () => {
                 </div>
             )}
 
-            {!loading && <HealthDataUpload onDataUploaded={handleDataUploaded} />}
+            {!loading && !isDoctorView && <HealthDataUpload onDataUploaded={handleDataUploaded} />}
 
             {workoutSessions.length > 0 && (
                 <WorkoutSessionTimeline
                     sessions={workoutSessions}
                     selectedSessionId={selectedSessionId}
                     onSelect={handleSelectSession}
-                    onEdit={handleEditSession}
-                    onDelete={handleDeleteSession}
+                    onEdit={isDoctorView ? undefined : handleEditSession}
+                    onDelete={isDoctorView ? undefined : handleDeleteSession}
                 />
             )}
 
@@ -467,16 +467,21 @@ const HealthDataTab = () => {
                             No Health Data Yet
                         </h3>
                         <p className="text-gray-600 mb-6">
-                            Upload your health data from Apple Watch or Android Health to see your activity rings,
-                            health metrics, and personalized challenges.
+                            {isDoctorView
+                                ? "This patient has not uploaded any Apple Watch or Android Health activity data yet."
+                                : "Upload your health data from Apple Watch or Android Health to see your activity rings, health metrics, and personalized challenges."
+                            }
                         </p>
-                        <div className="bg-white rounded-2xl p-4 text-left space-y-2">
-                            <h4 className="font-semibold text-gray-900 mb-2">How to export:</h4>
-                            <div className="text-sm text-gray-700 space-y-1">
-                                <p><strong>Apple Health:</strong> Health app → Profile → Export All Health Data</p>
-                                <p><strong>Google Fit:</strong> Google Takeout → Select Fit → Export JSON</p>
+
+                        {!isDoctorView && (
+                            <div className="bg-white rounded-2xl p-4 text-left space-y-2">
+                                <h4 className="font-semibold text-gray-900 mb-2">How to export:</h4>
+                                <div className="text-sm text-gray-700 space-y-1">
+                                    <p><strong>Apple Health:</strong> Health app → Profile → Export All Health Data</p>
+                                    <p><strong>Google Fit:</strong> Google Takeout → Select Fit → Export JSON</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             )}
