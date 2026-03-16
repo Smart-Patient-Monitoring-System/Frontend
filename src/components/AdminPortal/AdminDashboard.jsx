@@ -47,19 +47,23 @@ function AdminDashboard() {
 
   const [activeTab, setActiveTab] = useState("users");
   const [doctorCount, setDoctorCount] = useState(0);
-  const [specialdoctorCount, setSpecialDoctorCount] = useState(0);
+  const [pendingdoctorCount, setPendingDoctorCount] = useState(0);
   const [patientCount, setPatientCount] = useState(0);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/dashboard/counts")
-      .then((res) => res.json())
-      .then((data) => {
-        setDoctorCount(data.doctorCount);
-        setSpecialDoctorCount(data.specialdoctorCount);
-        setPatientCount(data.patientCount);
-      })
-      .catch((error) => console.error("Error fetching dashboard counts:", error));
-  }, []);
+  fetch("http://localhost:8080/api/dashboard/counts")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+
+      setDoctorCount(data.doctorCount);
+      setPatientCount(data.patientCount);
+      setPendingDoctorCount(data.pendingDoctorCount);
+    })
+    .catch((error) =>
+      console.error("Error fetching dashboard counts:", error)
+    );
+}, []);
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
@@ -115,7 +119,7 @@ function AdminDashboard() {
 
       {/* === STATS CARDS === */}
       <div className="px-6 mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
           {/* Active Doctors */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
@@ -130,7 +134,7 @@ function AdminDashboard() {
             </h2>
           </div>
 
-          {/* Special Doctors */}
+          {/* Special Doctors 
           <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
               <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
@@ -141,12 +145,12 @@ function AdminDashboard() {
             <h2 className="text-3xl font-bold text-gray-800">
               {specialdoctorCount === 0 ? "..." : specialdoctorCount}
             </h2>
-          </div>
+          </div>  */}
 
           {/* Active Patients */}
-          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
+          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
-              <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
                 <Activity className="text-white w-5 h-5" />
               </div>
               <p className="text-sm text-gray-600">Active Patients</p>
@@ -157,20 +161,22 @@ function AdminDashboard() {
           </div>
 
           {/* Pending Doctors */}
-          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
+          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
                 <Bell className="text-white w-5 h-5" />
               </div>
               <p className="text-sm text-gray-600">Pending Doctors</p>
             </div>
-            <h2 className="text-3xl font-bold text-gray-800">23</h2>
+            <h2 className="text-3xl font-bold text-gray-800">
+              {pendingdoctorCount ?? "..."}
+            </h2>
           </div>
 
           {/* IoT Devices */}
-          <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
+          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
-              <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
                 <TrendingUp className="text-white w-5 h-5" />
               </div>
               <p className="text-sm text-gray-600">IOT Devices</p>
@@ -201,6 +207,7 @@ function AdminDashboard() {
             Doctor Management
           </button>
 
+            {/*
           <button
             onClick={() => setActiveTab("logs")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
@@ -215,7 +222,7 @@ function AdminDashboard() {
             }
           >
             Special Doctors
-          </button>
+          </button>   */}
 
           <button
             onClick={() => setActiveTab("patients")}
