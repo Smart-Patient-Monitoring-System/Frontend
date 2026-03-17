@@ -1,12 +1,36 @@
 import { useEffect, useState } from "react";
 import { Activity, Video, User } from "lucide-react";
 import BookingModal from "../../components/PatientPortal/bookings/BookingPage";
-import { getUserAppointments } from "../../api/api.js";
+import { getUserAppointments, confirmAppointmentDoctor } from "../../api/api.js";
 
 const AppointmentsCard = ({ isDoctorView = false }) => {
   const [appointments, setAppointments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [links, setLinks] = useState({});
+
+  const handleLinkChange = (id, value) => {
+    setLinks((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleConfirm = async (apt) => {
+    try {
+      const linkValue = links[apt.appointmentId];
+      if (!linkValue) return alert("Please enter a link or location");
+
+      const params =
+        apt.appointmentType === "Physical"
+          ? { physicalLocation: linkValue }
+          : { zoomLink: linkValue };
+
+      await confirmAppointmentDoctor(apt.appointmentId, params);
+      alert("Appointment confirmed and link sent!");
+      fetchAppointments();
+    } catch (err) {
+      console.error("Confirm error:", err);
+      alert("Failed to confirm appointment");
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -124,11 +148,46 @@ const AppointmentsCard = ({ isDoctorView = false }) => {
 
                   <p className="text-xs sm:text-sm text-gray-500 line-clamp-1">{dateText}</p>
 
-                  {/* Optional small status line */}
-                  <p className="text-[11px] sm:text-xs text-gray-400 mt-1">
-                    {apt.paymentStatus ? `Payment: ${apt.paymentStatus}` : ""}
-                    {apt.appointmentStatus ? ` • Status: ${apt.appointmentStatus}` : ""}
-                  </p>
+                  {/* Zoom Link Display for Patient / Admin */}
+                  {apt.locationOrLink && (
+                    <div className="mt-2">
+                      <a
+                        href={apt.locationOrLink.startsWith("http") ? apt.locationOrLink : `https://${apt.locationOrLink}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-block bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded-md text-xs font-semibold"
+                      >
+                        {apt.appointmentType === "Physical" ? "View Location" : "Join Zoom"}
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Doctor Confirmation Input */}
+                  {isDoctorView &&
+                    apt.appointmentStatus === "PENDING" &&
+                    apt.paymentStatus === "SUCCESS" && (
+                      <div className="mt-3 flex flex-col gap-2 relative z-10">
+                        <input
+                          type="text"
+                          className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
+                          placeholder={
+                            apt.appointmentType === "Physical"
+                              ? "Enter location"
+                              : "Enter meeting link (Zoom, Meet)"
+                          }
+                          value={links[apt.appointmentId] || ""}
+                          onChange={(e) =>
+                            handleLinkChange(apt.appointmentId, e.target.value)
+                          }
+                        />
+                        <button
+                          onClick={() => handleConfirm(apt)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-xs w-fit transition-colors"
+                        >
+                          Confirm & Send Link
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             );
