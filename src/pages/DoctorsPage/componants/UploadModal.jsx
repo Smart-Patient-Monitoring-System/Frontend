@@ -1,14 +1,39 @@
-import React, { useState } from "react";
-import { X, Upload, FileText, AlertCircle } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { X, Upload, FileText, AlertCircle, CheckCircle } from "lucide-react";
 import axios from "axios";
 
-function UploadModal({ open, onClose, onAnalyze }) {
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const MAX_RATIONALE_LENGTH = 15000;
+
+function UploadModal({ open, onClose, onAnalyze, patients = [], defaultPatientId = "" }) {
   const [patientId, setPatientId] = useState("");
   const [datFile, setDatFile] = useState(null);
   const [heaFile, setHeaFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [saveStatus, setSaveStatus] = useState(""); // "", "success", "error"
+
+  const patientOptions = useMemo(
+    () => (Array.isArray(patients) ? patients : []).map((patient) => ({
+      id: patient.patientId,
+      label: `${patient.patientName || "Unknown"} (P-${patient.patientId})`,
+      name: patient.patientName || "Unknown",
+    })),
+    [patients]
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    setError("");
+    setSaveStatus("");
+    if (defaultPatientId) {
+      setPatientId(String(defaultPatientId));
+      return;
+    }
+    if (patientOptions.length === 1) {
+      setPatientId(String(patientOptions[0].id));
+    }
+  }, [defaultPatientId, open, patientOptions]);
 
   if (!open) return null;
 
@@ -27,56 +52,70 @@ function UploadModal({ open, onClose, onAnalyze }) {
     try {
       setLoading(true);
       setSaveStatus("");
+      const token = localStorage.getItem("token");
+      const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/vital/ecg/analyze`,
-        formData
+        `${API_BASE_URL}/api/vital/ecg/analyze`,
+        formData,
+        {
+          headers: authHeaders,
+        }
       );
 
       // Extract numeric ID only (handles "P-12", "Patient-12", or "12")
       const rawId = patientId.trim();
       const numericIdMatch = rawId.match(/\d+/);
       const numericId = numericIdMatch ? parseInt(numericIdMatch[0], 10) : null;
+      const selectedPatient = patientOptions.find((patient) => patient.id === numericId);
 
       if (!numericId) {
-        throw new Error("Could not extract a valid numeric patient ID. Please use a format like 'P-12' or just '12'.");
+        throw new Error("Please select a valid patient.");
       }
 
-      // Save result to MainService for persistent history
-      try {
-        await axios.post(
-          "http://localhost:8084/api/doctor/ecg/save",
-          {
-            patientId: numericId,
-            prediction: res.data.prediction || res.data.status || "Unknown",
-            probability: res.data.probability || 0,
-            meanHR: res.data.meanHR || 0,
-            sdnn: res.data.SDNN !== undefined ? res.data.SDNN : (res.data.sdnn || 0),
-            rmssd: res.data.RMSSD !== undefined ? res.data.RMSSD : (res.data.rmssd || 0),
-            beats: res.data.beats || 0,
-            status: res.data.status || "Unknown",
-            rationale: res.data.rationale || "No rationale provided.",
-            waveformJson: JSON.stringify(res.data.waveform || []),
-          },
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }
-        );
-        setSaveStatus("success");
-      } catch (saveErr) {
-        console.error("Failed to save ECG reading to history:", saveErr);
-        setSaveStatus("error");
-        // We don't throw here because analysis itself succeeded
-      }
+      const saveRes = await axios.post(
+        `${API_BASE_URL}/api/doctor/ecg/save`,
+        {
+          patientId: numericId,
+          prediction: res.data.prediction || res.data.status || "Unknown",
+          probability: res.data.probability || 0,
+          meanHR: res.data.meanHR || 0,
+          sdnn: res.data.SDNN !== undefined ? res.data.SDNN : (res.data.sdnn || 0),
+          rmssd: res.data.RMSSD !== undefined ? res.data.RMSSD : (res.data.rmssd || 0),
+          beats: res.data.beats || 0,
+          status: res.data.status || "Unknown",
+          rationale: (res.data.rationale || "No rationale provided.").slice(0, MAX_RATIONALE_LENGTH),
+          waveformJson: JSON.stringify(res.data.waveform || []),
+        },
+        {
+          headers: authHeaders,
+        }
+      );
 
-      // Short delay to show success state before closing
-      setTimeout(() => {
-        onAnalyze(res.data);
-      }, 1500);
+      setSaveStatus("success");
+      onAnalyze({
+        id: saveRes.data?.id,
+        patientId: numericId,
+        patientName: selectedPatient?.name || `Patient #${numericId}`,
+        prediction: res.data.prediction || res.data.status || "Unknown",
+        probability: res.data.probability || 0,
+        meanHR: res.data.meanHR || 0,
+        sdnn: res.data.SDNN !== undefined ? res.data.SDNN : (res.data.sdnn || 0),
+        rmssd: res.data.RMSSD !== undefined ? res.data.RMSSD : (res.data.rmssd || 0),
+        beats: res.data.beats || 0,
+        status: res.data.status || "Unknown",
+        rationale: res.data.rationale || "No rationale provided.",
+        waveformJson: JSON.stringify(res.data.waveform || []),
+        recordedAt: new Date().toISOString(),
+        fs: res.data.fs || 500,
+        waveform: res.data.waveform || [],
+      });
     } catch (err) {
       console.error(err);
       const msg =
+        err?.response?.data?.message ||
         err?.response?.data?.error ||
         "ECG analysis failed. Make sure the VitalReports-AI service is running.";
+      setSaveStatus("error");
       setError(msg);
     } finally {
       setLoading(false);
@@ -124,17 +163,22 @@ function UploadModal({ open, onClose, onAnalyze }) {
           {/* Patient ID */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1.5">
-              Patient ID
+              Patient
             </label>
-            <input
-              type="text"
-              placeholder="e.g. P-12"
+            <select
               value={patientId}
               onChange={(e) => setPatientId(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
                          focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
                          transition-all"
-            />
+            >
+              <option value="">Select assigned patient</option>
+              {patientOptions.map((patient) => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* .dat File */}

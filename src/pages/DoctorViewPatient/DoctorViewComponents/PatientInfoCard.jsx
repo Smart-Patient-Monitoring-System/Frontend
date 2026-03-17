@@ -28,7 +28,7 @@ const PatientInfoCard = ({
         }
 
         const response = await fetch(
-          `http://localhost:8084/api/patient/get/${patientId}`,
+          `${import.meta.env.VITE_API_URL}/api/patient/get/${patientId}`,
           {
             method: "GET",
             headers: {

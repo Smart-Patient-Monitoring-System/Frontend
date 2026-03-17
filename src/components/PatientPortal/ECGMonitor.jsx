@@ -4,6 +4,38 @@ import {
     TrendingUp, Clock, AlertCircle
 } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
+const parseRecordedAt = (value) => {
+    if (!value) return null;
+    if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+    if (Array.isArray(value) && value.length >= 5) {
+        const [year, month, day, hour = 0, minute = 0, second = 0, nano = 0] = value;
+        return new Date(year, month - 1, day, hour, minute, second, Math.floor(nano / 1000000));
+    }
+    if (typeof value === "string") {
+        const normalized = value.includes("T") ? value : value.replace(" ", "T");
+        const parsed = new Date(normalized);
+        if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+    return null;
+};
+
+const formatRecordedDate = (value) => {
+    const parsed = parseRecordedAt(value);
+    return parsed ? parsed.toLocaleDateString() : "Date unavailable";
+};
+
+const formatRecordedTime = (value) => {
+    const parsed = parseRecordedAt(value);
+    return parsed ? parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
+};
+
+const formatRecordedDateTime = (value) => {
+    const parsed = parseRecordedAt(value);
+    return parsed ? parsed.toLocaleString() : "Date unavailable";
+};
+
 const ECGMonitor = ({ isFullPage = false, patientId }) => {
     const [isPaused, setIsPaused] = useState(false);
     const [history, setHistory] = useState([]);
@@ -29,7 +61,7 @@ const ECGMonitor = ({ isFullPage = false, patientId }) => {
             }
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`http://localhost:8084/api/patient/ecg/history/${patientId}`, {
+                const res = await fetch(`${API_BASE}/api/patient/ecg/history/${patientId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -131,7 +163,7 @@ const ECGMonitor = ({ isFullPage = false, patientId }) => {
         ctx.fillText("AI ECG REPORT: " + (selectedReading?.prediction || "Unknown"), 20, 35);
 
         ctx.font = "16px Arial";
-        ctx.fillText(`Date: ${new Date(selectedReading?.recordedAt).toLocaleString()}`, 20, 65);
+        ctx.fillText(`Date: ${formatRecordedDateTime(selectedReading?.recordedAt)}`, 20, 65);
         ctx.fillText(`Notes: AI Prediction Confidence ${(selectedReading?.probability || 0).toFixed(1)}%`, 20, 95);
         ctx.fillText(`Heart Rate: ${selectedReading?.meanHR} bpm`, 380, 65);
 
@@ -200,14 +232,14 @@ const ECGMonitor = ({ isFullPage = false, patientId }) => {
                                 >
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="font-semibold text-gray-800">
-                                            {new Date(reading.recordedAt).toLocaleDateString()}
+                                            {formatRecordedDate(reading.recordedAt)}
                                         </div>
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getRiskColor(reading.prediction)}`}>
                                             {reading.prediction}
                                         </span>
                                     </div>
                                     <div className="text-sm text-gray-500 mb-1 font-medium">
-                                        {new Date(reading.recordedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {formatRecordedTime(reading.recordedAt)}
                                     </div>
                                     <div className="text-xs text-gray-500 line-clamp-2">
                                         {reading.rationale}
@@ -231,7 +263,7 @@ const ECGMonitor = ({ isFullPage = false, patientId }) => {
                                     </div>
                                     <div>
                                         <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-                                            Record: {new Date(selectedReading.recordedAt).toLocaleDateString()}
+                                            Record: {formatRecordedDate(selectedReading.recordedAt)}
                                         </h2>
                                         <p className="text-gray-500 text-xs sm:text-sm font-medium">Historical AI ECG Analysis</p>
                                     </div>
