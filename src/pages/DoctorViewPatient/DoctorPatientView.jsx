@@ -1,0 +1,177 @@
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Header from "../../pages/DoctorViewPatient/DoctorViewComponents/Header";
+import PatientInfoCard from "../../pages/DoctorViewPatient/DoctorViewComponents/PatientInfoCard";
+import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
+import ReportsCard from "../../components/PatientPortal/ReportsCard";
+import HealthRiskCard from "../../components/PatientPortal/HealthRiskCard";
+import VitalCard from "../../components/PatientPortal/VitalCard";
+import VitalsDashboard from "../../components/PatientPortal/VitalsDashboard";
+import GraphCard from "../../components/PatientPortal/GraphCard";
+import MedicationsCard from "../../components/PatientPortal/MedicationsCard";
+import ECGMonitor from "../../components/PatientPortal/ECGMonitor";
+import Dashboard from "../../pages/DoctorViewPatient/DoctorViewComponents/Dashboard";
+import ManualEntryForm from "../../components/PatientPortal/ManualEntryForm";
+import EmergencyPanel from "../../components/PatientPortal/EmergencyPanel";
+import FloatingChatbot from "../../components/PatientPortal/FloatingChatbot";
+import ProfileTab from "../../components/PatientPortal/ProfileTab";
+import HealthTipsCard from "../../components/PatientPortal/HealthTipsCard";
+import RealtimeGraphs from "../../components/PatientPortal/RealtimeGraphs";
+import HealthDataTab from "../../components/PatientPortal/HealthDataTab";
+import DoctorNotesCard from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorNotesCard";
+import AssignedCareTeamCard from "../../pages/DoctorViewPatient/DoctorViewComponents/AssignedCareTeamCard";
+
+const DoctorPatientView = () => {
+  const [currentTab, setCurrentTab] = useState("Overview");
+  const [showManualEntry, setShowManualEntry] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const patientId =
+    location.state?.patientId || localStorage.getItem("profilePatientId");
+
+  const patientName =
+    location.state?.patientName || localStorage.getItem("profilePatientName");
+
+  if (!patientId) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+          No patient selected. Please go back and click “View”.
+          <button
+            className="ml-3 px-4 py-2 bg-red-600 text-white rounded-lg"
+            onClick={() => navigate("/DocDashboard")}
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
+  return (
+    <>
+      {/* Header */}
+      <Header
+        isDoctorView={true}
+        profileName={patientName}
+        backPath="/DocDashboard"
+      />
+
+      {/* Patient Info - Responsive padding */}
+      <div className="w-full bg-gray-100 px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8">
+        <PatientInfoCard isDoctorView={true} patientId={patientId} />
+      </div>
+
+      {/* Dashboard (Tabs + Manual Entry Button) */}
+      <div className="min-h-screen bg-gray-100">
+        <Dashboard
+          isDoctorView={true}
+          onTabChange={(tab) => {
+            if (tab === "manual-entry") {
+              setShowManualEntry(true);
+            } else {
+              setCurrentTab(tab);
+            }
+          }}
+        />
+
+        {/* Manual Entry Form */}
+        {showManualEntry && (
+          <ManualEntryForm onClose={() => setShowManualEntry(false)} />
+        )}
+
+        {/* Main Content - Responsive padding */}
+        <div className="p-3 sm:p-4 md:p-5 lg:p-6">
+          {/* Overview Tab - Simplified to match screenshot */}
+          {currentTab === "Overview" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+
+              {/* Left Column - Vitals and Graph */}
+              <div className="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
+                {/* Vitals Dashboard */}
+                <VitalsDashboard patientId={patientId} />
+
+                {/* Vital Trends Graph */}
+                <GraphCard patientId={patientId} />
+              </div>
+
+              {/* Right Column - Doctor's Notes and Care Team */}
+              <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                <DoctorNotesCard patientId={patientId} />
+                <AssignedCareTeamCard />
+              </div>
+            </div>
+          )}
+
+          {/* Real-Time Vitals Tab */}
+          {currentTab === "Real-Time Vitals" && (
+            <RealtimeGraphs patientId={patientId} />
+          )}
+
+          {/* ECG Readings Tab */}
+          {currentTab === "ECG Readings" && (
+            <div className="space-y-4 sm:space-y-5 md:space-y-6">
+              <ECGMonitor isFullPage={true} patientId={patientId} />
+            </div>
+          )}
+
+          {/* Medical Records Tab */}
+          {currentTab === "Medical Records" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+              <ReportsCard patientId={patientId} />
+              <MedicationsCard patientId={patientId} />
+            </div>
+          )}
+
+          {/* Health Insights Tab */}
+          {currentTab === "Health Insights" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+              <div className="lg:col-span-2">
+                <HealthRiskCard />
+              </div>
+              <div>
+                <HealthTipsCard />
+              </div>
+            </div>
+          )}
+
+          {/* Appointments Tab */}
+          {currentTab === "Appointments" && (
+            <div className="max-w-4xl">
+              <AppointmentsCard isDoctorView={true} />
+            </div>
+          )}
+
+          {/* Emergency Panel Tab */}
+          {currentTab === "Emergency Panel" && <EmergencyPanel />}
+
+          {/* Health Data from smart watch Tab */}
+          {currentTab === "Health Data from smart watch" && (
+            <HealthDataTab patientId={patientId} isDoctorView={true} />
+          )}
+
+          {/* Messaging Tab */}
+          {currentTab === "Doctor Notes" && <DoctorNotesCard patientId={patientId} />}
+
+          {/* Profile Tab */}
+          {currentTab === "Profile" && <ProfileTab />}
+
+          {/* AI Health Assistant - Responsive height */}
+          {currentTab === "AI Health Assistant" && (
+            <div className="w-full h-[calc(100vh-200px)] sm:h-[calc(100vh-240px)] md:h-[calc(100vh-260px)] lg:h-[calc(100vh-280px)] max-w-7xl mx-auto">
+              <FloatingChatbot isFullScreen={true} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Floating Chatbot - Disabled for Doctor View */}
+      {/* {currentTab !== "AI Health Assistant" && <FloatingChatbot />} */}
+    </>
+  );
+};
+
+export default DoctorPatientView;
