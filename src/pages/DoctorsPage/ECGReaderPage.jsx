@@ -4,11 +4,37 @@ import UploadModal from "./componants/UploadModal";
 import ECGGraph from "./componants/ECGGraph";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL;
+
+const parseRecordedAt = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (Array.isArray(value) && value.length >= 5) {
+    const [year, month, day, hour = 0, minute = 0, second = 0, nano = 0] = value;
+    return new Date(year, month - 1, day, hour, minute, second, Math.floor(nano / 1000000));
+  }
+  if (typeof value === "string") {
+    const normalized = value.includes("T") ? value : value.replace(" ", "T");
+    const parsed = new Date(normalized);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+  return null;
+};
+
+const formatRecordedDate = (value) => {
+  const parsed = parseRecordedAt(value);
+  return parsed ? parsed.toLocaleDateString() : "Date unavailable";
+};
+
+const formatRecordedTime = (value) => {
+  const parsed = parseRecordedAt(value);
+  return parsed ? parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
+};
 
 function ECGReaderPage({ doctorId }) {
   const [analysis, setAnalysis] = useState(null);
   const [history, setHistory] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
@@ -32,6 +58,24 @@ function ECGReaderPage({ doctorId }) {
       }
     };
     fetchHistory();
+  }, [doctorId]);
+
+  useEffect(() => {
+    if (!doctorId) return;
+
+    const fetchPatients = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`${API_BASE}/api/doctor/patients/${doctorId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPatients(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Error fetching doctor patients:", err);
+      }
+    };
+
+    fetchPatients();
   }, [doctorId]);
 
   const isNormal = analysis?.status?.toLowerCase() === "normal" || analysis?.prediction?.toLowerCase() === "normal";
@@ -77,12 +121,13 @@ function ECGReaderPage({ doctorId }) {
       {/* ── Upload Modal ── */}
       <UploadModal
         open={openModal}
+        patients={patients}
+        defaultPatientId={analysis?.patientId || ""}
         onClose={() => setOpenModal(false)}
         onAnalyze={(data) => {
+          setHistory((prev) => data?.id ? [data, ...prev] : prev);
           setAnalysis(data);
           setOpenModal(false);
-          // Optional: We could unshift the new upload into the history state here
-          // if we had the full DTO available from upload response.
         }}
       />
 
@@ -118,7 +163,7 @@ function ECGReaderPage({ doctorId }) {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="font-semibold text-gray-800 text-sm">
-                      {new Date(reading.recordedAt).toLocaleDateString()}
+                      {formatRecordedDate(reading.recordedAt)}
                     </div>
                     <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold border ${getRiskColor(reading.prediction || reading.status)}`}>
                       {reading.prediction || reading.status}
@@ -131,7 +176,7 @@ function ECGReaderPage({ doctorId }) {
                       {reading.patientName || `Patient #${reading.patientId}`}
                     </div>
                     <div className="text-xs text-gray-400 font-medium">
-                      {new Date(reading.recordedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Conf: {reading.probability ? (reading.probability * 100).toFixed(1) : 0}%
+                      {formatRecordedTime(reading.recordedAt)} • Conf: {reading.probability ? (reading.probability * 100).toFixed(1) : 0}%
                     </div>
                   </div>
                 </div>
