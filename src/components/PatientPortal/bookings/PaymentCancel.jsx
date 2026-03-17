@@ -1,9 +1,8 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function PaymentSuccess() {
+export default function PaymentCancel() {
   const nav = useNavigate();
-  useEffect(() => { nav("/patient/bookings"); }, []);
+  useEffect(() => { nav("/patient-portal"); }, []);
   return <h2>❌ Payment Cancelled</h2>;
 }

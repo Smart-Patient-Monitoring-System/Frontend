@@ -4,6 +4,7 @@ import ECGReaderPage from "./ECGReaderPage";
 import ReportsPage from "./ReportsPage";
 
 import DoctorMessagesPanel from "../../pages/DoctorViewPatient/DoctorViewComponents/DoctorMessagingDashboard";
+import DoctorBookingsPage from "./DoctorBookingsPage";
 
 
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ import {
   TrendingUp,
   Wifi,
   MessageSquare, // NEW ICON for Messaging
+  CalendarDays, // Bookings icon
 } from "lucide-react";
 
 /* ===================== Config ===================== */
@@ -405,6 +407,18 @@ function DocDashboard() {
                 <MessageSquare className="w-5 h-5" />
                 <span className="font-medium">Messaging</span>
               </button>
+
+              {/* Bookings button */}
+              <button
+                onClick={() => setActiveTab("bookings")}
+                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${activeTab === "bookings"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "hover:bg-gray-50 text-gray-700"
+                  }`}
+              >
+                <CalendarDays className="w-5 h-5" />
+                <span className="font-medium">Bookings</span>
+              </button>
             </div>
           </div>
 
@@ -650,6 +664,13 @@ function DocDashboard() {
 
           {/* NEW: Messaging tab renders here */}
           {activeTab === "messaging" && <DoctorMessagesPanel />}
+
+          {/* NEW: Bookings tab renders here */}
+          {activeTab === "bookings" && (
+            <DoctorBookingsPage
+              doctorEmail={getUserFromToken()?.email || ""}
+            />
+          )}
         </main>
       </div>
     </div>
