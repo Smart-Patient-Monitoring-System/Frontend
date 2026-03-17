@@ -116,4 +116,14 @@ export const confirmAppointment = async (appointmentId, params) => {
   return res.data;
 };
 
+// POST /api/doctor/appointments/confirm/{id}?physicalLocation=... OR ?zoomLink=...
+export const confirmAppointmentDoctor = async (appointmentId, params) => {
+  const res = await API.post(
+    `/doctor/appointments/confirm/${appointmentId}`,
+    null,
+    { params } // axios will convert this to query string
+  );
+  return res.data;
+};
+
 export default API;
