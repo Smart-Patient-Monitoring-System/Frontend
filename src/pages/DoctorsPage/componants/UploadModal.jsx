@@ -1,39 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { X, Upload, FileText, AlertCircle, CheckCircle } from "lucide-react";
+import React, { useState } from "react";
+import { X, Upload, FileText, AlertCircle } from "lucide-react";
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-const MAX_RATIONALE_LENGTH = 15000;
-
-function UploadModal({ open, onClose, onAnalyze, patients = [], defaultPatientId = "" }) {
+function UploadModal({ open, onClose, onAnalyze }) {
   const [patientId, setPatientId] = useState("");
   const [datFile, setDatFile] = useState(null);
   const [heaFile, setHeaFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [saveStatus, setSaveStatus] = useState(""); // "", "success", "error"
-
-  const patientOptions = useMemo(
-    () => (Array.isArray(patients) ? patients : []).map((patient) => ({
-      id: patient.patientId,
-      label: `${patient.patientName || "Unknown"} (P-${patient.patientId})`,
-      name: patient.patientName || "Unknown",
-    })),
-    [patients]
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    setError("");
-    setSaveStatus("");
-    if (defaultPatientId) {
-      setPatientId(String(defaultPatientId));
-      return;
-    }
-    if (patientOptions.length === 1) {
-      setPatientId(String(patientOptions[0].id));
-    }
-  }, [defaultPatientId, open, patientOptions]);
 
   if (!open) return null;
 
@@ -52,14 +27,9 @@ function UploadModal({ open, onClose, onAnalyze, patients = [], defaultPatientId
     try {
       setLoading(true);
       setSaveStatus("");
-      const token = localStorage.getItem("token");
-      const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.post(
-        `${API_BASE_URL}/api/vital/ecg/analyze`,
-        formData,
-        {
-          headers: authHeaders,
-        }
+        `${import.meta.env.VITE_API_URL}/api/vital/ecg/analyze`,
+        formData
       );
 
       // Extract numeric ID only (handles "P-12", "Patient-12", or "12")
@@ -163,22 +133,17 @@ function UploadModal({ open, onClose, onAnalyze, patients = [], defaultPatientId
           {/* Patient ID */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1.5">
-              Patient
+              Patient ID
             </label>
-            <select
+            <input
+              type="text"
+              placeholder="e.g. P-12"
               value={patientId}
               onChange={(e) => setPatientId(e.target.value)}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
                          focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
                          transition-all"
-            >
-              <option value="">Select assigned patient</option>
-              {patientOptions.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.label}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           {/* .dat File */}
