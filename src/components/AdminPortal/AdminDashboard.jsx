@@ -119,7 +119,7 @@ function AdminDashboard() {
 
       {/* === STATS CARDS === */}
       <div className="px-6 mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
           {/* Active Doctors */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
@@ -160,23 +160,10 @@ function AdminDashboard() {
             </h2>
           </div>
 
-          {/* Pending Doctors */}
+          {/* IoT Devices */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
               <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
-                <Bell className="text-white w-5 h-5" />
-              </div>
-              <p className="text-sm text-gray-600">Pending Doctors</p>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800">
-              {pendingdoctorCount ?? "..."}
-            </h2>
-          </div>
-
-          {/* IoT Devices */}
-          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
-            <div>
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
                 <TrendingUp className="text-white w-5 h-5" />
               </div>
               <p className="text-sm text-gray-600">IOT Devices</p>
@@ -257,22 +244,6 @@ function AdminDashboard() {
           </button>
 
           <button
-            onClick={() => setActiveTab("accept")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
-              activeTab === "accept"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-            style={
-              activeTab === "accept"
-                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
-                : {}
-            }
-          >
-            Pending Doctors
-          </button>
-
-          <button
             onClick={() => setActiveTab("booking")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
               activeTab === "booking"
@@ -314,9 +285,7 @@ function AdminDashboard() {
         {activeTab === "patients" && <PatientManagement />}
         {activeTab === "admins" && <AdminManagement />}
         {activeTab === "iot" && <IotDevices />}
-        {activeTab === "analytics" && <Analytics />}
-        {activeTab === "logs" && <SecurityLogs />}
-        {activeTab === "booking" && <SpecialDoctorAdminPage />}
+        
       </div>
     </div>
   );
