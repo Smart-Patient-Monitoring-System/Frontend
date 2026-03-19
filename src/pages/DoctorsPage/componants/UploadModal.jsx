@@ -27,45 +27,33 @@ function UploadModal({ open, onClose, onAnalyze }) {
     try {
       setLoading(true);
       setSaveStatus("");
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/vital/ecg/analyze`,
-        formData
-      );
-
+      
       // Extract numeric ID only (handles "P-12", "Patient-12", or "12")
       const rawId = patientId.trim();
       const numericIdMatch = rawId.match(/\d+/);
       const numericId = numericIdMatch ? parseInt(numericIdMatch[0], 10) : null;
-      const selectedPatient = patientOptions.find((patient) => patient.id === numericId);
 
       if (!numericId) {
-        throw new Error("Please select a valid patient.");
+        throw new Error("Please enter a valid Patient ID containing numbers.");
       }
 
-      const saveRes = await axios.post(
-        `${API_BASE_URL}/api/doctor/ecg/save`,
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/doctor/ecg/analyze-and-save/${numericId}`,
+        formData,
         {
-          patientId: numericId,
-          prediction: res.data.prediction || res.data.status || "Unknown",
-          probability: res.data.probability || 0,
-          meanHR: res.data.meanHR || 0,
-          sdnn: res.data.SDNN !== undefined ? res.data.SDNN : (res.data.sdnn || 0),
-          rmssd: res.data.RMSSD !== undefined ? res.data.RMSSD : (res.data.rmssd || 0),
-          beats: res.data.beats || 0,
-          status: res.data.status || "Unknown",
-          rationale: (res.data.rationale || "No rationale provided.").slice(0, MAX_RATIONALE_LENGTH),
-          waveformJson: JSON.stringify(res.data.waveform || []),
-        },
-        {
-          headers: authHeaders,
+          headers: { 
+             "Content-Type": "multipart/form-data",
+             Authorization: `Bearer ${token}` 
+          },
         }
       );
 
       setSaveStatus("success");
       onAnalyze({
-        id: saveRes.data?.id,
+        id: res.data?.id,
         patientId: numericId,
-        patientName: selectedPatient?.name || `Patient #${numericId}`,
+        patientName: `Patient #${numericId}`,
         prediction: res.data.prediction || res.data.status || "Unknown",
         probability: res.data.probability || 0,
         meanHR: res.data.meanHR || 0,

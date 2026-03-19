@@ -93,6 +93,16 @@ export const getUserAppointments = async () => {
     return [];
   }
 };
+export const getDoctorAppointments = async (doctorId) => {
+  try {
+    if (!doctorId) return [];
+    const res = await API.get(`/doctor/appointments/${doctorId}`);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching doctor appointments:", err);
+    return [];
+  }
+};
 
 /* =========================
    ADMIN – APPOINTMENTS
