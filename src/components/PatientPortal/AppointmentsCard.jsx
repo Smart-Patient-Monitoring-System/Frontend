@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Activity, Video, User } from "lucide-react";
 import BookingModal from "../../components/PatientPortal/bookings/BookingPage";
-import { getUserAppointments, confirmAppointmentDoctor } from "../../api/api.js";
+import { getUserAppointments, getDoctorAppointments, confirmAppointmentDoctor } from "../../api/api.js";
 
-const AppointmentsCard = ({ isDoctorView = false }) => {
+const AppointmentsCard = ({ isDoctorView = false, doctorId = null }) => {
   const [appointments, setAppointments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,9 @@ const AppointmentsCard = ({ isDoctorView = false }) => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getUserAppointments(); // backend call
+      const data = isDoctorView && doctorId 
+        ? await getDoctorAppointments(doctorId) 
+        : await getUserAppointments();
       setAppointments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching appointments:", err);
@@ -47,7 +49,7 @@ const AppointmentsCard = ({ isDoctorView = false }) => {
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [isDoctorView, doctorId]);
 
   // when booking is successful, add to list instantly
   const handleBookingSuccess = (newAppointment) => {
