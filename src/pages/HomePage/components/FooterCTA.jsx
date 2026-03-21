@@ -9,15 +9,6 @@ function FooterCTA() {
           Join leading healthcare facilities using AI-driven monitoring technology
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 sm:mb-12">
-          <button className="bg-white text-teal-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-teal-50 transition-colors shadow-lg">
-            Contact Sales
-          </button>
-          <button className="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-white/10 transition-colors">
-            Schedule Demo
-          </button>
-        </div>
-
         <div className="pt-6 sm:pt-8 border-t border-teal-400">
           <p className="text-teal-100 text-sm">
             24/7 Support Hotline: <span className="text-white font-semibold">0112221456</span>
