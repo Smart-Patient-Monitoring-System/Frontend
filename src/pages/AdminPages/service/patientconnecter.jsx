@@ -1,44 +1,66 @@
-const BASE_URL = import.meta.env.VITE_API_URL + "/api/patient";
+import { API_BASE_URL } from "../../../api";
 
-async function handleResponse(res) {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Request failed with status ${res.status}`);
-  }
-
-  if (res.status === 204) return null;
-
-  const contentType = res.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    return res.json();
-  }
-
-  return null;
-}
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+};
 
 export async function fetchPatient() {
-  const res = await fetch(`${BASE_URL}/get`);
-  return handleResponse(res);
+  const response = await fetch(`${API_BASE_URL}/api/patient/get`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch patients");
+  }
+
+  return response.json();
+}
+
+export async function createPatient(payload) {
+  const response = await fetch(`${API_BASE_URL}/api/admin/patient/create`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Failed to create patient");
+  }
+
+  return response.json();
+}
+
+export async function updatePatient(patientId, payload) {
+  const response = await fetch(`${API_BASE_URL}/api/admin/patient/update/${patientId}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Failed to update patient");
+  }
+
+  return response.json();
 }
 
 export async function deletePatient(patientId) {
-  const res = await fetch(`${BASE_URL}/delete/${patientId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/patient/delete/${patientId}`, {
     method: "DELETE",
-  });
-  return handleResponse(res);
-}
-
-export async function updatePatient(PatientId, data) {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(`${BASE_URL}/update/${PatientId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
+    headers: getAuthHeaders(),
   });
 
-  return handleResponse(res);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Failed to delete patient");
+  }
+
+  return response.text();
 }
