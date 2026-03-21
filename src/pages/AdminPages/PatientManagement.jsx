@@ -1,107 +1,89 @@
 import React, { useEffect, useState } from "react";
-import { fetchPatient, deletePatient, updatePatient } from "./service/patientconnecter";
-import { API_BASE_URL } from "../../api";
+import {
+  fetchPatient,
+  deletePatient,
+  updatePatient,
+  createPatient,
+} from "./service/patientconnecter";
 
 function PatientManagement() {
   const [patients, setPatient] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({
-      name: "",
-      dateOfBirth: "",
-      address: "",
-      email: "",
-      nicNo: "",
-      gender: "",
-      contactNo: "",
-      guardiansName: "",
-      guardiansContactNo: "",
-      username: "",
-      password: "",
-      bloodType: "",
-      city: "",
-      district: "",
-      dispostalCodet: "",
-      guardianRelationship: "",
-      guardianEmail: "",
-      medicalConditions: "",
-      allergies: "",
-      currentMedications: "",
-      pastSurgeries: "",
-      emergencyNotes: "",
-    });
-    const [error, setError] = useState("");
-    const [submitting, setSubmitting] = useState(false);
 
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editPatientId, setEditPatientId] = useState(null);
-    const [editFormData, setEditFormData] = useState({
-      name: "",
-      dateOfBirth: "",
-      address: "",
-      email: "",
-      nicNo: "",
-      gender: "",
-      contactNo: "",
-      guardiansName: "",
-      guardiansContactNo: "",
-      username: "",
-      password: "",
-      bloodType: "",
-      city: "",
-      district: "",
-      dispostalCodet: "",
-      guardianRelationship: "",
-      guardianEmail: "",
-      medicalConditions: "",
-      allergies: "",
-      currentMedications: "",
-      pastSurgeries: "",
-      emergencyNotes: "",
-      });
-//new
-    const [showViewModal, setShowViewModal] = useState(false);
-    const [selectedPatient, setSelectedPatient] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [editPatientId, setEditPatientId] = useState(null);
+
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const initialFormData = {
+    name: "",
+    dateOfBirth: "",
+    address: "",
+    email: "",
+    nicNo: "",
+    gender: "",
+    contactNo: "",
+    guardiansName: "",
+    guardiansContactNo: "",
+    username: "",
+    password: "",
+    bloodType: "",
+    city: "",
+    district: "",
+    postalCode: "",
+    guardianRelationship: "",
+    guardianEmail: "",
+    medicalConditions: "",
+    allergies: "",
+    currentMedications: "",
+    pastSurgeries: "",
+    emergencyNotes: "",
+    deviceId: "",
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+  const [editFormData, setEditFormData] = useState(initialFormData);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const data = await fetchPatient();
-        setPatient(data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    loadPatients();
   }, []);
 
-  // search bar
-  const filteredPatients = patients.filter((pt) =>
-    pt.name?.toLowerCase().includes(search.toLowerCase())
-  );
+  async function loadPatients() {
+    try {
+      setLoading(true);
+      const data = await fetchPatient();
+      setPatient(data || []);
+    } catch (err) {
+      console.error(err);
+      setPatient([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const handleDelete = async (PatientId) => {
-      if (!window.confirm("Reject this Patient?")) return;
-    
-      try {
-        await deletePatient(PatientId);
-    
-        setPatient((prev) =>
-          prev.filter((pt) => pt.Id !== PatientId)
-        );
-    
-        alert("Patient rejected successfully");
-      } catch (error) {
-        console.error(error);
-        alert("Failed to reject Patient")}
-  };
+  const filteredPatients = patients.filter((patient) =>
+    patient.name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleView = (patient) => {
+    setSelectedPatient(patient);
+    setShowViewModal(true);
   };
 
   const handleEdit = (patient) => {
@@ -115,132 +97,99 @@ function PatientManagement() {
       nicNo: patient.nicNo || "",
       gender: patient.gender || "",
       contactNo: patient.contactNo || "",
+      guardiansName: patient.guardiansName || "",
+      guardiansContactNo: patient.guardiansContactNo || "",
+      username: patient.username || "",
+      password: "",
+      bloodType: patient.bloodType || "",
+      city: patient.city || "",
+      district: patient.district || "",
+      postalCode: patient.postalCode || "",
+      guardianRelationship: patient.guardianRelationship || "",
+      guardianEmail: patient.guardianEmail || "",
+      medicalConditions: patient.medicalConditions || "",
+      allergies: patient.allergies || "",
+      currentMedications: patient.currentMedications || "",
+      pastSurgeries: patient.pastSurgeries || "",
+      emergencyNotes: patient.emergencyNotes || "",
+      deviceId: patient.deviceId || "",
     });
 
     setShowEditModal(true);
-  };   
-  //new
-  const handleView = (patient) => {
-    setSelectedPatient(patient);
-    setShowViewModal(true);
   };
 
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  const handleDelete = async (patientId) => {
+    if (!window.confirm("Delete this patient?")) return;
+
+    try {
+      await deletePatient(patientId);
+      setPatient((prev) => prev.filter((p) => (p.id || p.Id) !== patientId));
+      alert("Patient deleted successfully");
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Failed to delete patient");
+    }
   };
 
   const handleCreatePatient = async (e) => {
-      e.preventDefault();
-      setError("");
-  
-      if (
-          !formData.name ||
-          !formData.email ||
-          !formData.username ||
-          !formData.password ||
-          !formData.address ||
-          !formData.dateOfBirth ||
-          !formData.allergies ||
-          !formData.nicNo ||
-          !formData.gender ||
-          !formData.contactNo ||
-          !formData.bloodType ||
-          !formData.city ||
-          !formData.currentMedications ||
-          !formData.dispostalCodet ||
-          !formData.district ||
-          !formData.guardianEmail ||
-          !formData.guardianRelationship ||
-          !formData.guardiansContactNo ||
-          !formData.guardiansName ||
-          !formData.medicalConditions
-        ) {
-          setError("Please fill in all required fields");
-          return;
-          }
-  
+    e.preventDefault();
+    setError("");
+
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.username ||
+      !formData.password ||
+      !formData.dateOfBirth ||
+      !formData.address ||
+      !formData.nicNo ||
+      !formData.gender ||
+      !formData.contactNo
+    ) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    try {
       setSubmitting(true);
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${API_BASE_URL}/api/admin/patient/create`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        });
-  
-        if (!response.ok) {
-          const text = await response.text();
-          setError(text || "Failed to create Patient");
-          setSubmitting(false);
-          return;
-        }
-  
-        // Reset form and close modal
-        setFormData({
-          name: "",
-          dateOfBirth: "",
-          address: "",
-          email: "",
-          nicNo: "",
-          gender: "",
-          contactNo: "",
-          guardiansName: "",
-          guardiansContactNo: "",
-          username: "",
-          password: "",
-          bloodType: "",
-          city: "",
-          district: "",
-          dispostalCodet: "",
-          guardianRelationship: "",
-          guardianEmail: "",
-          medicalConditions: "",
-          allergies: "",
-          currentMedications: "",
-          pastSurgeries: "",
-          emergencyNotes: "",
-          createdAt: "",
-          updatedAt: "",
-        });
-        setShowModal(false);
-        setError("");
+      await createPatient(formData);
+      setShowModal(false);
+      setFormData(initialFormData);
+      await loadPatients();
+      alert("Patient created successfully");
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to create patient");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-        const data = await fetchPatient();
-              setPatient(response.data || []);
-            } catch (e) {
-              setError("Unable to connect to server. Please try again.");
-            } finally {
-              setSubmitting(false);
-        
-            }
-          };
-    const handleUpdatePatient = async (e) => {
-        e.preventDefault();
-    
-        try {
-          await updatePatient(editPatientId, editFormData);
-    
-          const data = await fetchPatient();
-          setPatient(data || []);
-          setShowEditModal(false);
-    
-          alert("Patient updated successfully");
-        } catch (err) {
-          console.error(err);
-          alert(err.message || "Failed to update Patient");
-        }
-      };      
+  const handleUpdatePatient = async (e) => {
+    e.preventDefault();
 
+    try {
+      await updatePatient(editPatientId, editFormData);
+      setShowEditModal(false);
+      await loadPatients();
+      alert("Patient updated successfully");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to update patient");
+    }
+  };
+
+  const resetCreateModal = () => {
+    setShowModal(false);
+    setError("");
+    setFormData(initialFormData);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-gray-800">Patients</h3>
-        <button 
+        <button
           onClick={() => setShowModal(true)}
           className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm px-4 py-1.5 rounded-full hover:shadow-lg transition"
         >
@@ -250,42 +199,42 @@ function PatientManagement() {
 
       <input
         type="text"
-        placeholder="Search Patients....."
+        placeholder="Search Patients..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full mb-4 px-4 py-2 bg-gray-100 rounded-full text-sm outline-none"
       />
 
       <div className="space-y-3">
-        {loading && (
-          <p className="text-sm text-gray-500">Loading...</p>
-        )}
+        {loading && <p className="text-sm text-gray-500">Loading...</p>}
 
         {!loading && filteredPatients.length === 0 && (
-          <p className="text-sm text-gray-500">No Patient found</p>
+          <p className="text-sm text-gray-500">No patients found</p>
         )}
 
         {filteredPatients.map((patient) => (
-  <div
-    key={patient.id}
-    className="flex justify-between items-start bg-gray-50 p-4 rounded-xl"
-  >
-    {/* Leftside-Patient Info */}
-    <div className="space-y-1">
-      <p className="font-medium text-gray-800">
-        {patient.name}
-      </p>
+          <div
+            key={patient.id || patient.Id}
+            className="flex justify-between items-center bg-gray-50 p-4 rounded-xl"
+          >
+            <div className="space-y-1">
+              <p className="font-medium text-gray-800">{patient.name}</p>
+              <p className="text-sm text-gray-500">
+                {patient.email || "No email"}
+              </p>
+              <p className="text-xs text-gray-500">
+                Device: {patient.deviceId || "Not assigned"}
+              </p>
+            </div>
 
-    </div>
-
-    {/* RIGHT SIDE – ACTION BUTTONS */}
-    <div className="flex gap-2">
+            <div className="flex gap-2">
               <button
                 onClick={() => handleView(patient)}
                 className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
               >
                 View
               </button>
+
               <button
                 onClick={() => handleEdit(patient)}
                 className="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
@@ -294,112 +243,82 @@ function PatientManagement() {
               </button>
 
               <button
-                  onClick={() => handleDelete(patient.id)}
-                  className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+                onClick={() => handleDelete(patient.id || patient.Id)}
+                className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
               >
-              Delete
+                Delete
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* View Patient Modal */}
-        {showViewModal && selectedPatient && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            
-            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-200">
-              
-              {/* Header */}
-              <div className="flex justify-between items-center px-6 py-4 border-b bg-gray-50 rounded-t-2xl">
-                <h2 className="text-xl font-bold text-gray-800">
-                  Patient Profile
-                </h2>
-                <button
-                  onClick={() => setShowViewModal(false)}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 hover:bg-red-500 hover:text-white transition"
-                >
-                  ×
-                </button>
-              </div>
+      {showViewModal && selectedPatient && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col border border-gray-200">
+            <div className="flex justify-between items-center px-6 py-4 border-b bg-gray-50 rounded-t-2xl">
+              <h2 className="text-xl font-bold text-gray-800">Patient Profile</h2>
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 hover:bg-red-500 hover:text-white transition"
+              >
+                ×
+              </button>
+            </div>
 
-              {/* Scrollable Body */}
-              <div className="p-6 overflow-y-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+            <div className="p-6 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                <InfoItem label="Full Name" value={selectedPatient.name} />
+                <InfoItem label="Email" value={selectedPatient.email} />
+                <InfoItem label="Date of Birth" value={selectedPatient.dateOfBirth} />
+                <InfoItem label="Gender" value={selectedPatient.gender} />
+                <InfoItem label="NIC Number" value={selectedPatient.nicNo} />
+                <InfoItem label="Contact Number" value={selectedPatient.contactNo} />
+                <InfoItem label="Blood Type" value={selectedPatient.bloodType} />
+                <InfoItem label="Guardian Name" value={selectedPatient.guardiansName} />
+                <InfoItem label="Guardian Contact" value={selectedPatient.guardiansContactNo} />
+                <InfoItem label="Guardian Relationship" value={selectedPatient.guardianRelationship} />
+                <InfoItem label="Guardian Email" value={selectedPatient.guardianEmail} />
+                <InfoItem label="Device ID" value={selectedPatient.deviceId || "Not assigned"} />
 
-                  <InfoItem label="Full Name" value={selectedPatient.name} />
-                  <InfoItem label="Email" value={selectedPatient.email} />
-                  <InfoItem label="Contact Number" value={selectedPatient.contactNo} />
-                  <InfoItem label="NIC Number" value={selectedPatient.nicNo} />
-                  <InfoItem label="Gender" value={selectedPatient.gender} />
-
-                  {/* Right column */}
-                  <InfoItem label="Date of Birth" value={selectedPatient.dateOfBirth} />
-                  <InfoItem label="Blood Type" value={selectedPatient.bloodType} />
+                <div className="md:col-span-2">
                   <InfoItem label="Address" value={selectedPatient.address} />
-                  <InfoItem label="City" value={selectedPatient.city} />
-                  <InfoItem label="District" value={selectedPatient.district} />
-                  <InfoItem label="Postal Code" value={selectedPatient.dispostalCodet} />
+                </div>
 
-                  {/* Guardian Details */}
-                  <InfoItem label="Guardian Name" value={selectedPatient.guardiansName} />
-                  <InfoItem label="Guardian Contact Number" value={selectedPatient.guardiansContactNo} />
-                  <InfoItem label="Guardian Relationship" value={selectedPatient.guardianRelationship} />
-                  <InfoItem label="Guardian Email" value={selectedPatient.guardianEmail} />
+                <InfoItem label="City" value={selectedPatient.city} />
+                <InfoItem label="District" value={selectedPatient.district} />
+                <InfoItem label="Postal Code" value={selectedPatient.postalCode} />
+                <InfoItem label="Medical Conditions" value={selectedPatient.medicalConditions} />
+                <InfoItem label="Allergies" value={selectedPatient.allergies} />
+                <InfoItem label="Current Medications" value={selectedPatient.currentMedications} />
+                <InfoItem label="Past Surgeries" value={selectedPatient.pastSurgeries} />
 
+                <div className="md:col-span-2">
+                  <InfoItem label="Emergency Notes" value={selectedPatient.emergencyNotes} />
                 </div>
               </div>
+            </div>
 
-              {/* Footer */}
-              <div className="px-6 py-4 border-t flex justify-end bg-gray-50 rounded-b-2xl">
-                <button
-                  onClick={() => setShowViewModal(false)}
-                  className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
-                >
-                  Close
-                </button>
-              </div>
-
+            <div className="px-6 py-4 border-t flex justify-end bg-gray-50 rounded-b-2xl">
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+              >
+                Close
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-      {/* Create Patient Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-800">Create New Patient</h2>
                 <button
-                  onClick={() => {
-                    setShowModal(false);
-                    setError("");
-                    setFormData({
-                      name: "", 
-                      dateOfBirth: "",
-                      address: "",
-                      email: "",
-                      nicNo: "",
-                      gender: "",
-                      contactNo: "",
-                      guardiansName: "",
-                      guardiansContactNo: "",
-                      username: "",
-                      password: "",
-                      bloodType: "",
-                      city: "",
-                      district: "",
-                      dispostalCodet: "",
-                      guardianRelationship: "",
-                      guardianEmail: "",
-                      medicalConditions: "",
-                      allergies: "",
-                      currentMedications: "",
-                      pastSurgeries: "",
-                      emergencyNotes: "",
-                    });
-                  }}
+                  onClick={resetCreateModal}
                   className="text-gray-500 hover:text-gray-700 text-2xl"
                 >
                   ×
@@ -415,80 +334,28 @@ function PatientManagement() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Name *">
+                  <input name="name" value={formData.name} onChange={handleInputChange} className="input" />
+                </Field>
+
+                <Field label="Date of Birth *">
+                  <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} className="input" />
+                </Field>
+
+                <Field label="Address *">
+                  <input name="address" value={formData.address} onChange={handleInputChange} className="input" />
+                </Field>
+
+                <Field label="Email *">
+                  <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="input" />
+                </Field>
+
+                <Field label="NIC No *">
+                  <input name="nicNo" value={formData.nicNo} onChange={handleInputChange} className="input" />
+                </Field>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Date of Birth <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Address <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    NIC No <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="nicNo"
-                    value={formData.nicNo}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Gender <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Gender *</label>
                   <div className="flex items-center gap-6 h-10">
                     <label className="flex items-center gap-2">
                       <input
@@ -497,7 +364,6 @@ function PatientManagement() {
                         value="MALE"
                         checked={formData.gender === "MALE"}
                         onChange={handleInputChange}
-                        required
                         className="accent-blue-500"
                       />
                       Male
@@ -509,7 +375,6 @@ function PatientManagement() {
                         value="FEMALE"
                         checked={formData.gender === "FEMALE"}
                         onChange={handleInputChange}
-                        required
                         className="accent-blue-500"
                       />
                       Female
@@ -517,235 +382,92 @@ function PatientManagement() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Contact No <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="contactNo"
-                    value={formData.contactNo}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Contact No *">
+                  <input name="contactNo" value={formData.contactNo} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Guardians Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="guardiansName"
-                    value={formData.guardiansName}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Guardian Name">
+                  <input name="guardiansName" value={formData.guardiansName} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Guardians ContactNo <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="guardiansContactNo"
-                    value={formData.guardiansContactNo}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Guardian Contact">
+                  <input name="guardiansContactNo" value={formData.guardiansContactNo} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Username <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Guardian Relationship">
+                  <input name="guardianRelationship" value={formData.guardianRelationship} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Password <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Guardian Email">
+                  <input name="guardianEmail" value={formData.guardianEmail} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Blood Type <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="bloodType"
-                    value={formData.bloodType}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      City <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Blood Type">
+                  <input name="bloodType" value={formData.bloodType} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    District <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="district"
-                    value={formData.district}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Username *">
+                  <input name="username" value={formData.username} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    District Postal Code <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="dispostalCodet"
-                    value={formData.dispostalCodet}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Password *">
+                  <input type="password" name="password" value={formData.password} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Guardian Relationship <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="guardianRelationship"
-                    value={formData.guardianRelationship}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="City">
+                  <input name="city" value={formData.city} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Guardian Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="guardianEmail"
-                    value={formData.guardianEmail}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="District">
+                  <input name="district" value={formData.district} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Medical Conditions <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="medicalConditions"
-                    value={formData.medicalConditions}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Postal Code">
+                  <input name="postalCode" value={formData.postalCode} onChange={handleInputChange} className="input" />
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Allergies  <span className="text-red-500">*</span>
-                  </label>
+                <Field label="Device ID">
                   <input
-                    type="text"
-                    name="allergies"
-                    value={formData.allergies}
+                    name="deviceId"
+                    value={formData.deviceId}
                     onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
+                    className="input"
+                    placeholder="Assign IoT device ID"
                   />
-                </div>
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Current Medications  <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="currentMedications"
-                    value={formData.currentMedications}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full h-10 px-3 rounded-lg border focus:border-blue-500 outline-none"
-                  />
-                </div>
+                <Field label="Medical Conditions">
+                  <input name="medicalConditions" value={formData.medicalConditions} onChange={handleInputChange} className="input" />
+                </Field>
 
+                <Field label="Allergies">
+                  <input name="allergies" value={formData.allergies} onChange={handleInputChange} className="input" />
+                </Field>
+
+                <Field label="Current Medications">
+                  <input name="currentMedications" value={formData.currentMedications} onChange={handleInputChange} className="input" />
+                </Field>
+
+                <Field label="Past Surgeries">
+                  <input name="pastSurgeries" value={formData.pastSurgeries} onChange={handleInputChange} className="input" />
+                </Field>
+
+                <div className="md:col-span-2">
+                  <Field label="Emergency Notes">
+                    <textarea
+                      name="emergencyNotes"
+                      value={formData.emergencyNotes}
+                      onChange={handleInputChange}
+                      className="w-full min-h-[100px] px-3 py-2 rounded-lg border focus:border-blue-500 outline-none"
+                    />
+                  </Field>
+                </div>
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setError("");
-                    setFormData({
-                      name: "",
-                      dateOfBirth: "",
-                      address: "",
-                      email: "",
-                      nicNo: "",
-                      gender: "",
-                      contactNo: "",
-                      guardiansName: "",
-                      guardiansContactNo: "",
-                      username: "",
-                      password: "",
-                      bloodType: "",
-                      city: "",
-                      district: "",
-                      dispostalCodet: "",
-                      guardianRelationship: "",
-                      guardianEmail: "",
-                      medicalConditions: "",
-                      allergies: "",
-                      currentMedications: "",
-                      pastSurgeries: "",
-                      emergencyNotes: "",
-                    });
-                  }}
+                  onClick={resetCreateModal}
                   className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   Cancel
@@ -765,7 +487,7 @@ function PatientManagement() {
 
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Edit Patient</h2>
               <button
@@ -778,197 +500,42 @@ function PatientManagement() {
 
             <form onSubmit={handleUpdatePatient} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+                <input name="name" value={editFormData.name} onChange={handleEditInputChange} className="input" placeholder="Name" />
+                <input type="date" name="dateOfBirth" value={editFormData.dateOfBirth} onChange={handleEditInputChange} className="input" />
+                <input name="address" value={editFormData.address} onChange={handleEditInputChange} className="input" placeholder="Address" />
+                <input name="email" value={editFormData.email} onChange={handleEditInputChange} className="input" placeholder="Email" />
+                <input name="nicNo" value={editFormData.nicNo} onChange={handleEditInputChange} className="input" placeholder="NIC" />
+                <input name="gender" value={editFormData.gender} onChange={handleEditInputChange} className="input" placeholder="Gender" />
+                <input name="contactNo" value={editFormData.contactNo} onChange={handleEditInputChange} className="input" placeholder="Contact No" />
+                <input name="guardiansName" value={editFormData.guardiansName} onChange={handleEditInputChange} className="input" placeholder="Guardian Name" />
+                <input name="guardiansContactNo" value={editFormData.guardiansContactNo} onChange={handleEditInputChange} className="input" placeholder="Guardian Contact" />
+                <input name="guardianRelationship" value={editFormData.guardianRelationship} onChange={handleEditInputChange} className="input" placeholder="Guardian Relationship" />
+                <input name="guardianEmail" value={editFormData.guardianEmail} onChange={handleEditInputChange} className="input" placeholder="Guardian Email" />
+                <input name="bloodType" value={editFormData.bloodType} onChange={handleEditInputChange} className="input" placeholder="Blood Type" />
+                <input name="city" value={editFormData.city} onChange={handleEditInputChange} className="input" placeholder="City" />
+                <input name="district" value={editFormData.district} onChange={handleEditInputChange} className="input" placeholder="District" />
+                <input name="postalCode" value={editFormData.postalCode} onChange={handleEditInputChange} className="input" placeholder="Postal Code" />
                 <input
-                  name="name"
-                  value={editFormData.name}
+                  name="deviceId"
+                  value={editFormData.deviceId}
                   onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Name"
+                  className="input"
+                  placeholder="Device ID"
                 />
+                <input name="medicalConditions" value={editFormData.medicalConditions} onChange={handleEditInputChange} className="input" placeholder="Medical Conditions" />
+                <input name="allergies" value={editFormData.allergies} onChange={handleEditInputChange} className="input" placeholder="Allergies" />
+                <input name="currentMedications" value={editFormData.currentMedications} onChange={handleEditInputChange} className="input" placeholder="Current Medications" />
+                <input name="pastSurgeries" value={editFormData.pastSurgeries} onChange={handleEditInputChange} className="input" placeholder="Past Surgeries" />
 
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={editFormData.dateOfBirth}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                />
-
-                <input
-                  name="address"
-                  value={editFormData.address}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Address"
-                />
-
-                <input
-                  name="email"
-                  value={editFormData.email}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Email"
-                />
-
-                <input
-                  name="nicNo"
-                  value={editFormData.nicNo}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="NIC"
-                />
-
-                <input
-                  name="contactNo"
-                  value={editFormData.contactNo}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Contact No"
-                />
-
-                <select
-                  name="gender"
-                  value={editFormData.gender}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <input
-                  name="contactNo"
-                  value={editFormData.contactNo}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Contact Number"
-                />
-
-                <input
-                  name="guardiansName"
-                  value={editFormData.guardiansName}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Guardian's Name"
-                />
-
-                <input
-                  name="guardiansContactNo"
-                  value={editFormData.guardiansContactNo}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Guardian's Contact Number"
-                />
-
-                <input
-                  name="username"
-                  value={editFormData.username}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Username"
-                />
-
-                <input
-                  type="password"
-                  name="password"
-                  value={editFormData.password}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Password"
-                />
-
-                <input
-                  name="bloodType"
-                  value={editFormData.bloodType}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Blood Type"
-                />
-
-                <input
-                  name="city"
-                  value={editFormData.city}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="City"
-                />
-
-                <input
-                  name="district"
-                  value={editFormData.district}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="District"
-                />
-
-                <input
-                  name="dispostalCodet"
-                  value={editFormData.dispostalCodet}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Postal Code"
-                />
-
-                <input
-                  name="guardianRelationship"
-                  value={editFormData.guardianRelationship}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Guardian Relationship"
-                />
-
-                <input
-                  type="email"
-                  name="guardianEmail"
-                  value={editFormData.guardianEmail}
-                  onChange={handleEditInputChange}
-                  className="w-full h-10 px-3 rounded-lg border"
-                  placeholder="Guardian Email"
-                />
-
-                <textarea
-                  name="medicalConditions"
-                  value={editFormData.medicalConditions}
-                  onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 rounded-lg border"
-                  placeholder="Medical Conditions"
-                />
-
-                <textarea
-                  name="allergies"
-                  value={editFormData.allergies}
-                  onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 rounded-lg border"
-                  placeholder="Allergies"
-                />
-
-                <textarea
-                  name="currentMedications"
-                  value={editFormData.currentMedications}
-                  onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 rounded-lg border"
-                  placeholder="Current Medications"
-                />
-
-                <textarea
-                  name="pastSurgeries"
-                  value={editFormData.pastSurgeries}
-                  onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 rounded-lg border"
-                  placeholder="Past Surgeries"
-                />
-
-                <textarea
-                  name="emergencyNotes"
-                  value={editFormData.emergencyNotes}
-                  onChange={handleEditInputChange}
-                  className="w-full px-3 py-2 rounded-lg border"
-                  placeholder="Emergency Notes"
-                />
-
+                <div className="md:col-span-2">
+                  <textarea
+                    name="emergencyNotes"
+                    value={editFormData.emergencyNotes}
+                    onChange={handleEditInputChange}
+                    className="w-full min-h-[100px] px-3 py-2 rounded-lg border focus:border-blue-500 outline-none"
+                    placeholder="Emergency Notes"
+                  />
+                </div>
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
@@ -991,18 +558,35 @@ function PatientManagement() {
         </div>
       )}
 
+      <style>{`
+        .input {
+          width: 100%;
+          height: 40px;
+          padding-left: 12px;
+          padding-right: 12px;
+          border-radius: 8px;
+          border: 1px solid #d1d5db;
+          outline: none;
+        }
+        .input:focus {
+          border-color: #3b82f6;
+        }
+      `}</style>
     </div>
   );
 }
 
+const Field = ({ label, children }) => (
+  <div>
+    <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
+    {children}
+  </div>
+);
+
 const InfoItem = ({ label, value }) => (
   <div className="bg-gray-50 rounded-xl p-4">
-    <p className="text-xs text-gray-500 font-semibold mb-1">
-      {label}
-    </p>
-    <p className="text-gray-800 font-medium">
-      {value || "-"}
-    </p>
+    <p className="text-xs text-gray-500 font-semibold mb-1">{label}</p>
+    <p className="text-gray-800 font-medium">{value || "-"}</p>
   </div>
 );
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import Header from "../../components/PatientPortal/Header";
 import PatientInfoCard from "../../components/PatientPortal/PatientInfoCard";
@@ -30,10 +30,25 @@ const PatientPortal = () => {
   const [currentTab, setCurrentTab] = useState("Overview");
   const [showManualEntry, setShowManualEntry] = useState(false);
 
-  // NEW: used to trigger vitals refresh after adding a new medical event
+  // used to trigger vitals refresh after adding a new medical event
   const [vitalsRefreshKey, setVitalsRefreshKey] = useState(0);
 
+  // medical-summary shared by VitalsDashboard, HealthRiskCard, HealthTipsCard
+  const [medicalSummary, setMedicalSummary] = useState(null);
+
   const patientId = localStorage.getItem("patientId");
+  const token = useMemo(() => localStorage.getItem("token"), []);
+
+  useEffect(() => {
+    if (!patientId || !token) return;
+    const API_BASE = import.meta.env.VITE_API_URL;
+    fetch(`${API_BASE}/api/patients/${patientId}/medical-summary`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data) setMedicalSummary(data); })
+      .catch(() => {});
+  }, [patientId, token, vitalsRefreshKey]);
 
   return (
     <>
@@ -83,13 +98,13 @@ const PatientPortal = () => {
               </div>
 
 
-              {/* ECG + Health Tips */}
+              {/* AI Predictions + Health Tips */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 <div className="lg:col-span-2">
-                  <HealthRiskCard />
+                  <HealthRiskCard medicalSummary={medicalSummary} />
                 </div>
                 <div>
-                  <HealthTipsCard />
+                  <HealthTipsCard medicalSummary={medicalSummary} />
                 </div>
               </div>
 

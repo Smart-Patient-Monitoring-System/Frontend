@@ -24,6 +24,7 @@ export default function SignupPagePatient() {
   const [currentAllergies, setCurrentAllergies] = useState("");
   const [currentMedications, setCurrentMedications] = useState("");
   const [pastSurgeries, setPastSurgeries] = useState("");
+  const [chronicConditions, setChronicConditions] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,6 +81,7 @@ export default function SignupPagePatient() {
           currentAllergies,
           currentMedications,
           pastSurgeries,
+          chronicConditions,
           role: "PATIENT",
         }),
       });
@@ -107,7 +109,11 @@ export default function SignupPagePatient() {
       ? "Parent Name"
       : guardianType === "CHILD"
       ? "Child Name"
-      : "Guardian’s Name";
+      : "Guardian's Name";
+
+  /* ── shared textarea style ── */
+  const textareaClass =
+    "w-full bg-white/35 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/40 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#00BAC5]/50";
 
   return (
     <div
@@ -119,24 +125,25 @@ export default function SignupPagePatient() {
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-[1600px] flex flex-col lg:flex-row gap-6 items-stretch">
-        {/* LEFT CARD */}
+
+        {/* ═══════════════ LEFT CARD — Personal & Guardian Info ═══════════════ */}
         <div
           className="
-          w-full lg:w-1/2
-          h-full
-          bg-white/20 backdrop-blur-xl
-          border border-white/30
-          shadow-[0_8px_40px_rgba(0,0,0,0.25)]
-          rounded-[36px] lg:rounded-[56px]
-          p-6 sm:p-8 md:p-10
-          flex flex-col
-        "
+            w-full lg:w-1/2
+            bg-white/20 backdrop-blur-xl
+            border border-white/30
+            shadow-[0_8px_40px_rgba(0,0,0,0.25)]
+            rounded-[36px] lg:rounded-[56px]
+            p-6 sm:p-8 md:p-10
+            flex flex-col
+          "
         >
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-light mb-8 tracking-wide text-white">
-            Patient’s Sign Up
+            Patient's Sign Up
           </h1>
 
           <div className="flex flex-col gap-5 w-full">
+            {/* ── Personal Info ── */}
             <FormRow
               label="Name"
               value={name}
@@ -206,71 +213,7 @@ export default function SignupPagePatient() {
               required
             />
 
-            <FormRow label="Current Allergies">
-              <textarea
-                value={currentAllergies}
-                onChange={(e) => setCurrentAllergies(e.target.value)}
-                rows={2}
-                className="
-                  w-full
-                  bg-white/35 backdrop-blur-md
-                  rounded-2xl px-4 py-2
-                  border border-white/40
-                  text-gray-900 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-[#00BAC5]/50
-                "
-              />
-            </FormRow>
-
-            <FormRow label="Current Medications">
-              <textarea
-                value={currentMedications}
-                onChange={(e) => setCurrentMedications(e.target.value)}
-                rows={2}
-                className="
-                  w-full
-                  bg-white/35 backdrop-blur-md
-                  rounded-2xl px-4 py-2
-                  border border-white/40
-                  text-gray-900 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-[#00BAC5]/50
-                "
-              />
-            </FormRow>
-
-            <FormRow label="Past Surgeries">
-              <textarea
-                value={pastSurgeries}
-                onChange={(e) => setPastSurgeries(e.target.value)}
-                rows={2}
-                className="
-                  w-full
-                  bg-white/35 backdrop-blur-md
-                  rounded-2xl px-4 py-2
-                  border border-white/40
-                  text-gray-900 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-[#00BAC5]/50
-                "
-              />
-            </FormRow>
-          </div>
-        </div>
-
-        {/* RIGHT CARD */}
-        <div
-          className="
-          w-full lg:w-1/2
-          h-full
-          bg-white/20 backdrop-blur-xl
-          border border-white/30
-          shadow-[0_8px_40px_rgba(0,0,0,0.25)]
-          rounded-[36px] lg:rounded-[56px]
-          p-6 sm:p-8 md:p-10
-          flex flex-col justify-between
-        "
-        >
-          {/* Form content */}
-          <div className="flex flex-col gap-5">
+            {/* ── Guardian Info ── */}
             <FormRow label="Guardian Type">
               <select
                 value={guardianType}
@@ -300,13 +243,31 @@ export default function SignupPagePatient() {
             />
 
             <FormRow
-              label="Guardian’s Contact No"
+              label="Guardian's Contact No"
               type="tel"
               value={guardianContactNo}
               onChange={(e) => setGuardianContactNo(e.target.value)}
               required
             />
+          </div>
+        </div>
 
+        {/* ═══════════════ RIGHT CARD — Credentials, Blood Type & Medical History ═══════════════ */}
+        <div
+          className="
+            w-full lg:w-1/2
+            bg-white/20 backdrop-blur-xl
+            border border-white/30
+            shadow-[0_8px_40px_rgba(0,0,0,0.25)]
+            rounded-[36px] lg:rounded-[56px]
+            p-6 sm:p-8 md:p-10
+            flex flex-col justify-between
+          "
+        >
+          {/* Form content */}
+          <div className="flex flex-col gap-5">
+
+            {/* ── Account Credentials ── */}
             <FormRow
               label="User Name"
               value={username}
@@ -330,6 +291,7 @@ export default function SignupPagePatient() {
               required
             />
 
+            {/* ── Blood Type ── */}
             <FormRow label="Blood Type">
               <select
                 value={bloodType}
@@ -354,6 +316,47 @@ export default function SignupPagePatient() {
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
               </select>
+            </FormRow>
+
+            {/* ── Optional Medical History ── */}
+            <FormRow label="Current Allergies (Optional)">
+              <textarea
+                value={currentAllergies}
+                onChange={(e) => setCurrentAllergies(e.target.value)}
+                rows={2}
+                placeholder="List any known allergies…"
+                className={textareaClass}
+              />
+            </FormRow>
+
+            <FormRow label="Current Medications (Optional)">
+              <textarea
+                value={currentMedications}
+                onChange={(e) => setCurrentMedications(e.target.value)}
+                rows={2}
+                placeholder="List any current medications…"
+                className={textareaClass}
+              />
+            </FormRow>
+
+            <FormRow label="Past Surgeries (Optional)">
+              <textarea
+                value={pastSurgeries}
+                onChange={(e) => setPastSurgeries(e.target.value)}
+                rows={2}
+                placeholder="List any past surgeries…"
+                className={textareaClass}
+              />
+            </FormRow>
+
+            <FormRow label="Chronic Conditions (Optional)">
+              <textarea
+                value={chronicConditions}
+                onChange={(e) => setChronicConditions(e.target.value)}
+                rows={2}
+                placeholder="e.g. Diabetes, Hypertension, Asthma…"
+                className={textareaClass}
+              />
             </FormRow>
           </div>
 
