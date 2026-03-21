@@ -10,7 +10,7 @@ export default function BookingsTab() {
   const fetchAppointments = async () => {
     try {
       const data = await getUserAppointments();
-      setAppointments(data); // set state
+      setAppointments(data); // only logged-in patient’s appointments
     } catch (err) {
       console.error("Error fetching appointments:", err);
     }
@@ -21,7 +21,7 @@ export default function BookingsTab() {
   }, []);
 
   const handleBookingSuccess = (appointment) => {
-    // Add new appointment to list
+    // Add new appointment to list (optional: you could re-fetch from backend)
     setAppointments((prev) => [...prev, appointment]);
   };
 
