@@ -9,7 +9,7 @@ const getAuthHeaders = () => {
 };
 
 export async function fetchAssignableDoctors() {
-  const response = await fetch(`${API_BASE_URL}/api/admin/doctor-assignments/doctors`, {
+  const response = await fetch(`${API_BASE_URL}/api/doctor-assignments/doctors`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -19,7 +19,7 @@ export async function fetchAssignableDoctors() {
 }
 
 export async function fetchAssignablePatients() {
-  const response = await fetch(`${API_BASE_URL}/api/admin/doctor-assignments/patients`, {
+  const response = await fetch(`${API_BASE_URL}/api/doctor-assignments/patients`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -29,7 +29,7 @@ export async function fetchAssignablePatients() {
 }
 
 export async function fetchDoctorAssignments() {
-  const response = await fetch(`${API_BASE_URL}/api/admin/doctor-assignments`, {
+  const response = await fetch(`${API_BASE_URL}/api/doctor-assignments`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -39,7 +39,7 @@ export async function fetchDoctorAssignments() {
 }
 
 export async function assignDoctorToPatient(doctorId, patientId) {
-  const response = await fetch(`${API_BASE_URL}/api/admin/doctor-assignments/assign`, {
+  const response = await fetch(`${API_BASE_URL}/api/doctor-assignments/assign`, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify({ doctorId, patientId }),
@@ -54,7 +54,7 @@ export async function assignDoctorToPatient(doctorId, patientId) {
 }
 
 export async function unassignDoctorFromPatient(patientId) {
-  const response = await fetch(`${API_BASE_URL}/api/admin/doctor-assignments/unassign/${patientId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/doctor-assignments/unassign/${patientId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
