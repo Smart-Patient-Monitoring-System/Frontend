@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Search, FileText, Download, User, Calendar, Activity, Eye, File } from "lucide-react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8084";
+const API_BASE = "http://localhost:8080";
 
 function ReportsPage({ doctorId }) {
   const [reports, setReports] = useState([]);

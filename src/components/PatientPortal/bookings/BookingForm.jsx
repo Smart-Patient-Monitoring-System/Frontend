@@ -3,6 +3,8 @@ import DoctorSelect from "./BookingDoctorSelect.jsx";
 import TimeSlotPicker from "./SpecialTimeSlotPicker.jsx";
 import { getAppointmentTypes, bookAppointment } from "../../../api/api.js";
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
 export default function BookingModal({ setShowModal, onBookingSuccess }) {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [date, setDate] = useState("");

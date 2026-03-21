@@ -21,8 +21,31 @@ const generateSlots = () => {
   return slots;
 };
 
-// Helper to normalize backend time (remove seconds if present)
-const normalizeTime = (time) => time.slice(0, 5);
+// Helper to normalize backend time to HH:mm
+const normalizeTime = (time) => {
+  if (!time) return "";
+  if (Array.isArray(time)) {
+    const hours = String(time[0] ?? "0").padStart(2, "0");
+    const minutes = String(time[1] ?? "0").padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }
+  if (typeof time !== "string") {
+    const raw = String(time);
+    const numericParts = raw.match(/\d+/g);
+    if (numericParts && numericParts.length >= 2) {
+      const hours = String(numericParts[0]).padStart(2, "0");
+      const minutes = String(numericParts[1]).padStart(2, "0");
+      return `${hours}:${minutes}`;
+    }
+    return raw;
+  }
+
+  const delimiter = time.includes(":") ? ":" : ",";
+  const parts = time.split(delimiter);
+  const hours = String(parts[0] ?? "0").padStart(2, "0");
+  const minutes = String(parts[1] ?? "0").padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
 
 export default function DoctorAvailabilityModal({ doctor, onClose }) {
   const [date, setDate] = useState("");
