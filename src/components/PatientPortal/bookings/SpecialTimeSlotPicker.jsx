@@ -1,6 +1,31 @@
 import { useEffect, useState } from "react";
 import { getAvailableSlots } from "../../../api/api";
 
+const normalizeTime = (time) => {
+  if (!time) return "";
+  if (Array.isArray(time)) {
+    const hours = String(time[0] ?? "0").padStart(2, "0");
+    const minutes = String(time[1] ?? "0").padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }
+  if (typeof time !== "string") {
+    const raw = String(time);
+    const numericParts = raw.match(/\d+/g);
+    if (numericParts && numericParts.length >= 2) {
+      const hours = String(numericParts[0]).padStart(2, "0");
+      const minutes = String(numericParts[1]).padStart(2, "0");
+      return `${hours}:${minutes}`;
+    }
+    return raw;
+  }
+
+  const delimiter = time.includes(":") ? ":" : ",";
+  const parts = time.split(delimiter);
+  const hours = String(parts[0] ?? "0").padStart(2, "0");
+  const minutes = String(parts[1] ?? "0").padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 export default function TimeSlotPicker({
   doctorId,
   date,
@@ -19,7 +44,7 @@ export default function TimeSlotPicker({
         const data = await getAvailableSlots(doctorId, date);
         // data = [{id, availableDate, availableTime}]
         // map to string "HH:mm" for buttons
-        setSlots(data.map((slot) => slot.availableTime.slice(0, 5)));
+        setSlots(data.map((slot) => normalizeTime(slot.availableTime)));
       } catch (err) {
         console.error(err);
       } finally {

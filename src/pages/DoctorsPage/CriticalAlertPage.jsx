@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AlertCard from "./componants/AlertCard";
 import { AlertTriangle, RefreshCw, Shield } from "lucide-react";
 
-const API_BASE = "http://localhost:8084";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 /* ── JWT helpers ── */
 const getToken = () => localStorage.getItem("token");
@@ -47,6 +47,30 @@ const fetchDoctorId = async () => {
   return me?.id || me?.Id || null;
 };
 
+const parseDateStr = (dateVal) => {
+  if (!dateVal) return 0;
+  if (Array.isArray(dateVal)) {
+    const [y, m, d, h = 0, min = 0, s = 0] = dateVal;
+    return new Date(y, m - 1, d, h, min, s).getTime();
+  }
+  return new Date(dateVal).getTime();
+};
+
+const formatAlertDate = (dateVal) => {
+  if (!dateVal) return "";
+  let d;
+  if (Array.isArray(dateVal)) {
+    const [y, m, day, h = 0, min = 0, s = 0] = dateVal;
+    d = new Date(y, m - 1, day, h, min, s);
+  } else {
+    d = new Date(dateVal);
+  }
+  return d.toLocaleString(undefined, {
+    year: "numeric", month: "short", day: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+};
+
 function CriticalAlertPage() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -79,7 +103,9 @@ function CriticalAlertPage() {
       if (!res.ok) throw new Error("Failed to load alerts");
 
       const data = await res.json();
-      setAlerts(Array.isArray(data) ? data : []);
+      const rawAlerts = Array.isArray(data) ? data : [];
+      rawAlerts.sort((a, b) => parseDateStr(b.recordedAt) - parseDateStr(a.recordedAt));
+      setAlerts(rawAlerts);
       setLastRefresh(new Date());
     } catch (e) {
       setError(e.message || "Error loading alerts");
@@ -214,11 +240,7 @@ function CriticalAlertPage() {
             normalRange={alert.normalRange}
             severity={alert.severity}
             room={alert.room}
-            time={
-              alert.recordedAt
-                ? new Date(alert.recordedAt).toLocaleString()
-                : ""
-            }
+            time={formatAlertDate(alert.recordedAt)}
           />
         ))}
       </div>
