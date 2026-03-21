@@ -41,6 +41,8 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
     const [aggregatedData, setAggregatedData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState(null);
+    // 'normal' | 'exercise' | 'heart-patient'
+    const [hrMode, setHrMode] = useState('normal');
 
     // Load sessions from backend on mount and when returning to tab (e.g. after refresh)
     useEffect(() => {
@@ -98,6 +100,28 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
         : (workoutSessions.length > 0 ? workoutSessions[0] : null);
     const healthData = currentSession?.healthData || null;
     const dataSource = currentSession?.source || '';
+
+    // Previous session for trend comparison
+    const currentSessionIndex = currentSession
+        ? workoutSessions.findIndex(s => s.id === currentSession.id)
+        : -1;
+    const prevSession = currentSessionIndex >= 0 && currentSessionIndex < workoutSessions.length - 1
+        ? workoutSessions[currentSessionIndex + 1]
+        : null;
+    const prevAggregatedData = prevSession ? aggregateHealthData(prevSession.healthData) : null;
+
+    // Helper: compute % trend between current and previous value
+    const calcTrend = (current, previous) => {
+        if (!prevAggregatedData || !previous || previous === 0) {
+            return { trend: 'neutral', trendValue: 'No prev data' };
+        }
+        const pct = Math.round(((current - previous) / previous) * 100);
+        if (pct === 0) return { trend: 'neutral', trendValue: 'No change' };
+        return {
+            trend: pct > 0 ? 'up' : 'down',
+            trendValue: `${pct > 0 ? '+' : ''}${pct}%`,
+        };
+    };
 
     const handleDataUploaded = async (jsonData, fileName, metadata) => {
         try {
@@ -318,14 +342,94 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
 
                     <div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-6">Health Metrics</h3>
+
+                        {/* ─── Heart Rate Mode Selector ─── */}
+                        <div className="flex items-center gap-3 mb-4 flex-wrap">
+                            <span className="text-sm font-semibold text-gray-600">Mode:</span>
+                            {[
+                                { id: 'normal',        label: '🧍 Normal',        tip: 'Resting / daily activity' },
+                                { id: 'exercise',      label: '🏃 Exercising',    tip: 'During a workout session' },
+                                { id: 'heart-patient', label: '❤️‍🩹 Heart Patient', tip: 'Cardiac condition / post-surgery' },
+                            ].map(m => (
+                                <button
+                                    key={m.id}
+                                    title={m.tip}
+                                    onClick={() => setHrMode(m.id)}
+                                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                                        hrMode === m.id
+                                            ? 'bg-blue-600 text-white border-blue-600 shadow'
+                                            : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+                                    }`}
+                                >
+                                    {m.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* ─── Critical Heart Rate Warning ─── */}
+                        {(() => {
+                            const avgHR = aggregatedData.today.avgHeartRate;
+                            if (!avgHR) return null;
+
+                            // Thresholds per mode
+                            const thresholds = {
+                                'normal':        { warn: 100, critical: 120 },
+                                'exercise':      { warn: 150, critical: 170 },
+                                'heart-patient': { warn: 110, critical: 120 },
+                            };
+                            const { warn, critical } = thresholds[hrMode];
+
+                            if (avgHR <= warn) return null;
+
+                            const isCritical = avgHR > critical;
+
+                            const messages = {
+                                normal: {
+                                    warn:     'Your resting heart rate is elevated. Rest and avoid exertion. Consult your doctor if this persists.',
+                                    critical: 'Critical resting heart rate! Stop any activity and seek medical attention immediately.',
+                                },
+                                exercise: {
+                                    warn:     `Heart rate is high for exercise (${avgHR} bpm). Slow down and catch your breath — you're approaching your limit.`,
+                                    critical: `Heart rate is dangerously high during exercise (${avgHR} bpm). Stop immediately, rest, and seek help if discomfort occurs.`,
+                                },
+                                'heart-patient': {
+                                    warn:     `Heart rate exceeds your safe limit (${avgHR} bpm). Stop activity, rest, and take prescribed medication if needed.`,
+                                    critical: `Critical! Heart rate is ${avgHR} bpm — far above the safe range for cardiac patients. Seek immediate medical attention.`,
+                                },
+                            };
+
+                            const msg = isCritical ? messages[hrMode].critical : messages[hrMode].warn;
+
+                            return (
+                                <div className={`flex items-start gap-4 mb-6 p-4 rounded-2xl border-2 shadow-md
+                                    ${isCritical ? 'bg-red-50 border-red-400' : 'bg-orange-50 border-orange-400'}`}>
+                                    <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl
+                                        ${isCritical ? 'bg-red-100' : 'bg-orange-100'}`}>
+                                        {isCritical ? '🚨' : '⚠️'}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className={`text-lg font-bold ${isCritical ? 'text-red-700' : 'text-orange-700'}`}>
+                                            {isCritical ? 'Critical Heart Rate Detected!' : 'Elevated Heart Rate'}
+                                        </p>
+                                        <p className={`text-sm mt-1 ${isCritical ? 'text-red-600' : 'text-orange-600'}`}>
+                                            Avg HR: <strong>{avgHR} bpm</strong> — {msg}
+                                        </p>
+                                        <p className="text-xs mt-2 text-gray-500">
+                                            Safe range ({hrMode === 'normal' ? 'resting' : hrMode === 'exercise' ? 'exercise' : 'cardiac'}):
+                                            {' '}<strong>60–{warn} bpm</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <HealthMetricCard
                                 title="Steps"
                                 value={aggregatedData.today.steps.toLocaleString()}
                                 unit="steps"
                                 icon={Footprints}
-                                trend="up"
-                                trendValue="+12%"
+                                {...calcTrend(aggregatedData.today.steps, prevAggregatedData?.today.steps)}
                                 bgGradient="bg-gradient-to-br from-blue-100 to-blue-200"
                                 iconBg="bg-blue-500"
                                 chartData={generateChartData(healthData.steps)}
@@ -337,12 +441,11 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
                                 value={aggregatedData.today.avgHeartRate}
                                 unit="bpm"
                                 icon={Heart}
-                                trend="down"
-                                trendValue="-2 bpm"
+                                {...calcTrend(aggregatedData.today.avgHeartRate, prevAggregatedData?.today.avgHeartRate)}
                                 bgGradient="bg-gradient-to-br from-red-100 to-pink-200"
                                 iconBg="bg-red-500"
                                 chartData={generateChartData(healthData.heartRate)}
-                                subtitle={`Resting: ${aggregatedData.today.avgHeartRate} bpm`}
+                                subtitle={`Avg across session: ${aggregatedData.today.avgHeartRate} bpm`}
                             />
 
                             <HealthMetricCard
@@ -350,8 +453,7 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
                                 value={aggregatedData.today.avgSpo2 || 98}
                                 unit="%"
                                 icon={Droplets}
-                                trend="up"
-                                trendValue="+1%"
+                                {...calcTrend(aggregatedData.today.avgSpo2, prevAggregatedData?.today.avgSpo2)}
                                 bgGradient="bg-gradient-to-br from-teal-100 to-cyan-200"
                                 iconBg="bg-teal-500"
                                 chartData={generateChartData(healthData.spo2)}
@@ -363,8 +465,7 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
                                 value={aggregatedData.today.calories.toLocaleString()}
                                 unit="cal"
                                 icon={Flame}
-                                trend="up"
-                                trendValue="+8%"
+                                {...calcTrend(aggregatedData.today.calories, prevAggregatedData?.today.calories)}
                                 bgGradient="bg-gradient-to-br from-orange-100 to-red-200"
                                 iconBg="bg-orange-500"
                                 chartData={generateChartData(healthData.calories)}
@@ -376,8 +477,7 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
                                 value={aggregatedData.today.distance.toFixed(1)}
                                 unit="km"
                                 icon={TrendingUp}
-                                trend="up"
-                                trendValue="+5%"
+                                {...calcTrend(aggregatedData.today.distance, prevAggregatedData?.today.distance)}
                                 bgGradient="bg-gradient-to-br from-purple-100 to-indigo-200"
                                 iconBg="bg-purple-500"
                                 chartData={generateChartData(healthData.distance)}
@@ -389,7 +489,7 @@ const HealthDataTab = ({ patientId: propPatientId, isDoctorView = false }) => {
                                 value={aggregatedData.today.workouts}
                                 unit="sessions"
                                 icon={Activity}
-                                trend="neutral"
+                                {...calcTrend(aggregatedData.today.workouts, prevAggregatedData?.today.workouts)}
                                 bgGradient="bg-gradient-to-br from-green-100 to-emerald-200"
                                 iconBg="bg-green-500"
                                 chartData={healthData.workouts.slice(-7).map((workout, i) => ({
