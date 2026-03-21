@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Bell,
   Activity,
-  Users,
   UserCircle,
   TrendingUp,
 } from "lucide-react";
@@ -17,9 +16,9 @@ import IotDevices from "../../pages/AdminPages/IotDevices";
 import Analytics from "../../pages/AdminPages/Analytics";
 import SecurityLogs from "../../pages/AdminPages/SecurityLogs";
 import SpecialDoctorAdminPage from "../PatientPortal/bookings/SpecialDoctorAdminPage";
+import { API_BASE_URL } from "../../api";
 
 function AdminDashboard() {
-  const [hasNotification, setHasNotification] = useState(true);
   const navigate = useNavigate();
 
   const [adminData, setAdminData] = useState({ name: "", role: "" });
@@ -67,11 +66,9 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
-      {/* === HEADER === */}
       <header className="bg-white shadow-sm w-full">
         <div className="max-w-full px-4 sm:px-6 md:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            {/* Left */}
             <div className="flex items-center gap-3">
               <div
                 className="rounded-lg p-2.5 shadow-xl flex items-center justify-center"
@@ -100,7 +97,6 @@ function AdminDashboard() {
               </div>
             </div>
 
-            {/* Right */}
             <div className="flex items-center gap-3">
               <button
                 onClick={handleLogout}
@@ -160,7 +156,6 @@ function AdminDashboard() {
             </h2>
           </div>
 
-          {/* IoT Devices */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
               <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
@@ -170,11 +165,9 @@ function AdminDashboard() {
             </div>
             <h2 className="text-3xl font-bold text-gray-800">23</h2>
           </div>
-
         </div>
       </div>
 
-      {/* === BOTTOM NAVIGATION === */}
       <div className="px-6 mt-8">
         <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
 
@@ -281,9 +274,7 @@ function AdminDashboard() {
       {/* === TAB CONTENT === */}
       <div className="px-6 mt-6">
         {activeTab === "users" && <UserManagement />}
-        {activeTab === "accept" && <PendingDoctors />}
         {activeTab === "patients" && <PatientManagement />}
-        {activeTab === "admins" && <AdminManagement />}
         {activeTab === "iot" && <IotDevices />}
         
       </div>
