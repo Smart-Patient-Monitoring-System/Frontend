@@ -251,7 +251,7 @@ export default function RealtimeGraphs({ patientId: propPatientId }) {
   const hr = hrStatus(current?.avgBpm);
   const sp = spo2Status(current?.spo2);
   const bt = tempStatus(current?.waterTempC);
-  const rt = roomTempStatus(current?.roomTempC);
+  const rt = roomTempStatus(current?.roomTemp);
   const hm = humidityStatus(current?.humidity);
 
   return (
@@ -322,7 +322,7 @@ export default function RealtimeGraphs({ patientId: propPatientId }) {
             <MetricCard
               icon={Thermometer}
               label="Room Temperature"
-              value={current?.roomTempC?.toFixed(1) ?? 0}
+              value={current?.roomTemp?.toFixed(1) ?? 0}
               unit="°C"
               status={rt.text}
               statusColor={rt.color}
@@ -368,7 +368,7 @@ export default function RealtimeGraphs({ patientId: propPatientId }) {
 
           <GraphCard
             data={history}
-            dataKey="roomTempC"
+            dataKey="roomTemp"
             label="Room Temperature Trend"
             icon={Thermometer}
             unit="°C"
