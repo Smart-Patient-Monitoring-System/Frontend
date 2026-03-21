@@ -27,56 +27,53 @@ function UploadModal({ open, onClose, onAnalyze }) {
     try {
       setLoading(true);
       setSaveStatus("");
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/vital/ecg/analyze`,
-        formData
-      );
-
+      
       // Extract numeric ID only (handles "P-12", "Patient-12", or "12")
       const rawId = patientId.trim();
       const numericIdMatch = rawId.match(/\d+/);
       const numericId = numericIdMatch ? parseInt(numericIdMatch[0], 10) : null;
 
       if (!numericId) {
-        throw new Error("Could not extract a valid numeric patient ID. Please use a format like 'P-12' or just '12'.");
+        throw new Error("Please enter a valid Patient ID containing numbers.");
       }
 
-      // Save result to MainService for persistent history
-      try {
-        await axios.post(
-          "http://localhost:8084/api/doctor/ecg/save",
-          {
-            patientId: numericId,
-            prediction: res.data.prediction || res.data.status || "Unknown",
-            probability: res.data.probability || 0,
-            meanHR: res.data.meanHR || 0,
-            sdnn: res.data.SDNN !== undefined ? res.data.SDNN : (res.data.sdnn || 0),
-            rmssd: res.data.RMSSD !== undefined ? res.data.RMSSD : (res.data.rmssd || 0),
-            beats: res.data.beats || 0,
-            status: res.data.status || "Unknown",
-            rationale: res.data.rationale || "No rationale provided.",
-            waveformJson: JSON.stringify(res.data.waveform || []),
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/doctor/ecg/analyze-and-save/${numericId}`,
+        formData,
+        {
+          headers: { 
+             "Content-Type": "multipart/form-data",
+             Authorization: `Bearer ${token}` 
           },
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }
-        );
-        setSaveStatus("success");
-      } catch (saveErr) {
-        console.error("Failed to save ECG reading to history:", saveErr);
-        setSaveStatus("error");
-        // We don't throw here because analysis itself succeeded
-      }
+        }
+      );
 
-      // Short delay to show success state before closing
-      setTimeout(() => {
-        onAnalyze(res.data);
-      }, 1500);
+      setSaveStatus("success");
+      onAnalyze({
+        id: res.data?.id,
+        patientId: numericId,
+        patientName: `Patient #${numericId}`,
+        prediction: res.data.prediction || res.data.status || "Unknown",
+        probability: res.data.probability || 0,
+        meanHR: res.data.meanHR || 0,
+        sdnn: res.data.SDNN !== undefined ? res.data.SDNN : (res.data.sdnn || 0),
+        rmssd: res.data.RMSSD !== undefined ? res.data.RMSSD : (res.data.rmssd || 0),
+        beats: res.data.beats || 0,
+        status: res.data.status || "Unknown",
+        rationale: res.data.rationale || "No rationale provided.",
+        waveformJson: JSON.stringify(res.data.waveform || []),
+        recordedAt: new Date().toISOString(),
+        fs: res.data.fs || 500,
+        waveform: res.data.waveform || [],
+      });
     } catch (err) {
       console.error(err);
       const msg =
+        err?.response?.data?.message ||
         err?.response?.data?.error ||
         "ECG analysis failed. Make sure the VitalReports-AI service is running.";
+      setSaveStatus("error");
       setError(msg);
     } finally {
       setLoading(false);

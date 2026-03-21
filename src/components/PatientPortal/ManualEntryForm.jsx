@@ -84,10 +84,13 @@ const ManualEntryForm = ({ onClose, onSuccess }) => {
 
       console.log("Submitting vital signs:", apiData);
 
+      const token = localStorage.getItem("token") || "";
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vital-signs/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(apiData),
       });

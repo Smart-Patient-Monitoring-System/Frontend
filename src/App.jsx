@@ -26,7 +26,7 @@ import DocDashboard from "./pages/DoctorsPage/DocDashboard";
 import DocViewPatient from "./pages/DoctorViewPatient/DoctorPatientView";
 
 import AdminConfirmAppointments from "./components/PatientPortal/bookings/AdminConfirmAppointments";
-
+import PaymentSuccess from "./components/PatientPortal/bookings/PaymentSuccess";
 
 function HomePage() {
   const stats = [
@@ -126,6 +126,7 @@ function AppContent() {
           path="/AdminDashboard/confirm-appointments"
           element={<AdminConfirmAppointments />}
         />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
       </Routes>
     </>
   );
