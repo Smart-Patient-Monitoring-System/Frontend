@@ -1,68 +1,219 @@
 import React, { useEffect, useState } from "react";
-import { getAllAppointments, confirmAppointment } from "../../../api/api";
+import {
+  getAllAppointments,
+  confirmAppointment,
+  updateAppointmentDate,
+} from "../../../api/api";
 
 export default function AdminConfirmAppointments() {
   const [appointments, setAppointments] = useState([]);
-  const [input, setInput] = useState({});
+  const [dates, setDates] = useState({});
+  const [times, setTimes] = useState({});
+  const [locations, setLocations] = useState({});
 
   useEffect(() => {
-    load();
+    loadAppointments();
   }, []);
 
-  const load = async () => {
-    const data = await getAllAppointments();
-    setAppointments(Array.isArray(data) ? data : []);
+  const loadAppointments = async () => {
+    try {
+      const data = await getAllAppointments();
+      console.log("Appointments from backend:", data);
+      setAppointments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load appointments:", err);
+    }
   };
 
-  const confirm = async (a) => {
-    const params =
-      a.appointmentType === "Physical"
-        ? { physicalLocation: input[a.id] }
-        : { zoomLink: input[a.id] };
+  const confirm = async (appointment) => {
+    const appointmentId = appointment.id || appointment.appointmentId;
+    if (!appointmentId) {
+      alert("Appointment ID is missing");
+      return;
+    }
 
-    await confirmAppointment(a.id, params);
-    load();
+    const value = locations[appointmentId];
+    if (!value) {
+      alert(
+        appointment.appointmentType === "Physical"
+          ? "Please enter a location"
+          : "Please enter a meeting link",
+      );
+      return;
+    }
+
+    const params =
+      appointment.appointmentType === "Physical"
+        ? { physicalLocation: value }
+        : { zoomLink: value };
+
+    try {
+      await confirmAppointment(appointmentId, params);
+      loadAppointments();
+      setLocations((prev) => ({ ...prev, [appointmentId]: "" }));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to confirm appointment. Check console for details.");
+    }
+  };
+
+  const updateDate = async (appointment) => {
+    const appointmentId = appointment.id || appointment.appointmentId;
+
+    if (!appointmentId) {
+      alert("Appointment ID is missing");
+      return;
+    }
+
+    const dateValue = dates[appointmentId];
+    const timeValue = times[appointmentId];
+
+    if (!dateValue && !timeValue) {
+      alert("Please change date or time");
+      return;
+    }
+
+    try {
+      await updateAppointmentDate(appointmentId, dateValue, timeValue);
+      loadAppointments();
+
+      setDates((prev) => ({ ...prev, [appointmentId]: "" }));
+      setTimes((prev) => ({ ...prev, [appointmentId]: "" }));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update appointment. Check console for details.");
+    }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Admin Confirm Appointments</h1>
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">
+        Admin Appointment Management
+      </h1>
 
-      {appointments.map((a) => (
-        <div key={a.id} className="border p-4 mb-4 rounded shadow">
-          <p><b>Doctor:</b> {a.doctorName}</p>
-          <p><b>Specialty:</b> {a.specialty}</p>
-          <p><b>Type:</b> {a.appointmentType}</p>
-          <p><b>Date:</b> {a.bookingDate}</p>
-          <p><b>Time:</b> {a.bookingTime}</p>
-          <p><b>Status:</b> {a.appointmentStatus}</p>
-          <p><b>Payment:</b> {a.paymentStatus}</p>
-          <p><b>Location / Link:</b> {a.locationOrLink}</p>
+      <div className="grid gap-6">
+        {appointments.map((a) => {
+          const appointmentId = a.id || a.appointmentId;
 
-          {a.appointmentStatus === "PENDING" &&
-            a.paymentStatus === "SUCCESS" && (
-              <>
-                <input
-                  className="border p-2 w-full my-2"
-                  placeholder={
-                    a.appointmentType === "Physical"
-                      ? "Enter location"
-                      : "Enter meeting link"
-                  }
-                  onChange={(e) =>
-                    setInput({ ...input, [a.id]: e.target.value })
-                  }
-                />
-                <button
-                  className="bg-green-600 text-white px-4 py-2 rounded"
-                  onClick={() => confirm(a)}
-                >
-                  Confirm
-                </button>
-              </>
-            )}
-        </div>
-      ))}
+          return (
+            <div
+              key={appointmentId}
+              className="bg-white rounded-xl shadow-md border p-6 hover:shadow-lg transition"
+            >
+              {/* Doctor Info */}
+              <div className="grid md:grid-cols-2 gap-4 text-gray-700">
+                <p>
+                  <span className="font-semibold">Doctor:</span> {a.doctorName}
+                </p>
+
+                <p>
+                  <span className="font-semibold">Specialty:</span>{" "}
+                  {a.specialty}
+                </p>
+
+                <p>
+                  <span className="font-semibold">Type:</span>{" "}
+                  {a.appointmentType}
+                </p>
+
+                <p>
+                  <span className="font-semibold">Status:</span>{" "}
+                  {a.appointmentStatus}
+                </p>
+
+                <p>
+                  <span className="font-semibold">Payment:</span>{" "}
+                  {a.paymentStatus}
+                </p>
+
+                <p>
+                  <span className="font-semibold">Location / Link:</span>{" "}
+                  {a.locationOrLink}
+                </p>
+              </div>
+
+              {/* Date + Time */}
+              <div className="grid md:grid-cols-3 gap-4 mt-5 items-center">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">
+                    Date
+                  </label>
+
+                  <input
+                    type="date"
+                    className="border w-full px-3 py-2 rounded-md mt-1"
+                    value={dates[appointmentId] || a.bookingDate}
+                    onChange={(e) =>
+                      setDates((prev) => ({
+                        ...prev,
+                        [appointmentId]: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-600">
+                    Time
+                  </label>
+
+                  <input
+                    type="time"
+                    className="border w-full px-3 py-2 rounded-md mt-1"
+                    value={times[appointmentId] || a.bookingTime}
+                    onChange={(e) =>
+                      setTimes((prev) => ({
+                        ...prev,
+                        [appointmentId]: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                {(dates[appointmentId] || times[appointmentId]) && (
+                  <div className="mt-5 md:mt-6">
+                    <button
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                      onClick={() => updateDate(a)}
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm Section */}
+              {a.appointmentStatus === "PENDING" &&
+                a.paymentStatus === "SUCCESS" && (
+                  <div className="mt-6 border-t pt-4">
+                    <input
+                      className="border w-full px-3 py-2 rounded-md mb-3"
+                      placeholder={
+                        a.appointmentType === "Physical"
+                          ? "Enter location"
+                          : "Enter meeting link"
+                      }
+                      value={locations[appointmentId] || ""}
+                      onChange={(e) =>
+                        setLocations((prev) => ({
+                          ...prev,
+                          [appointmentId]: e.target.value,
+                        }))
+                      }
+                    />
+
+                    <button
+                      className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700"
+                      onClick={() => confirm(a)}
+                    >
+                      Confirm Appointment
+                    </button>
+                  </div>
+                )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
