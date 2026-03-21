@@ -16,21 +16,39 @@ function AssignDoctors() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [doctorData, patientData, assignmentData] = await Promise.all([
+      setError("");
+
+      // Fetch each independently so one failure doesn't block the others
+      const [doctorResult, patientResult, assignmentResult] = await Promise.allSettled([
         fetchAssignableDoctors(),
         fetchAssignablePatients(),
         fetchDoctorAssignments(),
       ]);
-      setDoctors(Array.isArray(doctorData) ? doctorData : []);
-      setPatients(Array.isArray(patientData) ? patientData : []);
-      setAssignments(Array.isArray(assignmentData) ? assignmentData : []);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to load doctor assignment data");
+
+      if (doctorResult.status === "fulfilled") {
+        setDoctors(Array.isArray(doctorResult.value) ? doctorResult.value : []);
+      } else {
+        console.error("Failed to load doctors:", doctorResult.reason);
+        setError("Could not load doctors. Check that the backend is running.");
+      }
+
+      if (patientResult.status === "fulfilled") {
+        setPatients(Array.isArray(patientResult.value) ? patientResult.value : []);
+      } else {
+        console.error("Failed to load patients:", patientResult.reason);
+        setError("Could not load patients. Check that the backend is running.");
+      }
+
+      if (assignmentResult.status === "fulfilled") {
+        setAssignments(Array.isArray(assignmentResult.value) ? assignmentResult.value : []);
+      } else {
+        console.error("Failed to load assignments:", assignmentResult.reason);
+      }
     } finally {
       setLoading(false);
     }
@@ -77,7 +95,7 @@ function AssignDoctors() {
       alert("Doctor assigned successfully");
     } catch (error) {
       console.error(error);
-      alert("Failed to assign doctor");
+      alert("Failed to assign doctor: " + (error.message || "Unknown error"));
     } finally {
       setActionLoading(false);
     }
@@ -90,10 +108,9 @@ function AssignDoctors() {
       setActionLoading(true);
       await unassignDoctorFromPatient(patientId);
       await loadData();
-      alert("Doctor unassigned successfully");
     } catch (error) {
       console.error(error);
-      alert("Failed to unassign doctor");
+      alert("Failed to unassign doctor: " + (error.message || "Unknown error"));
     } finally {
       setActionLoading(false);
     }
@@ -108,13 +125,25 @@ function AssignDoctors() {
         </p>
       </div>
 
+      {error && (
+        <div className="mb-4 px-4 py-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm">
+          ⚠️ {error}
+          <button
+            onClick={loadData}
+            className="ml-3 underline font-medium hover:text-red-900"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <select
           value={selectedDoctorId}
           onChange={(e) => setSelectedDoctorId(e.target.value)}
           className="border border-gray-200 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
-          <option value="">Select Doctor</option>
+          <option value="">Select Doctor {doctors.length > 0 ? `(${doctors.length})` : ""}</option>
           {doctors.map((doctor) => (
             <option key={doctor.Id || doctor.id} value={doctor.Id || doctor.id}>
               {doctor.name} {doctor.position ? `- ${doctor.position}` : ""}
@@ -127,7 +156,7 @@ function AssignDoctors() {
           onChange={(e) => setSelectedPatientId(e.target.value)}
           className="border border-gray-200 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
-          <option value="">Select Patient</option>
+          <option value="">Select Patient {availablePatients.length > 0 ? `(${availablePatients.length} unassigned)` : ""}</option>
           {availablePatients.map((patient) => (
             <option key={patient.Id || patient.id} value={patient.Id || patient.id}>
               {patient.name}
@@ -138,7 +167,7 @@ function AssignDoctors() {
         <button
           type="button"
           onClick={handleAssign}
-          disabled={actionLoading}
+          disabled={actionLoading || !selectedDoctorId || !selectedPatientId}
           className="rounded-2xl px-4 py-3 text-white font-medium disabled:opacity-60"
           style={{ background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }}
         >
@@ -157,14 +186,25 @@ function AssignDoctors() {
       </div>
 
       <div className="border border-gray-100 rounded-2xl overflow-hidden">
-        <div className="bg-gray-50 px-5 py-4 border-b border-gray-100">
+        <div className="bg-gray-50 px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">Current Assignments</h3>
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+          >
+            {loading ? "Loading..." : "↻ Refresh"}
+          </button>
         </div>
 
         {loading ? (
           <div className="px-5 py-6 text-gray-500">Loading assignments...</div>
         ) : filteredAssignments.length === 0 ? (
-          <div className="px-5 py-6 text-gray-500">No doctor assignments found.</div>
+          <div className="px-5 py-6 text-gray-500">
+            {assignments.length === 0
+              ? "No doctor assignments yet. Select a doctor and patient above to assign."
+              : "No assignments match your search."}
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -181,17 +221,23 @@ function AssignDoctors() {
                     <td className="px-5 py-4">
                       <div className="font-medium text-gray-800">{item.patientName}</div>
                       <div className="text-sm text-gray-500">Patient ID: {item.patientId}</div>
+                      {item.patientEmail && (
+                        <div className="text-sm text-gray-400">{item.patientEmail}</div>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <div className="font-medium text-gray-800">{item.doctorName}</div>
                       <div className="text-sm text-gray-500">Doctor ID: {item.doctorId}</div>
+                      {item.doctorEmail && (
+                        <div className="text-sm text-gray-400">{item.doctorEmail}</div>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <button
                         type="button"
                         onClick={() => handleUnassign(item.patientId)}
                         disabled={actionLoading}
-                        className="px-4 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-60"
+                        className="px-4 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-60 text-sm font-medium"
                       >
                         Unassign
                       </button>
