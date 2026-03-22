@@ -4,6 +4,38 @@ import {
     TrendingUp, Clock, AlertCircle
 } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
+const parseRecordedAt = (value) => {
+    if (!value) return null;
+    if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+    if (Array.isArray(value) && value.length >= 5) {
+        const [year, month, day, hour = 0, minute = 0, second = 0, nano = 0] = value;
+        return new Date(year, month - 1, day, hour, minute, second, Math.floor(nano / 1000000));
+    }
+    if (typeof value === "string") {
+        const normalized = value.includes("T") ? value : value.replace(" ", "T");
+        const parsed = new Date(normalized);
+        if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+    return null;
+};
+
+const formatRecordedDate = (value) => {
+    const parsed = parseRecordedAt(value);
+    return parsed ? parsed.toLocaleDateString() : "Date unavailable";
+};
+
+const formatRecordedTime = (value) => {
+    const parsed = parseRecordedAt(value);
+    return parsed ? parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--:--";
+};
+
+const formatRecordedDateTime = (value) => {
+    const parsed = parseRecordedAt(value);
+    return parsed ? parsed.toLocaleString() : "Date unavailable";
+};
+
 const ECGMonitor = ({ isFullPage = false, patientId }) => {
     const [isPaused, setIsPaused] = useState(false);
     const [history, setHistory] = useState([]);
@@ -29,7 +61,7 @@ const ECGMonitor = ({ isFullPage = false, patientId }) => {
             }
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`http://localhost:8084/api/patient/ecg/history/${patientId}`, {
+                const res = await fetch(`${API_BASE}/api/patient/ecg/history/${patientId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {

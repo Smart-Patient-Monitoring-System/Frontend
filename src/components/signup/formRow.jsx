@@ -1,4 +1,4 @@
-export default function FormRow({ label, type = "text", value, onChange, children, required = false }) {
+export default function FormRow({ label, type = "text", value, onChange, children, required = false, ...rest }) {
   return (
     <div className="
       flex items-center
@@ -25,6 +25,7 @@ export default function FormRow({ label, type = "text", value, onChange, childre
             value={value}
             onChange={onChange}
             required={required}
+            {...rest}
             className="
     w-full h-11
     bg-white/35 backdrop-blur-md
