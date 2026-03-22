@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  Bell,
   Activity,
   UserCircle,
   TrendingUp,
@@ -21,20 +20,23 @@ import { API_BASE_URL } from "../../api";
 function AdminDashboard() {
   const navigate = useNavigate();
 
-  const [adminData, setAdminData] = useState({ name: "", role: "" });
+  const [activeTab, setActiveTab] = useState("users");
+  const [doctorCount, setDoctorCount] = useState(null);
+  const [patientCount, setPatientCount] = useState(null);
+  const [deviceCount, setDeviceCount] = useState(null);
+
+  // ✅ FIX: read admin info from localStorage (set during login)
+  const [adminData, setAdminData] = useState({ name: "Admin" });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setAdminData({
-          name: parsed.name || parsed.username || parsed.fullName || "Admin",
-          role: parsed.role || "Administrator",
-        });
-      } catch (e) {
-        console.error("Failed to parse user from localStorage", e);
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setAdminData(parsed);
       }
+    } catch (e) {
+      console.warn("Could not parse user from localStorage", e);
     }
   }, []);
 
@@ -44,25 +46,54 @@ function AdminDashboard() {
     navigate("/");
   };
 
-  const [activeTab, setActiveTab] = useState("users");
-  const [doctorCount, setDoctorCount] = useState(0);
-  const [pendingdoctorCount, setPendingDoctorCount] = useState(0);
-  const [patientCount, setPatientCount] = useState(0);
-
   useEffect(() => {
-  fetch("http://localhost:8080/api/dashboard/counts")
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
+    const token = localStorage.getItem("token");
 
-      setDoctorCount(data.doctorCount);
-      setPatientCount(data.patientCount);
-      setPendingDoctorCount(data.pendingDoctorCount);
-    })
-    .catch((error) =>
-      console.error("Error fetching dashboard counts:", error)
-    );
-}, []);
+    async function loadDashboardCounts() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/dashboard/counts`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard counts");
+        }
+
+        const data = await response.json();
+        setDoctorCount(data?.doctorCount ?? 0);
+        setPatientCount(data?.patientCount ?? 0);
+      } catch (error) {
+        console.error("Error fetching dashboard counts:", error);
+        setDoctorCount(0);
+        setPatientCount(0);
+      }
+    }
+
+    async function loadDeviceCount() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/sensordata/devices`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch IoT devices");
+        }
+
+        const data = await response.json();
+        setDeviceCount(Array.isArray(data) ? data.length : 0);
+      } catch (error) {
+        console.error("Error fetching IoT devices:", error);
+        setDeviceCount(0);
+      }
+    }
+
+    loadDashboardCounts();
+    loadDeviceCount();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F0F6FF] transition-colors">
@@ -91,7 +122,7 @@ function AdminDashboard() {
                 <p className="text-sm text-gray-600">
                   Welcome,{" "}
                   <span className="font-semibold">
-                    {adminData.name || "..."}
+                    {adminData?.name || "Admin"}
                   </span>
                 </p>
               </div>
@@ -113,11 +144,8 @@ function AdminDashboard() {
         </div>
       </header>
 
-      {/* === STATS CARDS === */}
       <div className="px-6 mt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          {/* Active Doctors */}
           <div className="bg-[#E9FBF6] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
               <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mb-3">
@@ -126,24 +154,10 @@ function AdminDashboard() {
               <p className="text-sm text-gray-600">Active Doctors</p>
             </div>
             <h2 className="text-3xl font-bold text-gray-800">
-              {doctorCount === 0 ? "..." : doctorCount}
+              {doctorCount ?? "..."}
             </h2>
           </div>
 
-          {/* Special Doctors 
-          <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
-            <div>
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
-                <Users className="text-white w-5 h-5" />
-              </div>
-              <p className="text-sm text-gray-600">Special Doctors</p>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800">
-              {specialdoctorCount === 0 ? "..." : specialdoctorCount}
-            </h2>
-          </div>  */}
-
-          {/* Active Patients */}
           <div className="bg-[#F5F0FF] rounded-2xl p-5 shadow-md flex justify-between items-center">
             <div>
               <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
@@ -152,7 +166,7 @@ function AdminDashboard() {
               <p className="text-sm text-gray-600">Active Patients</p>
             </div>
             <h2 className="text-3xl font-bold text-gray-800">
-              {patientCount === 0 ? "..." : patientCount}
+              {patientCount ?? "..."}
             </h2>
           </div>
 
@@ -163,14 +177,15 @@ function AdminDashboard() {
               </div>
               <p className="text-sm text-gray-600">IOT Devices</p>
             </div>
-            <h2 className="text-3xl font-bold text-gray-800">23</h2>
+            <h2 className="text-3xl font-bold text-gray-800">
+              {deviceCount ?? "..."}
+            </h2>
           </div>
         </div>
       </div>
 
       <div className="px-6 mt-8">
         <div className="bg-white rounded-3xl shadow-md p-2 flex gap-3 w-fit">
-
           <button
             onClick={() => setActiveTab("users")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
@@ -186,23 +201,6 @@ function AdminDashboard() {
           >
             Doctor Management
           </button>
-
-            {/*
-          <button
-            onClick={() => setActiveTab("logs")}
-            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
-              activeTab === "logs"
-                ? "text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-            style={
-              activeTab === "logs"
-                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
-                : {}
-            }
-          >
-            Special Doctors
-          </button>   */}
 
           <button
             onClick={() => setActiveTab("patients")}
@@ -237,19 +235,19 @@ function AdminDashboard() {
           </button>
 
           <button
-            onClick={() => setActiveTab("booking")}
+            onClick={() => setActiveTab("accept")}
             className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
-              activeTab === "booking"
+              activeTab === "accept"
                 ? "text-white shadow-md"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
             style={
-              activeTab === "booking"
+              activeTab === "accept"
                 ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
                 : {}
             }
           >
-            Booking
+            Pending Doctors
           </button>
 
           <button
@@ -268,15 +266,49 @@ function AdminDashboard() {
             Admin Management
           </button>
 
+          <button
+            onClick={() => setActiveTab("security")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "security"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+            style={
+              activeTab === "security"
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
+                : {}
+            }
+          >
+            Security Logs
+          </button>
+
+          <button
+            onClick={() => setActiveTab("booking")}
+            className={`px-4 py-2 rounded-3xl text-sm font-medium transition-all ${
+              activeTab === "booking"
+                ? "text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+            style={
+              activeTab === "booking"
+                ? { background: "linear-gradient(45deg, #007CFC 0%, #11C2BA 100%)" }
+                : {}
+            }
+          >
+            Booking
+          </button>
         </div>
       </div>
 
-      {/* === TAB CONTENT === */}
-      <div className="px-6 mt-6">
+      <div className="px-6 py-8">
         {activeTab === "users" && <UserManagement />}
         {activeTab === "patients" && <PatientManagement />}
         {activeTab === "iot" && <IotDevices />}
-        
+        {activeTab === "accept" && <PendingDoctors />}
+        {activeTab === "analytics" && <Analytics />}
+        {activeTab === "admins" && <AdminManagement />}
+        {activeTab === "security" && <SecurityLogs />}
+        {activeTab === "booking" && <SpecialDoctorAdminPage />}
       </div>
     </div>
   );

@@ -93,6 +93,16 @@ export const getUserAppointments = async () => {
     return [];
   }
 };
+export const getDoctorAppointments = async (doctorId) => {
+  try {
+    if (!doctorId) return [];
+    const res = await API.get(`/doctor/appointments/${doctorId}`);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching doctor appointments:", err);
+    return [];
+  }
+};
 
 /* =========================
    ADMIN – APPOINTMENTS
@@ -110,6 +120,16 @@ export const getAllAppointments = async () => {
 export const confirmAppointment = async (appointmentId, params) => {
   const res = await API.post(
     `/admin/appointments/confirm/${appointmentId}`,
+    null,
+    { params } // axios will convert this to query string
+  );
+  return res.data;
+};
+
+// POST /api/doctor/appointments/confirm/{id}?physicalLocation=... OR ?zoomLink=...
+export const confirmAppointmentDoctor = async (appointmentId, params) => {
+  const res = await API.post(
+    `/doctor/appointments/confirm/${appointmentId}`,
     null,
     { params } // axios will convert this to query string
   );
