@@ -104,6 +104,16 @@ export const getDoctorAppointments = async (doctorId) => {
   }
 };
 
+export const verifyPaymentSuccess = async (orderId) => {
+  try {
+    const res = await API.get(`/payments/success/${orderId}`);
+    return res.data;
+  } catch (err) {
+    console.error("Error verifying payment:", err);
+    return null;
+  }
+};
+
 /* =========================
    ADMIN – APPOINTMENTS
 ========================= */
