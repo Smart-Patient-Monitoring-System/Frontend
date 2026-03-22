@@ -10,8 +10,6 @@ import AppointmentsCard from "../../components/PatientPortal/AppointmentsCard";
 import { useNavigate } from "react-router-dom";
 import {
   Heart,
-  Bell,
-  Settings,
   Activity,
   AlertTriangle,
   FileText,
@@ -21,8 +19,8 @@ import {
   AlertCircle,
   TrendingUp,
   Wifi,
-  MessageSquare, // NEW ICON for Messaging
-  Calendar,      // NEW ICON for Appointments
+  MessageSquare,
+  Calendar,
 } from "lucide-react";
 
 /* ===================== Config ===================== */
@@ -114,7 +112,6 @@ const fetchMyPatients = async () => {
 };
 
 function DocDashboard() {
-  const [hasNotification, setHasNotification] = useState(true);
   const [activeTab, setActiveTab] = useState("patient-overview");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -309,23 +306,7 @@ function DocDashboard() {
 
             {/* Right */}
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-              <button
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative"
-                aria-label="Notifications"
-                onClick={() => setHasNotification(false)}
-              >
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black" />
-                {hasNotification && (
-                  <span className="absolute top-1 right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-red-500 rounded-full" />
-                )}
-              </button>
 
-              <button
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Settings"
-              >
-                <Settings className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-black" />
-              </button>
 
               <button
                 onClick={handleLogout}
