@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Activity, Video, User } from "lucide-react";
 import BookingModal from "../../components/PatientPortal/bookings/BookingPage";
+import AppointmentsTable from "../../components/PatientPortal/bookings/AppointmentsTable";
 import { getUserAppointments, getDoctorAppointments, confirmAppointmentDoctor } from "../../api/api.js";
 
 const AppointmentsCard = ({ isDoctorView = false, doctorId = null }) => {
@@ -117,6 +118,15 @@ const AppointmentsCard = ({ isDoctorView = false, doctorId = null }) => {
       {/* Body */}
       {loading ? (
         <p className="text-sm text-gray-500">Loading appointments...</p>
+      ) : isDoctorView ? (
+        <div className="mt-4 -mx-4 sm:mx-0">
+          <AppointmentsTable
+            appointments={appointments}
+            isAdminView={false}
+            isDoctorView={true}
+            refreshData={fetchAppointments}
+          />
+        </div>
       ) : appointments.length === 0 ? (
         <p className="text-sm text-gray-500">No appointments found.</p>
       ) : (
@@ -163,33 +173,6 @@ const AppointmentsCard = ({ isDoctorView = false, doctorId = null }) => {
                       </a>
                     </div>
                   )}
-
-                  {/* Doctor Confirmation Input */}
-                  {isDoctorView &&
-                    apt.appointmentStatus === "PENDING" &&
-                    apt.paymentStatus === "SUCCESS" && (
-                      <div className="mt-3 flex flex-col gap-2 relative z-10">
-                        <input
-                          type="text"
-                          className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
-                          placeholder={
-                            apt.appointmentType === "Physical"
-                              ? "Enter location"
-                              : "Enter meeting link (Zoom, Meet)"
-                          }
-                          value={links[apt.appointmentId] || ""}
-                          onChange={(e) =>
-                            handleLinkChange(apt.appointmentId, e.target.value)
-                          }
-                        />
-                        <button
-                          onClick={() => handleConfirm(apt)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-xs w-fit transition-colors"
-                        >
-                          Confirm & Send Link
-                        </button>
-                      </div>
-                    )}
                 </div>
               </div>
             );
