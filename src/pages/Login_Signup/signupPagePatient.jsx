@@ -29,6 +29,14 @@ export default function SignupPagePatient() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Date-of-birth bounds (recalculated at render time)
+  const today = new Date();
+  const dobMax = new Date(today);
+  dobMax.setDate(dobMax.getDate() - 1); // at least 1 day old
+  const dobMin = new Date(today);
+  dobMin.setFullYear(dobMin.getFullYear() - 110); // at most 110 years old
+  const toDateStr = (d) => d.toISOString().split("T")[0];
+
   const handleSignup = async () => {
     setError("");
 
@@ -55,6 +63,19 @@ export default function SignupPagePatient() {
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
+    }
+
+    // Validate date of birth range
+    if (dateOfBirth) {
+      const dob = new Date(dateOfBirth);
+      if (dob > dobMax) {
+        setError("Date of birth must be at least 1 day in the past.");
+        return;
+      }
+      if (dob < dobMin) {
+        setError("Date of birth cannot be more than 110 years ago.");
+        return;
+      }
     }
 
     setLoading(true);
@@ -155,6 +176,8 @@ export default function SignupPagePatient() {
               type="date"
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
+              min={toDateStr(dobMin)}
+              max={toDateStr(dobMax)}
               required
             />
             <FormRow
@@ -173,7 +196,8 @@ export default function SignupPagePatient() {
             <FormRow
               label="NIC No"
               value={nicNo}
-              onChange={(e) => setNicNo(e.target.value)}
+              onChange={(e) => setNicNo(e.target.value.replace(/\D/g, ""))}
+              inputMode="numeric"
               required
             />
 
@@ -209,7 +233,8 @@ export default function SignupPagePatient() {
               label="Contact No"
               type="tel"
               value={contactNo}
-              onChange={(e) => setContactNo(e.target.value)}
+              onChange={(e) => setContactNo(e.target.value.replace(/\D/g, ""))}
+              inputMode="numeric"
               required
             />
 
@@ -246,7 +271,8 @@ export default function SignupPagePatient() {
               label="Guardian's Contact No"
               type="tel"
               value={guardianContactNo}
-              onChange={(e) => setGuardianContactNo(e.target.value)}
+              onChange={(e) => setGuardianContactNo(e.target.value.replace(/\D/g, ""))}
+              inputMode="numeric"
               required
             />
           </div>
