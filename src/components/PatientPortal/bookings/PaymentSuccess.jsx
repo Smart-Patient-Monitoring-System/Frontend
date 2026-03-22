@@ -1,16 +1,29 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { verifyPaymentSuccess } from "../../../api/api.js";
 
 export default function PaymentSuccess() {
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [status, setStatus] = useState("Verifying payment...");
   
   useEffect(() => {
-    // The backend already marked it as SUCCESS before redirecting here.
-    const timer = setTimeout(() => {
-      nav("/patient-portal");
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [nav]);
+    const verify = async () => {
+      const orderId = searchParams.get("order_id");
+      if (orderId) {
+        await verifyPaymentSuccess(orderId);
+        setStatus("Payment Successful! Redirecting...");
+      } else {
+        setStatus("Payment Successful! Redirecting...");
+      }
+
+      setTimeout(() => {
+        nav("/patient-portal");
+      }, 2000);
+    };
+
+    verify();
+  }, [nav, searchParams]);
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-50">

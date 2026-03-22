@@ -1,68 +1,49 @@
 import React, { useEffect, useState } from "react";
-import { getAllAppointments, confirmAppointment } from "../../../api/api";
+import { getAllAppointments } from "../../../api/api";
+import AppointmentsTable from "./AppointmentsTable";
 
 export default function AdminConfirmAppointments() {
   const [appointments, setAppointments] = useState([]);
-  const [input, setInput] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     load();
   }, []);
 
   const load = async () => {
-    const data = await getAllAppointments();
-    setAppointments(Array.isArray(data) ? data : []);
-  };
-
-  const confirm = async (a) => {
-    const params =
-      a.appointmentType === "Physical"
-        ? { physicalLocation: input[a.id] }
-        : { zoomLink: input[a.id] };
-
-    await confirmAppointment(a.id, params);
-    load();
+    setLoading(true);
+    try {
+      const data = await getAllAppointments();
+      setAppointments(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      setAppointments([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Admin Confirm Appointments</h1>
+    <div className="p-6 bg-[#F0F6FF] min-h-[calc(100vh-80px)]">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Admin Confirm Appointments</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Review all system bookings across all doctors and manually set locations or meeting links.
+        </p>
+      </div>
 
-      {appointments.map((a) => (
-        <div key={a.id} className="border p-4 mb-4 rounded shadow">
-          <p><b>Doctor:</b> {a.doctorName}</p>
-          <p><b>Specialty:</b> {a.specialty}</p>
-          <p><b>Type:</b> {a.appointmentType}</p>
-          <p><b>Date:</b> {a.bookingDate}</p>
-          <p><b>Time:</b> {a.bookingTime}</p>
-          <p><b>Status:</b> {a.appointmentStatus}</p>
-          <p><b>Payment:</b> {a.paymentStatus}</p>
-          <p><b>Location / Link:</b> {a.locationOrLink}</p>
-
-          {a.appointmentStatus === "PENDING" &&
-            a.paymentStatus === "SUCCESS" && (
-              <>
-                <input
-                  className="border p-2 w-full my-2"
-                  placeholder={
-                    a.appointmentType === "Physical"
-                      ? "Enter location"
-                      : "Enter meeting link"
-                  }
-                  onChange={(e) =>
-                    setInput({ ...input, [a.id]: e.target.value })
-                  }
-                />
-                <button
-                  className="bg-green-600 text-white px-4 py-2 rounded"
-                  onClick={() => confirm(a)}
-                >
-                  Confirm
-                </button>
-              </>
-            )}
+      {loading ? (
+        <p className="text-gray-500">Loading system appointments...</p>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-1">
+          <AppointmentsTable
+            appointments={appointments}
+            isAdminView={true}
+            isDoctorView={false}
+            refreshData={load}
+          />
         </div>
-      ))}
+      )}
     </div>
   );
 }
