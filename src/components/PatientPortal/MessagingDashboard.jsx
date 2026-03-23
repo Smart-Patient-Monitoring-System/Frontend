@@ -352,7 +352,7 @@ const MessagingDashboard = () => {
   const connectWebSocket = () => {
     try {
       if (stompRef.current?.active) return;
-      const sock = new SockJS(`${WS_BASE}/ws`);
+      const sock = new SockJS(`/ws`);
       const stomp = new Client({
         webSocketFactory: () => sock,
         reconnectDelay: 5000,

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Heart, Bell, ArrowLeft } from "lucide-react";
-import AlertsCard from "../../../components/PatientPortal/AlertsCard";
+import { Heart, ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Header = ({
@@ -10,8 +9,7 @@ const Header = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [showAlerts, setShowAlerts] = useState(false);
+
   const [profileName, setProfileName] = useState("Patient");
 
   // where to return (from navigate state)
@@ -74,40 +72,7 @@ const Header = ({
             </button>
           )}
 
-          {/* DARK MODE UI toggle only */}
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`relative w-12 h-6 sm:w-14 sm:h-7 rounded-full transition-colors ${
-              isDarkMode ? "bg-gray-700" : "bg-gray-300"
-            }`}
-            aria-label="Toggle dark mode"
-            type="button"
-          >
-            <div
-              className={`absolute top-1 w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full shadow-md transition-transform ${
-                isDarkMode ? "translate-x-6 sm:translate-x-8" : "translate-x-1"
-              }`}
-            />
-          </button>
 
-          {/* ALERTS */}
-          <div className="relative">
-            <button
-              className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
-              onClick={() => setShowAlerts(!showAlerts)}
-              aria-label="Alerts"
-              type="button"
-            >
-              <Bell className="w-5 h-5 text-gray-700" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-
-            {showAlerts && (
-              <div className="absolute right-0 mt-3 z-50 w-[260px] sm:w-auto">
-                <AlertsCard />
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </header>

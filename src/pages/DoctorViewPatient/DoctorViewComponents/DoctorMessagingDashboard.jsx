@@ -23,7 +23,9 @@ import SockJS from "sockjs-client";
 
 /* ===================== Helpers ===================== */
 const API_BASE = import.meta.env.VITE_API_URL;
-const WS_BASE  = import.meta.env.VITE_WS_URL || import.meta.env.VITE_API_URL;
+// WebSocket connects directly to mainservice (not via API gateway)
+// SockJS doesn't support custom request headers, so token is passed as query param
+const WS_BASE = import.meta.env.VITE_WS_URL || "http://localhost:8080";
 
 // Allow 0 as valid ID
 function safeNumber(v) {
@@ -310,7 +312,8 @@ const DoctorMessagingDashboard = () => {
   const connectWebSocket = () => {
     if (stompRef.current?.active) return;
     const stomp = new Client({
-      webSocketFactory: () => new SockJS(`${WS_BASE}/ws`),
+      // Pass token as query param — SockJS cannot send custom HTTP headers
+      webSocketFactory: () => new SockJS(`/ws`),
       reconnectDelay: 5000,
     });
 
@@ -493,6 +496,12 @@ const DoctorMessagingDashboard = () => {
     if (!messageText.trim()) return;
     if (userId === null || !selectedChat.participantId) return;
 
+    // Block send if WebSocket is not connected
+    if (!isConnected) {
+      alert("Not connected. Please wait a moment and try again.");
+      return;
+    }
+
     const message = {
       conversationId: selectedChat.id,
       senderId: userId,
@@ -506,6 +515,7 @@ const DoctorMessagingDashboard = () => {
 
     try {
       stompRef.current.send(message);
+      // Only show message locally after confirming send was attempted
       setMessages((prev) => [
         ...prev,
         { id: Date.now(), sender: "self", text: messageText, time: "Just now", read: false, attachments: [] },
@@ -514,7 +524,7 @@ const DoctorMessagingDashboard = () => {
       if (textareaRef.current) textareaRef.current.style.height = "auto";
     } catch (err) {
       console.error("Error sending message:", err);
-      alert("Failed to send message.");
+      alert("Failed to send message. Please check your connection.");
     }
   };
 
