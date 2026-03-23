@@ -18,6 +18,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/ws': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        ws: true,  // enable WebSocket proxying
+      },
       '/chatbot': {
         target: 'http://localhost:8081',
         changeOrigin: true,

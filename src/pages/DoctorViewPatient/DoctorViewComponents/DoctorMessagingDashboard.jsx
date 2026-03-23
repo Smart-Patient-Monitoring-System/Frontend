@@ -313,7 +313,7 @@ const DoctorMessagingDashboard = () => {
     if (stompRef.current?.active) return;
     const stomp = new Client({
       // Pass token as query param — SockJS cannot send custom HTTP headers
-      webSocketFactory: () => new SockJS(`${WS_BASE}/ws?token=${encodeURIComponent(token || "")}`),
+      webSocketFactory: () => new SockJS(`/ws`),
       reconnectDelay: 5000,
     });
 
