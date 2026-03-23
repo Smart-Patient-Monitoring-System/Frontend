@@ -6,7 +6,7 @@ const FloatingChatbot = ({ isFullScreen = false, hideFloatingButton = false }) =
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI Health Assistant. How can I help you today?",
+      text: "I received your message. How else can I assist you?",
       sender: "bot",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
